@@ -7,4 +7,12 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="input\Mesh.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="input\Mesh.txt" />
+  </ItemGroup>
+
 </Project>

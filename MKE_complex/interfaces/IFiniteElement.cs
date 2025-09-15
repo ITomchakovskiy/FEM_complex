@@ -10,5 +10,5 @@ public interface IFiniteElement<VectorT> where VectorT : IVector
 {
     IFiniteElement<VectorT> Geometry { get;}
 
-
+    string Material { get; }
 }

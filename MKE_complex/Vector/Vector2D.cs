@@ -12,5 +12,5 @@ public class Vector2D : IVector
     double X { get; init; }
     double Y { get; init; }
 
-
+    public Vector2D(double x, double y) { X = x; Y = y; }
 }
