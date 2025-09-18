@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace MKE_complex.Vector;
 
-public class Vector2D : IVector
+public record Vector2D (double X, double Y): IVector
 {
-    double X { get; init; }
-    double Y { get; init; }
+    //public double X;//{ get; init; }
+   // public double Y; //{ get; init; }
 
-    public Vector2D(double x, double y) { X = x; Y = y; }
+    //public Vector2D(double x, double y) { X = x; Y = y; }
 }

@@ -14,8 +14,8 @@ public class Mesh<VectorT> : IFiniteElementMesh<VectorT> where VectorT : IVector
     public required List<IFiniteElement<VectorT>> Elements { get; init; }
     IReadOnlyList<IFiniteElement<VectorT>> IFiniteElementMesh<VectorT>.Elements => Elements;
 
-    public Mesh<VectorT> RegularMesh(string meshFileName, string meshFragmentationFile)
-    {
+    //public Mesh<VectorT> RegularMesh(string meshFileName, string meshFragmentationFile)
+    //{
         
-    }
+    //}
 }

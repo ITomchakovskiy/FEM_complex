@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace MKE_complex.Vector;
 
-public class Vector3D : IVector
+public record Vector3D(double X, double Y, double Z) : IVector
 {
-    double X { get; init; }
-    double Y { get; init; }
-    double Z { get; init; }
+    //public double X;//{ get; init; }
+    //public double Y; //{ get; init; }
+    //public double Z; //{ get; init; }
 }

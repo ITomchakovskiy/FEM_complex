@@ -9,10 +9,16 @@
 
   <ItemGroup>
     <None Remove="input\Mesh.txt" />
+    <None Remove="input\MeshFragmentation.txt" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="input\Mesh.txt" />
+    <Content Include="input\Mesh.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="input\MeshFragmentation.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>
