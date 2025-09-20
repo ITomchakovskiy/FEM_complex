@@ -1,10 +1,12 @@
-﻿using System;
+﻿using MKE_complex.FiniteElements;
+using MKE_complex.Vector;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MKE_complex.interfaces;
+namespace MKE_complex.Mesh;
 
 public interface IFiniteElementMesh<VectorT> where VectorT : IVector
 {

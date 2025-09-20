@@ -1,10 +1,12 @@
-﻿using MKE_complex.interfaces;
+﻿using MKE_complex.FiniteElements.FiniteElementGeometry;
 using MKE_complex.Vector;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -26,21 +28,125 @@ public record PseudoRegularMeshData(
 
 public class PseudoRegularMeshBuilder : IMeshBuilder
 {
-    public IFiniteElementMesh<IVector> BuildMesh(Dimension dimension, MeshType meshType, string[] fileNames)
+    public IFiniteElementMesh<IVector> BuildMesh(Dimension dimension, GeometryType meshType, BasisType basisType, string[] fileNames)
     {
         PseudoRegularMeshData? fragmentData = ReadFile(fileNames[0], fileNames[1], dimension);
 
         if (fragmentData == null)
             throw new Exception("Error in reading mesh file");
 
-        for(int w = 0; w < fragmentData.materials.Length; w++)
+        List<IFiniteElementGeometry<IVector>> elementsGeometry = new();
+
+        List<IVector> vertices = new();
+
+        //add points on coordinate lines
+        switch(dimension)
+        {
+            case Dimension.D2:
+                {
+                    for(int i = 0; i < fragmentData.lines.GetLength(0); ++i)
+                    {
+                        for (int j = 0; j < fragmentData.lines.GetLength(1); ++j)
+                            vertices.Add(fragmentData.lines[i, j]);
+                    }
+                    break;
+                }
+            case Dimension.D3:
+                {
+                    foreach(double z in fragmentData.z_lines!)
+                    {
+                        for(int j = 0; j < fragmentData.lines.GetLength(0); ++j)
+                        {
+                            for(int k = 0; k < fragmentData.lines.GetLength(1);++k)
+                            {
+                                Vector2D xy = fragmentData.lines[j, k];
+                                Vector3D vector = new(xy.X, xy.Y, z);
+                                vertices.Add(vector);
+                            }
+                        }
+                    }
+                    break;
+                }
+            default: throw new NotImplementedException();
+        }
+
+        //number of points on the subdomain borders
+        Dictionary<(int y, int z, int x_left, int x_right), int[]> vertices_on_x_lines = new();
+        Dictionary<(int x, int z, int y_left, int y_right), int[]> vertices_on_y_lines = new();
+        Dictionary<(int x, int y, int z_left, int z_right), int[]> vertices_on_z_lines = new();
+
+        for (int w = 0; w < fragmentData.materials.Length; ++w)
         {
             string material = fragmentData.materials[w];
-            for (int x_line = fragmentData.areaBorders[w, 0]; x_line < fragmentData.areaBorders[w, 1]; ++x_line)
-            {
-                for(int y_line = fragmentData.areaBorders[w, 2]; x_line < fragmentData.areaBorders[w, 3]; ++y_line)
-                {
 
+            int left_x = fragmentData.areaBorders[w, 0];
+            int right_x = fragmentData.areaBorders[w, 1];
+
+            int left_y = fragmentData.areaBorders[w, 2];
+            int right_y = fragmentData.areaBorders[w, 3];
+
+            int left_z = fragmentData.areaBorders[w, 4];
+            int right_z = fragmentData.areaBorders[w, 5];
+
+            for (int x_line = left_x; x_line < right_x - 1; ++x_line)
+            {
+                //addition of points on subdomain borders
+                //bottom border
+                switch (dimension)
+                {
+                    case Dimension.D2:
+                        {
+                            if (!vertices_on_x_lines.ContainsKey((left_y,0,x_line,x_line+1)))
+                            {
+                                int n = fragmentData.x_intervals[x_line];
+                                double k = fragmentData.x_stretch[x_line];
+                                for (int x_ind = 1; x_ind < n; ++x_ind)
+                                {
+                                    Vector2D vector = PointOnLine(fragmentData.lines[left_y, x_line],
+                                                                  fragmentData.lines[left_y, x_line + 1], n, k, 0, 0, x_ind, 0);
+                                    vertices.Add(vector);
+                                }
+                            }
+                            break;
+                        }
+                    case Dimension.D3:
+                        {
+                            if (!vertices_on_x_lines.ContainsKey((fragmentData.areaBorders[w, 2], 0, x_line, x_line + 1)))
+                            {
+                                int n = fragmentData.x_intervals[x_line];
+                                double k = fragmentData.x_stretch[x_line];
+                                for (int x_ind = 1; x_ind < n; ++x_ind)
+                                {
+                                    Vector2D vector = PointOnLine(fragmentData.lines[left_y, x_line],
+                                                                  fragmentData.lines[left_y, x_line + 1], n, k, 0, 0, x_ind, 0);
+                                    vertices.Add(vector);
+                                }
+                            }
+                            break;
+                        }
+                }
+                        
+                for (int y_line = fragmentData.areaBorders[w, 2]; y_line < fragmentData.areaBorders[w, 3]; ++y_line)
+                {
+                    switch(dimension)
+                    {
+                        case Dimension.D2:
+                            {
+                                for(int y_ind = 0; y_ind < fragmentData.y_intervals.Length; ++y_ind)
+                                {
+                                    for(int x_ind = 0; x_ind < fragmentData.x_intervals.Length; ++x_ind)
+                                    {
+                                        switch(meshType)
+                                        {
+                                            case GeometryType.Quadrangle:
+                                                {
+
+                                                }
+                                        }
+                                    }
+                                }
+                            }
+                    }
                 }
             }
         }
@@ -190,8 +296,10 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
 
     private double PointOnLine(double p1, double p2, int n, double k, int ind)
     {
+        if (ind == 0) return p1;
+        if (ind == n) return p2;
         double l = p2 - p1;
-        double l_ind = l * (1d - Math.Pow(k, ind + 1d)) / (1d - Math.Pow(k, n));
+        double l_ind = l * (1d - Math.Pow(k, ind)) / (1d - Math.Pow(k, n));
         l_ind = k > 0 ? l_ind : l - l_ind;
         return p1 + l_ind;
     }

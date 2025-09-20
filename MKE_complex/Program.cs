@@ -5,6 +5,12 @@ using System.Globalization;
 
 Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 
+var GeometryTypesForDimension = new Dictionary<Dimension, GeometryType[]>()
+{
+    {Dimension.D2, new GeometryType[] {GeometryType.Triangle,GeometryType.Quadrangle} },
+    {Dimension.D3, new GeometryType[] {GeometryType.Hexagon,GeometryType.Tetrahedron} },
+};
+
 //Console.Write($"Choose dimension\n" +
 //              $"1D : {Dimension.D1}\n" +
 //              $"2D : {Dimension.D2}\n" +
@@ -19,12 +25,12 @@ Dimension dimension = (Dimension)int.Parse(Console.ReadLine()!);
 
 Console.WriteLine("Choose mesh type");
 
-foreach (MeshType d in Enum.GetValues(typeof(MeshType)))
+foreach (GeometryType d in GeometryTypesForDimension[dimension])
 {
     Console.WriteLine($"{d} : {(int)d}");
 }
 
-MeshType mesh_type = (MeshType)int.Parse(Console.ReadLine()!);
+GeometryType mesh_type = (GeometryType)int.Parse(Console.ReadLine()!);
 
 Console.WriteLine("Type file names for mesh building");
 
@@ -32,5 +38,5 @@ string[] fileNames = Console.ReadLine()!.Split(' ');
 
 PseudoRegularMeshBuilder builder = new PseudoRegularMeshBuilder();
 
-builder.ReadFile(fileNames[0], fileNames[1], dimension);
+//builder.ReadFile(fileNames[0], fileNames[1], dimension);
 

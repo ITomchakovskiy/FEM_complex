@@ -1,4 +1,5 @@
-﻿using MKE_complex.interfaces;
+﻿using MKE_complex.FiniteElements;
+using MKE_complex.Vector;
 using System;
 using System.Collections.Generic;
 using System.Linq;

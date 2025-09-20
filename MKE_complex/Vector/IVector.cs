@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MKE_complex.interfaces;
+namespace MKE_complex.Vector;
 
 public interface IVector
 {

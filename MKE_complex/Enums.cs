@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design.Serialization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,8 +9,6 @@ namespace MKE_complex;
 
 public enum Dimension {D1,D2,D3}
 
-public enum MeshType {Triangle, Quadrangle, Rectangle, Mix}
+public enum GeometryType {Line, Triangle, Quadrangle, Hexagon, Tetrahedron, Mix}
 
-public enum Geometry1D {Line }
-
-public enum Geometry2D {Quadrangle, Triangle, Rectangle}
+public enum BasisType { Lagrangian, Hermitian}
