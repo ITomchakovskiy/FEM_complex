@@ -221,28 +221,46 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                     {
                         int n_x = x_intervals.Sum() + 1;
                         int n_y = y_intervals.Sum() + 1;
-                        for (int y_line = y0; y_line < y1 - 1; ++y_line)
+
+                        int x_interval_points = 0;
+                        int y_interval_points = 0;
+
+                        for (int y_line = y0; y_line < y1 - 1; y_interval_points += y_intervals[y_line],++y_line)
                         {
                             for (int y_ind = 0; y_ind < y_intervals[y_line]; ++y_ind)
                             {
-                                for (int x_line = x0; x_line < x1 - 1; ++x_line)
+                                for (int x_line = x0; x_line < x1 - 1;x_interval_points += x_intervals[x_line], ++x_line)
                                 {
                                     for (int x_ind = 0; x_ind < x_intervals[x_line]; ++x_ind)
                                     {
-                                        int[] local_index_start = [(x_line - x0) * n_x + x_ind, (y_line - y0) * n_y + y_ind];
+                                        int[] local_index_start = [x_interval_points + x_ind, y_interval_points + y_ind];
                                         int[][] quadrangle_local_indices = [local_index_start,[local_index_start[0], local_index_start[1] + 1],
                                                                                               [local_index_start[0] + 1, local_index_start[1] + 1],
                                                                                               [local_index_start[0] + 1, local_index_start[1]]];
+                                        int[] quadrangle_vertex_numbers = new int[4];
                                         for(int i = 0; i < 4; ++i)
                                         {
                                             int[] local_index = quadrangle_local_indices[i];
-                                            int vertex_index;
+                                            //int vertex_index;
 
-                                            if (local_index[0] == 0)
+                                            if ((local_index[0] == 0 || local_index[0] == n_x - 1) && (local_index[1] == 0 || local_index[1] == n_y - 1))
                                             {
-                                                if(local_index[1] == 0)
-                                                    vertex_index = 
+                                                int shift_x = local_index[0] == 0 ? 0 : 1;
+                                                int shift_y = local_index[1] == 0 ? 0 : 1;
+                                                quadrangle_vertex_numbers[i] = lines.GetLength(1) * (y_line + shift_y) + x_line + shift_x;
                                             }
+                                            else if((local_index[0] == 0 || local_index[0] == n_x - 1))
+                                            {
+                                                int shift = local_index[0] == 0 ? 0 : 1;
+                                                quadrangle_vertex_numbers[i] = vertices_on_y_lines[(x_line + shift, 0, y_line, y_line + 1)] + y_ind - 1;
+                                            }
+                                            else if((local_index[1] == 0 || local_index[1] == n_y - 1))
+                                            {
+                                                int shift = local_index[1] == 0 ? 0 : 1;
+                                                quadrangle_vertex_numbers[i] = vertices_on_x_lines[(y_line + shift, 0, x_line, x_line + 1)] + x_ind - 1;
+                                            }
+                                            else
+                                                quadrangle_vertex_numbers[i] = inner_index_start + (n_x - 2) * (local_index[1] - 1) + local_index[0] - 1;
                                         }
                                     }
                                 }
@@ -252,22 +270,49 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                     }
                 case Dimension.D3:
                     {
-                        for (int z_line = z0; z_line < z1 - 1; ++z_line)
+                        int x_interval_points = 0;
+                        int y_interval_points = 0;
+                        int z_interval_points = 0;
+                        for (int z_line = z0; z_line < z1 - 1;z_interval_points += z_intervals![z_line],++z_line)
                         {
                             for (int z_ind = 0; z_ind < z_intervals![z_line]; ++z_ind)
                             {
-                                for (int y_line = y0; y_line < y1 - 1; ++y_line)
+                                for (int y_line = y0; y_line < y1 - 1; y_interval_points += y_intervals[y_line], ++y_line)
                                 {
                                     for (int y_ind = 0; y_ind < y_intervals[y_line]; ++y_ind)
                                     {
-                                        for (int x_line = x0; x_line < x1 - 1; ++x_line)
+                                        for (int x_line = x0; x_line < x1 - 1; x_interval_points += x_intervals[x_line], ++x_line)
                                         {
                                             for (int x_ind = 0; x_ind < x_intervals[x_line]; ++x_ind)
                                             {
-                                                Vector3D p1 = new(lines[y_line, x_line].X, lines[y_line, x_line].Y, z_lines![z_line]);
-                                                Vector3D p2 = new(lines[y_line + 1, x_line + 1].X, lines[y_line + 1, x_line + 1].Y, z_lines![z_line + 1]);
-                                                Vector3D vertex = PointOnLine(p1, p2, x_intervals[x_line], x_stretch[x_line], y_intervals[y_line], y_stretch[y_line], z_intervals[z_line], z_stretch![z_line], x_ind, y_ind, z_ind);
-                                                vertices.Add(vertex);
+                                                int[] local_index_start = [x_interval_points + x_ind, y_interval_points + y_ind];
+                                                int[][] quadrangle_local_indices = [local_index_start,[local_index_start[0], local_index_start[1] + 1],
+                                                                                              [local_index_start[0] + 1, local_index_start[1] + 1],
+                                                                                              [local_index_start[0] + 1, local_index_start[1]]];
+                                                for (int i = 0; i < 4; ++i)
+                                                {
+                                                    int[] local_index = quadrangle_local_indices[i];
+                                                    int vertex_index;
+
+                                                    if ((local_index[0] == 0 || local_index[0] == n_x - 1) && (local_index[1] == 0 || local_index[1] == n_y - 1))
+                                                    {
+                                                        int shift_x = local_index[0] == 0 ? 0 : 1;
+                                                        int shift_y = local_index[1] == 0 ? 0 : 1;
+                                                        vertex_index = lines.GetLength(1) * (y_line + shift_y) + x_line + shift_x;
+                                                    }
+                                                    else if ((local_index[0] == 0 || local_index[0] == n_x - 1))
+                                                    {
+                                                        int shift = local_index[0] == 0 ? 0 : 1;
+                                                        vertex_index = vertices_on_y_lines[(x_line + shift, 0, y_line, y_line + 1)] + y_ind - 1;
+                                                    }
+                                                    else if ((local_index[1] == 0 || local_index[1] == n_y - 1))
+                                                    {
+                                                        int shift = local_index[1] == 0 ? 0 : 1;
+                                                        vertex_index = vertices_on_x_lines[(y_line + shift, 0, x_line, x_line + 1)] + x_ind - 1;
+                                                    }
+                                                    else
+                                                        vertex_index = inner_index_start + (n_x - 2) * (local_index[1] - 1) + local_index[0] - 1;
+                                                }
                                             }
                                         }
                                     }
