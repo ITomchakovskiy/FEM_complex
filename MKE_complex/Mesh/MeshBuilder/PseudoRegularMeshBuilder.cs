@@ -1,4 +1,5 @@
 ﻿using MKE_complex.FiniteElements.FiniteElementGeometry;
+using MKE_complex.FiniteElements.FiniteElementGeometry._2D;
 using MKE_complex.Vector;
 using System;
 using System.Collections;
@@ -12,27 +13,43 @@ using System.Threading.Tasks;
 
 namespace MKE_complex.Mesh.MeshBuilder;
 
-public record PseudoRegularMeshData(
-    Vector2D[,] lines,
-    double[]? z_lines,
-    string[] materials,
-    int[,] areaBorders,
+//public record PseudoRegularMeshData(
+//    Vector2D[,] lines,
+//    double[]? z_lines,
+//    string[] materials,
+//    int[,] areaBorders,
 
-    int[] x_intervals,
-    int[] y_intervals,
-    int[]? z_intervals,
+//    int[] x_intervals,
+//    int[] y_intervals,
+//    int[]? z_intervals,
 
-    double[] x_stretch,
-    double[] y_stretch,
-    double[]? z_stretch);
+//    double[] x_stretch,
+//    double[] y_stretch,
+//    double[]? z_stretch);
 
 public class PseudoRegularMeshBuilder : IMeshBuilder
 {
+
+    private Vector2D[,]? lines;
+    private double[]? z_lines;
+    private string[]? materials;
+    private int[,]? areaBorders;
+
+    private int[]? x_intervals;
+    private int[]? y_intervals;
+    private int[]? z_intervals;
+
+    private double[]? x_stretch;
+    private double[]? y_stretch;
+    private double[]? z_stretch;
+
+    private Dimension dimension;
     public IFiniteElementMesh<IVector> BuildMesh(Dimension dimension, GeometryType meshType, BasisType basisType, string[] fileNames)
     {
-        PseudoRegularMeshData? fragmentData = ReadFile(fileNames[0], fileNames[1], dimension);
+        this.dimension = dimension;
+        ReadFile(fileNames[0], fileNames[1], dimension);
 
-        if (fragmentData == null)
+        if (lines == null || materials == null || areaBorders == null || x_intervals == null || y_intervals == null || x_stretch == null || y_stretch == null)
             throw new Exception("Error in reading mesh file");
 
         List<IFiniteElementGeometry<IVector>> elementsGeometry = new();
@@ -44,22 +61,22 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
         {
             case Dimension.D2:
                 {
-                    for(int i = 0; i < fragmentData.lines.GetLength(0); ++i)
+                    for(int i = 0; i < lines.GetLength(0); ++i)
                     {
-                        for (int j = 0; j < fragmentData.lines.GetLength(1); ++j)
-                            vertices.Add(fragmentData.lines[i, j]);
+                        for (int j = 0; j < lines.GetLength(1); ++j)
+                            vertices.Add(lines[i, j]);
                     }
                     break;
                 }
             case Dimension.D3:
                 {
-                    foreach(double z in fragmentData.z_lines!)
+                    foreach(double z in z_lines!)
                     {
-                        for(int j = 0; j < fragmentData.lines.GetLength(0); ++j)
+                        for(int j = 0; j < lines.GetLength(0); ++j)
                         {
-                            for(int k = 0; k < fragmentData.lines.GetLength(1);++k)
+                            for(int k = 0; k < lines.GetLength(1);++k)
                             {
-                                Vector2D xy = fragmentData.lines[j, k];
+                                Vector2D xy = lines[j, k];
                                 Vector3D vector = new(xy.X, xy.Y, z);
                                 vertices.Add(vector);
                             }
@@ -71,62 +88,259 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
         }
 
         //number of points on the subdomain borders
-        Dictionary<(int y, int z, int x_left, int x_right), int[]> vertices_on_x_lines = new();
-        Dictionary<(int x, int z, int y_left, int y_right), int[]> vertices_on_y_lines = new();
-        Dictionary<(int x, int y, int z_left, int z_right), int[]> vertices_on_z_lines = new();
+        Dictionary<(int y, int z, int x_left, int x_right), int> vertices_on_x_lines = new();
+        Dictionary<(int x, int z, int y_left, int y_right), int> vertices_on_y_lines = new();
+        Dictionary<(int x, int y, int z_left, int z_right), int> vertices_on_z_lines = new();
 
-        for (int w = 0; w < fragmentData.materials.Length; ++w)
+        for (int w = 0; w < materials.Length; ++w)
         {
-            string material = fragmentData.materials[w];
+            string material = materials[w];
 
-            int left_x = fragmentData.areaBorders[w, 0];
-            int right_x = fragmentData.areaBorders[w, 1];
+            int x0 = areaBorders[w, 0];
+            int x1 = areaBorders[w, 1];
 
-            int left_y = fragmentData.areaBorders[w, 2];
-            int right_y = fragmentData.areaBorders[w, 3];
+            int y0 = areaBorders[w, 2];
+            int y1 = areaBorders[w, 3];
 
-            int left_z = fragmentData.areaBorders[w, 4];
-            int right_z = fragmentData.areaBorders[w, 5];
+            int z0 = areaBorders[w, 4];
+            int z1 = areaBorders[w, 5];
 
-            for (int x_line = left_x; x_line < right_x - 1; ++x_line)
+            for (int x_line = x0; x_line < x1 - 1; ++x_line)
             {
                 //addition of points on subdomain borders
-                //bottom border
-                switch (dimension)
+                //y const,z const borders
+                int n = x_intervals[x_line];
+                double k = x_stretch[x_line];
+
+                //z = z0; y = y0
+                FillBorder("x", vertices, vertices_on_x_lines, x_line, y0, z0, n, k);
+                //z = z0; y = y1
+                FillBorder("x", vertices, vertices_on_x_lines, x_line, y1, z0, n, k);
+                //z = z1; y = y0
+                FillBorder("x", vertices, vertices_on_x_lines, x_line, y0, z1, n, k);
+                //z = z1; y = y1
+                FillBorder("x", vertices, vertices_on_x_lines, x_line, y1, z1, n, k);
+            }
+            for (int y_line = y0; y_line < y1 - 1; ++y_line)
+            {
+                //addition of points on subdomain borders
+                //x const,z const borders
+                int n = y_intervals[y_line];
+                double k = y_stretch[y_line];
+
+                //z = z0; x = x0
+                FillBorder("y", vertices, vertices_on_y_lines, x0, y_line, z0, n, k);
+                //z = z0; x = x1                               
+                FillBorder("y", vertices, vertices_on_y_lines, x1, y_line, z0, n, k);
+                //z = z1; x = x0                                  
+                FillBorder("y", vertices, vertices_on_y_lines, x0, y_line, z1, n, k);
+                //z = z1; x = x1                                   
+                FillBorder("y", vertices, vertices_on_y_lines, x1, y_line, z1, n, k);
+            }
+            if(dimension is Dimension.D3)
+            {
+                for (int z_line = z0; z_line < z1 - 1; ++z_line)
                 {
-                    case Dimension.D2:
-                        {
-                            if (!vertices_on_x_lines.ContainsKey((left_y,0,x_line,x_line+1)))
-                            {
-                                int n = fragmentData.x_intervals[x_line];
-                                double k = fragmentData.x_stretch[x_line];
-                                for (int x_ind = 1; x_ind < n; ++x_ind)
-                                {
-                                    Vector2D vector = PointOnLine(fragmentData.lines[left_y, x_line],
-                                                                  fragmentData.lines[left_y, x_line + 1], n, k, 0, 0, x_ind, 0);
-                                    vertices.Add(vector);
-                                }
-                            }
-                            break;
-                        }
-                    case Dimension.D3:
-                        {
-                            if (!vertices_on_x_lines.ContainsKey((fragmentData.areaBorders[w, 2], 0, x_line, x_line + 1)))
-                            {
-                                int n = fragmentData.x_intervals[x_line];
-                                double k = fragmentData.x_stretch[x_line];
-                                for (int x_ind = 1; x_ind < n; ++x_ind)
-                                {
-                                    Vector2D vector = PointOnLine(fragmentData.lines[left_y, x_line],
-                                                                  fragmentData.lines[left_y, x_line + 1], n, k, 0, 0, x_ind, 0);
-                                    vertices.Add(vector);
-                                }
-                            }
-                            break;
-                        }
+                    //addition of points on subdomain borders
+                    //x const,y const borders
+                    int n = z_intervals![z_line];
+                    double k = z_stretch![z_line];
+
+                    //y = y0; x = x0
+                    FillBorder("z", vertices, vertices_on_z_lines, x0, y0, z_line, n, k);
+                    //z = y0; x = x1                               
+                    FillBorder("z", vertices, vertices_on_z_lines, x1, y0, z_line, n, k);
+                    //z = y1; x = x0                                  
+                    FillBorder("z", vertices, vertices_on_z_lines, x0, y1, z_line, n, k);
+                    //z = y1; x = x1                                   
+                    FillBorder("z", vertices, vertices_on_z_lines, x1, y1, z_line, n, k);
                 }
-                        
-                for (int y_line = fragmentData.areaBorders[w, 2]; y_line < fragmentData.areaBorders[w, 3]; ++y_line)
+            }
+
+            //addition of subdomain inner vertices
+            int inner_index_start = vertices.Count; //start index for inner vertices
+
+            switch (dimension)
+            {
+                case Dimension.D2:
+                    {
+                        for (int y_line = y0; y_line < y1 - 1; ++y_line)
+                        {
+                            int y_ind_start = y_line == y0 ? 1 : 0;
+                            for (int y_ind = y_ind_start; y_ind < y_intervals[y_line]; ++y_ind)
+                            {
+                                for (int x_line = x0; x_line < x1 - 1; ++x_line)
+                                {
+                                    int x_ind_start = x_line == x0 ? 1 : 0;
+                                    for (int x_ind = x_ind_start; x_ind < x_intervals[x_line]; ++x_ind)
+                                    {
+                                        Vector2D vertex = PointOnLine(lines[y_line, x_line], lines[y_line + 1, x_line + 1], x_intervals[x_line], x_stretch[x_line], y_intervals[y_line], y_stretch[y_line], x_ind, y_ind);
+                                        vertices.Add(vertex);
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    }
+                case Dimension.D3:
+                    {
+                        for (int z_line = z0; z_line < z1 - 1; ++z_line)
+                        {
+                            int z_ind_start = z_line == z0 ? 1 : 0;
+                            for (int z_ind = z_ind_start; z_ind < z_intervals![z_line]; ++z_ind)
+                            {
+                                for (int y_line = y0; y_line < y1 - 1; ++y_line)
+                                {
+                                    int y_ind_start = y_line == y0 ? 1 : 0;
+                                    for (int y_ind = y_ind_start; y_ind < y_intervals[y_line]; ++y_ind)
+                                    {
+                                        for (int x_line = x0; x_line < x1 - 1; ++x_line)
+                                        {
+                                            int x_ind_start = x_line == x0 ? 1 : 0;
+                                            for (int x_ind = x_ind_start; x_ind < x_intervals[x_line]; ++x_ind)
+                                            {
+                                                Vector3D p1 = new(lines[y_line, x_line].X, lines[y_line, x_line].Y, z_lines![z_line]);
+                                                Vector3D p2 = new(lines[y_line + 1, x_line + 1].X, lines[y_line + 1, x_line + 1].Y, z_lines![z_line + 1]);
+                                                Vector3D vertex = PointOnLine(p1, p2, x_intervals[x_line], x_stretch[x_line], y_intervals[y_line], y_stretch[y_line], z_intervals[z_line], z_stretch![z_line], x_ind, y_ind, z_ind);
+                                                vertices.Add(vertex);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        break;
+                    }
+            }
+            //forming of Quadrangles or Hexagons
+
+            switch (dimension)
+            {
+                case Dimension.D2:
+                    {
+                        int n_x = x_intervals.Sum() + 1;
+                        int n_y = y_intervals.Sum() + 1;
+                        for (int y_line = y0; y_line < y1 - 1; ++y_line)
+                        {
+                            for (int y_ind = 0; y_ind < y_intervals[y_line]; ++y_ind)
+                            {
+                                for (int x_line = x0; x_line < x1 - 1; ++x_line)
+                                {
+                                    for (int x_ind = 0; x_ind < x_intervals[x_line]; ++x_ind)
+                                    {
+                                        int[] local_index_start = [(x_line - x0) * n_x + x_ind, (y_line - y0) * n_y + y_ind];
+                                        int[][] quadrangle_local_indices = [local_index_start,[local_index_start[0], local_index_start[1] + 1],
+                                                                                              [local_index_start[0] + 1, local_index_start[1] + 1],
+                                                                                              [local_index_start[0] + 1, local_index_start[1]]];
+                                        for(int i = 0; i < 4; ++i)
+                                        {
+                                            int[] local_index = quadrangle_local_indices[i];
+                                            int vertex_index;
+
+                                            if (local_index[0] == 0)
+                                            {
+                                                if(local_index[1] == 0)
+                                                    vertex_index = 
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    }
+                case Dimension.D3:
+                    {
+                        for (int z_line = z0; z_line < z1 - 1; ++z_line)
+                        {
+                            for (int z_ind = 0; z_ind < z_intervals![z_line]; ++z_ind)
+                            {
+                                for (int y_line = y0; y_line < y1 - 1; ++y_line)
+                                {
+                                    for (int y_ind = 0; y_ind < y_intervals[y_line]; ++y_ind)
+                                    {
+                                        for (int x_line = x0; x_line < x1 - 1; ++x_line)
+                                        {
+                                            for (int x_ind = 0; x_ind < x_intervals[x_line]; ++x_ind)
+                                            {
+                                                Vector3D p1 = new(lines[y_line, x_line].X, lines[y_line, x_line].Y, z_lines![z_line]);
+                                                Vector3D p2 = new(lines[y_line + 1, x_line + 1].X, lines[y_line + 1, x_line + 1].Y, z_lines![z_line + 1]);
+                                                Vector3D vertex = PointOnLine(p1, p2, x_intervals[x_line], x_stretch[x_line], y_intervals[y_line], y_stretch[y_line], z_intervals[z_line], z_stretch![z_line], x_ind, y_ind, z_ind);
+                                                vertices.Add(vertex);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        break;
+                    }
+            }
+
+
+            //for (int y_line = y0; y_line < y1 - 1; ++y_line)
+            //{
+            //    for (int x_line = x0; x_line < x1 - 1; ++x_line)
+            //    {
+            //        //vertices addition
+
+            //        int inner_index = vertices.Count;
+
+            //        for(int y_ind = 1; y_ind < y_intervals[y_line];++y_ind)
+            //        {
+            //            for(int x_ind = 1; x_ind < x_intervals[x_line]; ++x_ind)
+            //            {
+            //                Vector2D vertex = PointOnLine(lines[y_line, x_line], lines[y_line + 1, x_line + 1], x_intervals[x_line], x_stretch[x_line], y_intervals[y_line], y_stretch[y_line], x_ind, y_ind);
+            //                vertices.Add(vertex);
+            //            }
+            //        }
+            //        //quadranles forming
+            //        for (int y_ind = 0; y_ind < y_intervals[y_line]; ++y_ind)
+            //        {
+            //            for (int x_ind = 0; x_ind < x_intervals[x_line]; ++x_ind)
+            //            {
+            //                int[][] quadrangle_indices = [ [x_ind,y_ind ], [x_ind,y_ind+1 ], [ x_ind + 1, y_ind + 1 ], [ x_ind + 1, y_ind ] ];
+            //                int[] quadrangle_vertex_numbers = new int[4];
+            //                for(int i = 0; i < 4; ++i)
+            //                {
+            //                    int[] local_indices = quadrangle_indices[i];
+            //                    if(local_indices[0] == 0)
+            //                    {
+            //                        if(local_indices[1] == 0)
+            //                            quadrangle_vertex_numbers[i] = y_line * lines.GetLength(1) + x_line;
+            //                        else if(local_indices[1] == y_intervals[y_line])
+            //                    }
+
+            //                    switch(local_indices[0])
+            //                    {
+            //                        case 0:
+            //                            {
+            //                                switch(local_indices[1])
+            //                                {
+            //                                    case 0:
+            //                                        quadrangle_vertex_numbers[i] = y_line * lines.GetLength(1) + x_line;
+            //                                        break;
+            //                                    case y_intervals[y_line]:
+            //                                        quadrangle_vertex_numbers[i] = (y_line + 1) * lines.GetLength(1) + x_line;
+            //                                        break;
+
+            //                                }
+            //                                break;
+            //                            }
+            //                    }
+            //                }
+            //            }
+            //        }
+            //    }
+            //}
+            //break;
+            // }
+
+
+
+            for (int y_line = fragmentData.areaBorders[w, 2]; y_line < fragmentData.areaBorders[w, 3]; ++y_line)
                 {
                     switch(dimension)
                     {
@@ -153,7 +367,119 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
         //return new General2DMesh();
     }
 
-    private PseudoRegularMeshData? ReadFile(string MeshFileName, string MeshFragmentationFileName, Dimension dimension)
+    private void FillBorder(string coordinate, List<IVector> vertices, Dictionary<(int, int , int , int ),int> borderDictionary, int x, int y, int z,int n, double k)
+    {
+        switch(dimension)
+        {
+            case Dimension.D2:
+                {
+                    switch(coordinate)
+                    {
+                        case "x":
+                            {
+                                var key = (y, 0, x, x + 1);
+                                if (!borderDictionary.ContainsKey(key))
+                                {
+                                    int index = vertices.Count;
+                                    borderDictionary[key] = index;
+                                    for (int x_ind = 1; x_ind < n; ++x_ind)
+                                    {
+                                        Vector2D vector = PointOnLine(lines![y, x],
+                                                                      lines[y, x + 1], n, k, 0, 0, x_ind, 0);
+                                        vertices.Add(vector);
+                                    }
+                                }
+                                break;
+                            }
+                        case "y":
+                            {
+                                var key = (x, 0, y, y + 1);
+                                if (!borderDictionary.ContainsKey(key))
+                                {
+                                    int index = vertices.Count;
+                                    borderDictionary[key] = index;
+                                    for (int y_ind = 1; y_ind < n; ++y_ind)
+                                    {
+                                        Vector2D vector = PointOnLine(lines![y, x], lines[y + 1, x],0,0, n, k, 0, y_ind);
+                                        vertices.Add(vector);
+                                    }
+                                }
+                                break;
+                            }
+                    }
+                    break;
+                }
+            case Dimension.D3:
+                {
+                    switch (coordinate)
+                    {
+                        case "x":
+                            {
+                                var key = (y, z, x, x + 1);
+                                if (!borderDictionary.ContainsKey(key))
+                                {
+                                    int index = vertices.Count;
+                                    borderDictionary[key] = index;
+                                    for (int x_ind = 1; x_ind < n; ++x_ind)
+                                    {
+                                        Vector3D p1 = new(lines![y, x].X,
+                                                          lines[y, x].Y, z_lines![z]);
+                                        Vector3D p2 = new(lines[y, x + 1].X,
+                                                          lines[y, x + 1].Y, z_lines![z]);
+                                        Vector3D vector = PointOnLine(p1, p2, n, k, 0, 0, 0, 0, x_ind, 0, 0);
+
+                                        vertices.Add(vector);
+                                    }
+                                }
+                                break;
+                            }
+                        case "y":
+                            {
+                                var key = (x, z, y, y + 1);
+                                if (!borderDictionary.ContainsKey(key))
+                                {
+                                    int index = vertices.Count;
+                                    borderDictionary[key] = index;
+                                    for (int y_ind = 1; y_ind < n; ++y_ind)
+                                    {
+                                        Vector3D p1 = new(lines![y, x].X,
+                                                          lines[y, x].Y, z_lines![z]);
+                                        Vector3D p2 = new(lines[y + 1, x].X,
+                                                          lines[y + 1, x].Y, z_lines![z]);
+                                        Vector3D vector = PointOnLine(p1, p2, 0, 0, n, k, 0, 0, 0, y_ind, 0);
+
+                                        vertices.Add(vector);
+                                    }
+                                }
+                                break;
+                            }
+                        case "z":
+                            {
+                                var key = (x, y, z, z + 1);
+                                if (!borderDictionary.ContainsKey(key))
+                                {
+                                    int index = vertices.Count;
+                                    borderDictionary[key] = index;
+                                    for (int z_ind = 1; z_ind < n; ++z_ind)
+                                    {
+                                        Vector3D p1 = new(lines![y, x].X,
+                                                          lines[y, x].Y, z_lines![z]);
+                                        Vector3D p2 = new(lines[y, x].X,
+                                                          lines[y, x].Y, z_lines![z + 1]);
+                                        Vector3D vector = PointOnLine(p1, p2, 0, 0, 0, 0, n, k, 0, 0, z_ind);
+
+                                        vertices.Add(vector);
+                                    }
+                                }
+                                break;
+                            }
+                    }
+                    break;
+                }
+        }
+    }
+
+    private void ReadFile(string MeshFileName, string MeshFragmentationFileName, Dimension dimension)
     {
         //PseudoRegularMeshData data = new();
 
@@ -173,7 +499,7 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
 
             int n_y = int.Parse(strings[1]);
 
-            Vector2D[,] lines = new Vector2D[n_y,n_x] ;
+            lines = new Vector2D[n_y,n_x] ;
 
             for (int i = 0; i < n_y; ++i)
             {
@@ -188,7 +514,7 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
 
             //z_coordinate lines reading
 
-            double[]? z_lines = null;
+            z_lines = null;
 
             int n_z = 0;
 
@@ -213,7 +539,7 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
 
             int n_w = int.Parse(strings[0]);
 
-            string[] materials = new string[n_w];
+            materials = new string[n_w];
 
             int n_borders = 0;
 
@@ -229,7 +555,7 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                     throw new Exception("");
             }
 
-            int[,] areaBorders = new int[n_w, n_borders];
+            areaBorders = new int[n_w, 6];
 
             strings = srMesh.ReadLine()!.Split(' ');
 
@@ -237,7 +563,9 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
             {
                 materials[i] = strings[0];
                 for(int j = 0; j < n_borders; ++j)
-                    areaBorders[i,j] = int.Parse(strings[j + 1]);
+                    areaBorders[i, j] = int.Parse(strings[j + 1]);
+                for(int j = n_borders; j < 6; ++j)
+                    areaBorders[i, j] = 0;
             }
 
             srMesh.Close(); //close mesh file
@@ -246,14 +574,14 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
 
             StreamReader srFragment = new StreamReader(fragmentPath); //open mesh fragmentation file
 
-            int[] x_intervals = new int[n_x - 1];
-            double[] x_stretch = new double[n_x - 1];
+            x_intervals = new int[n_x - 1];
+            x_stretch = new double[n_x - 1];
 
-            int[] y_intervals = new int[n_y - 1];
-            double[] y_stretch = new double[n_y - 1];
+            y_intervals = new int[n_y - 1];
+            y_stretch = new double[n_y - 1];
 
-            int[]? z_intervals = n_z > 0 ? new int[n_z - 1] : null;
-            double[]? z_stretch =  n_z > 0 ? new double[n_z - 1] : null;
+            z_intervals = n_z > 0 ? new int[n_z - 1] : null;
+            z_stretch =  n_z > 0 ? new double[n_z - 1] : null;
 
             strings = srFragment.ReadLine()!.Split(' ');
 
@@ -284,14 +612,16 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
 
             srFragment.Close(); //close mesh fragmentation file
 
-            return new(lines, z_lines, materials, areaBorders, x_intervals, y_intervals, z_intervals, x_stretch, y_stretch, z_stretch);
+
+
+            //return new(lines, z_lines, materials, areaBorders, x_intervals, y_intervals, z_intervals, x_stretch, y_stretch, z_stretch);
         }
         catch (Exception e)
         {
             Console.WriteLine("Exception: " + e.Message);
         }
 
-        return null;
+        //return null;
     }
 
     private double PointOnLine(double p1, double p2, int n, double k, int ind)
