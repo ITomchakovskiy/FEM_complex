@@ -16,7 +16,10 @@ public static class FiniteElementsCreator
     public static void LoadFiniteElementTypes(Assembly assembly)
     {
         var finiteElementType = typeof(IFiniteElement<IVector>);
-        var elementsTypes = assembly.GetTypes().Where(t => finiteElementType.IsAssignableFrom(t) && t.IsClass);
+        //var types = assembly.GetTypes();
+        //bool re = TriangleLagrangianLinearFiniteElement is typeof(IFiniteElement<IVector>);
+        var elementsTypes = assembly.GetTypes().Where(t => t.GetInterfaces().Any(i => i.IsGenericType &&
+        i.GetGenericTypeDefinition() == typeof(IFiniteElement<>)));
 
         foreach (var type in elementsTypes)
         {
