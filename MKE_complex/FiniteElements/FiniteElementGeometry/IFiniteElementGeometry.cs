@@ -9,6 +9,7 @@ namespace MKE_complex.FiniteElements.FiniteElementGeometry;
 
 public interface IFiniteElementGeometry<VectorT> where VectorT : IVector
 {
+   // GeometryType GeometryType { get; }
     int[] VertexNumber { get; }
 
     (int, int) Edge(int edgeNumber);

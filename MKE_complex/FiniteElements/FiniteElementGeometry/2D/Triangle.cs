@@ -9,6 +9,8 @@ namespace MKE_complex.FiniteElements.FiniteElementGeometry._2D;
 
 public record Triangle(int[] VertexNumber) : IFiniteElementGeometry<Vector2D>
 {
+    public GeometryType GeometryType => GeometryType.Triangle;
+
     public (int, int) Edge(int edgeNumber)
     {
         switch (edgeNumber)

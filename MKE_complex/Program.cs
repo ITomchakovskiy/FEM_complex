@@ -1,9 +1,18 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using MKE_complex;
+using MKE_complex.FiniteElements;
+using MKE_complex.FiniteElements.Elements;
+using MKE_complex.Mesh;
 using MKE_complex.Mesh.MeshBuilder;
+using MKE_complex.Vector;
 using System.Globalization;
+using System.Reflection;
 
 Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+
+Assembly assembly = Assembly.GetExecutingAssembly();
+
+FiniteElementsCreator.LoadFiniteElementTypes(assembly);
 
 var GeometryTypesForDimension = new Dictionary<Dimension, GeometryType[]>()
 {
@@ -25,18 +34,33 @@ Dimension dimension = (Dimension)int.Parse(Console.ReadLine()!);
 
 Console.WriteLine("Choose mesh type");
 
-foreach (GeometryType d in GeometryTypesForDimension[dimension])
+foreach (GeometryType g in GeometryTypesForDimension[dimension])
 {
-    Console.WriteLine($"{d} : {(int)d}");
+    Console.WriteLine($"{g} : {(int)g}");
 }
 
 GeometryType mesh_type = (GeometryType)int.Parse(Console.ReadLine()!);
+
+foreach (BasisType b in Enum.GetValues(typeof(BasisType)))
+{
+    Console.WriteLine($"{b} : {(int)b}");
+}
+
+BasisType basis = (BasisType)int.Parse(Console.ReadLine()!);
+
+Console.WriteLine($"Choose basis order");
+
+int order = int.Parse(Console.ReadLine()!);
+
+if (order < 1) throw new Exception();
 
 Console.WriteLine("Type file names for mesh building");
 
 string[] fileNames = Console.ReadLine()!.Split(' ');
 
 PseudoRegularMeshBuilder builder = new PseudoRegularMeshBuilder();
+
+IFiniteElementMesh<IVector> mesh = builder.BuildMesh(dimension,mesh_type,basis,order,fileNames);
 
 //builder.ReadFile(fileNames[0], fileNames[1], dimension);
 

@@ -9,6 +9,8 @@ namespace MKE_complex.FiniteElements.FiniteElementGeometry._2D;
 
 public record Line(int[] VertexNumber) : IFiniteElementGeometry<Vector2D>
 {
+    public GeometryType GeometryType => GeometryType.Line;
+
     public (int, int) Edge(int edgeNumber)
     {
         switch (edgeNumber)

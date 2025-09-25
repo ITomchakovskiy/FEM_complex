@@ -9,6 +9,8 @@ namespace MKE_complex.FiniteElements.FiniteElementGeometry._3D;
 
 public record Tetrahedron(int[] VertexNumber) : IFiniteElementGeometry<Vector3D>
 {
+    public GeometryType GeometryType => GeometryType.Tetrahedron;
+
     public (int, int) Edge(int edgeNumber)
     {
         switch(edgeNumber)

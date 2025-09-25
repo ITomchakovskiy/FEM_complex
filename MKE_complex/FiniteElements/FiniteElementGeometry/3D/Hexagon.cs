@@ -9,6 +9,8 @@ namespace MKE_complex.FiniteElements.FiniteElementGeometry._3D;
 
 public record Hexagon(int[] VertexNumber) : IFiniteElementGeometry<Vector3D>
 {
+    public GeometryType GeometryType => GeometryType.Hexagon;
+
     public (int, int) Edge(int edgeNumber)
     {
         switch(edgeNumber)

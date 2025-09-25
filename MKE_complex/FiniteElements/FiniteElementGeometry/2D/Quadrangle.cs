@@ -9,6 +9,8 @@ namespace MKE_complex.FiniteElements.FiniteElementGeometry._2D;
 
 public record Quadrangle(int[] VertexNumber) : IFiniteElementGeometry<Vector2D>
 {
+    public GeometryType GeometryType => GeometryType.Quadrangle;
+
     public (int, int) Edge(int edgeNumber)
     {
         switch(edgeNumber)
@@ -19,5 +21,15 @@ public record Quadrangle(int[] VertexNumber) : IFiniteElementGeometry<Vector2D>
             case 3: return (3, 0);
             default: throw new Exception("Wrong edge number");
         }
+    }
+
+    public Triangle[] ToTriangles()
+    {
+        int[][] triangleVertices_local = [[0, 1, 3], [1, 2, 3]];
+        // int[][] triangleVertices = 
+        Triangle[] triangles = new Triangle[2];
+        for(int i = 0; i < triangles.Length; ++i)
+            triangles[i] = new Triangle(triangleVertices_local[i].Select(j => VertexNumber[j]).ToArray());
+        return triangles;
     }
 }

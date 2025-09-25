@@ -1,4 +1,5 @@
-﻿using MKE_complex.Vector;
+﻿using MKE_complex.FiniteElements.FiniteElementGeometry;
+using MKE_complex.Vector;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,9 @@ namespace MKE_complex.FiniteElements;
 
 public interface IFiniteElement<VectorT> where VectorT : IVector
 {
-    IFiniteElement<VectorT> Geometry { get;}
+    IFiniteElementGeometry<VectorT> Geometry { get;}
 
     string Material { get; }
+    //BasisType BasisType { get; }
+    //int Order { get; }
 }

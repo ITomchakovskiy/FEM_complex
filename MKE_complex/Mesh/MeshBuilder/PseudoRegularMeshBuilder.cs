@@ -1,5 +1,8 @@
-﻿using MKE_complex.FiniteElements.FiniteElementGeometry;
+﻿using MKE_complex.FiniteElements;
+using MKE_complex.FiniteElements.Elements;
+using MKE_complex.FiniteElements.FiniteElementGeometry;
 using MKE_complex.FiniteElements.FiniteElementGeometry._2D;
+using MKE_complex.FiniteElements.FiniteElementGeometry._3D;
 using MKE_complex.Vector;
 using System;
 using System.Collections;
@@ -44,7 +47,7 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
     private double[]? z_stretch;
 
     private Dimension dimension;
-    public IFiniteElementMesh<IVector> BuildMesh(Dimension dimension, GeometryType meshType, BasisType basisType, string[] fileNames)
+    public IFiniteElementMesh<IVector> BuildMesh(Dimension dimension, GeometryType meshType, BasisType basisType, int order, string[] fileNames)
     {
         this.dimension = dimension;
         ReadFile(fileNames[0], fileNames[1], dimension);
@@ -52,9 +55,11 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
         if (lines == null || materials == null || areaBorders == null || x_intervals == null || y_intervals == null || x_stretch == null || y_stretch == null)
             throw new Exception("Error in reading mesh file");
 
-        List<IFiniteElementGeometry<IVector>> elementsGeometry = new();
+        //List<IFiniteElementGeometry<IVector>> elementsGeometry = new();
 
         List<IVector> vertices = new();
+
+        List<IFiniteElement<IVector>> elements = new();
 
         //add points on coordinate lines
         switch(dimension)
@@ -215,6 +220,8 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
             }
             //forming of Quadrangles or Hexagons
 
+            List<IFiniteElementGeometry<IVector>> elementsGeometry = new();
+
             switch (dimension)
             {
                 case Dimension.D2:
@@ -233,34 +240,45 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                                 {
                                     for (int x_ind = 0; x_ind < x_intervals[x_line]; ++x_ind)
                                     {
-                                        int[] local_index_start = [x_interval_points + x_ind, y_interval_points + y_ind];
-                                        int[][] quadrangle_local_indices = [local_index_start,[local_index_start[0], local_index_start[1] + 1],
-                                                                                              [local_index_start[0] + 1, local_index_start[1] + 1],
-                                                                                              [local_index_start[0] + 1, local_index_start[1]]];
-                                        int[] quadrangle_vertex_numbers = new int[4];
-                                        for(int i = 0; i < 4; ++i)
+                                        (int x, int y) local_index_start = (x_interval_points + x_ind, y_interval_points + y_ind);
+                                        (int x, int y)[] quadrangle_local_indices = [local_index_start,(local_index_start.x, local_index_start.y + 1),
+                                                                                                       (local_index_start.x + 1, local_index_start.y + 1),
+                                                                                                       (local_index_start.x + 1, local_index_start.y)];
+                                        int[] quadrangle_vertex_numbers = new int[quadrangle_local_indices.Length];
+                                        for (int i = 0; i < quadrangle_vertex_numbers.Length; ++i)
                                         {
-                                            int[] local_index = quadrangle_local_indices[i];
-                                            //int vertex_index;
+                                            (int x, int y) local_index = quadrangle_local_indices[i];
 
-                                            if ((local_index[0] == 0 || local_index[0] == n_x - 1) && (local_index[1] == 0 || local_index[1] == n_y - 1))
+                                            if ((local_index.x == 0 || local_index.x == n_x - 1) && (local_index.y == 0 || local_index.y == n_y - 1)) //vertices of subdomain
                                             {
-                                                int shift_x = local_index[0] == 0 ? 0 : 1;
-                                                int shift_y = local_index[1] == 0 ? 0 : 1;
+                                                int shift_x = local_index.x == 0 ? 0 : 1;
+                                                int shift_y = local_index.y == 0 ? 0 : 1;
                                                 quadrangle_vertex_numbers[i] = lines.GetLength(1) * (y_line + shift_y) + x_line + shift_x;
                                             }
-                                            else if((local_index[0] == 0 || local_index[0] == n_x - 1))
+                                            else if ((local_index.x == 0 || local_index.x == n_x - 1))  //x0 and x1 border
                                             {
-                                                int shift = local_index[0] == 0 ? 0 : 1;
+                                                int shift = local_index.x == 0 ? 0 : 1;
                                                 quadrangle_vertex_numbers[i] = vertices_on_y_lines[(x_line + shift, 0, y_line, y_line + 1)] + y_ind - 1;
                                             }
-                                            else if((local_index[1] == 0 || local_index[1] == n_y - 1))
+                                            else if ((local_index.y == 0 || local_index.y == n_y - 1)) //y0 and y1 border
                                             {
-                                                int shift = local_index[1] == 0 ? 0 : 1;
+                                                int shift = local_index.y == 0 ? 0 : 1;
                                                 quadrangle_vertex_numbers[i] = vertices_on_x_lines[(y_line + shift, 0, x_line, x_line + 1)] + x_ind - 1;
                                             }
-                                            else
-                                                quadrangle_vertex_numbers[i] = inner_index_start + (n_x - 2) * (local_index[1] - 1) + local_index[0] - 1;
+                                            else  //inner vertices
+                                                quadrangle_vertex_numbers[i] = inner_index_start + (n_x - 2) * (local_index.y - 1) + local_index.x - 1;
+                                        }
+                                        Quadrangle quadrangle = new(quadrangle_vertex_numbers);
+                                        switch (meshType)
+                                        {
+                                            case GeometryType.Triangle:
+                                                elementsGeometry.AddRange((IEnumerable<IFiniteElementGeometry<IVector>>)quadrangle.ToTriangles());
+                                                break;
+                                            case GeometryType.Quadrangle:
+                                                elementsGeometry.Add((IFiniteElementGeometry<IVector>)quadrangle);
+                                                break;
+                                            default:
+                                                throw new NotSupportedException();
                                         }
                                     }
                                 }
@@ -270,6 +288,10 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                     }
                 case Dimension.D3:
                     {
+                        int n_x = x_intervals.Sum() + 1;
+                        int n_y = y_intervals.Sum() + 1;
+                        int n_z = z_intervals!.Sum() - 1;
+
                         int x_interval_points = 0;
                         int y_interval_points = 0;
                         int z_interval_points = 0;
@@ -285,34 +307,58 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                                         {
                                             for (int x_ind = 0; x_ind < x_intervals[x_line]; ++x_ind)
                                             {
-                                                int[] local_index_start = [x_interval_points + x_ind, y_interval_points + y_ind];
-                                                int[][] quadrangle_local_indices = [local_index_start,[local_index_start[0], local_index_start[1] + 1],
-                                                                                              [local_index_start[0] + 1, local_index_start[1] + 1],
-                                                                                              [local_index_start[0] + 1, local_index_start[1]]];
-                                                for (int i = 0; i < 4; ++i)
-                                                {
-                                                    int[] local_index = quadrangle_local_indices[i];
-                                                    int vertex_index;
+                                                (int x, int y, int z) local_index_start = (x_interval_points + x_ind, y_interval_points + y_ind, z_interval_points + z_ind);
+                                                (int x, int y, int z)[] hexagon_local_indices = [local_index_start,(local_index_start.x, local_index_start.y + 1, local_index_start.z),
+                                                                                                                      (local_index_start.x + 1, local_index_start.y + 1, local_index_start.z),
+                                                                                                                      (local_index_start.x + 1, local_index_start.y, local_index_start.z),
+                                                                                                                      (local_index_start.x, local_index_start.y, local_index_start.z + 1),
+                                                                                                                      (local_index_start.x, local_index_start.y + 1, local_index_start.z + 1),
+                                                                                                                      (local_index_start.x + 1, local_index_start.y + 1, local_index_start.z + 1),
+                                                                                                                      (local_index_start.x + 1, local_index_start.y, local_index_start.z + 1)];
+                                                int[] hexagon_vertex_numbers = new int[hexagon_local_indices.Length];
 
-                                                    if ((local_index[0] == 0 || local_index[0] == n_x - 1) && (local_index[1] == 0 || local_index[1] == n_y - 1))
+                                                for (int i = 0; i < hexagon_vertex_numbers.Length; ++i)
+                                                {
+                                                    (int x, int y, int z) local_index = hexagon_local_indices[i];
+
+                                                    if ((local_index.x == 0 || local_index.x == n_x - 1) && (local_index.y == 0 || local_index.y == n_y - 1) && (local_index.z == 0 || local_index.z == n_z - 1)) //vertices of subdomain
                                                     {
-                                                        int shift_x = local_index[0] == 0 ? 0 : 1;
-                                                        int shift_y = local_index[1] == 0 ? 0 : 1;
-                                                        vertex_index = lines.GetLength(1) * (y_line + shift_y) + x_line + shift_x;
+                                                        int shift_x = local_index.x == 0 ? 0 : 1;
+                                                        int shift_y = local_index.y == 0 ? 0 : 1;
+                                                        int shift_z = local_index.z == 0 ? 0 : 1;
+                                                        hexagon_vertex_numbers[i] = lines.GetLength(0)* lines.GetLength(1) * (z_line + shift_z) + lines.GetLength(1) * (y_line + shift_y) + x_line + shift_x;
                                                     }
-                                                    else if ((local_index[0] == 0 || local_index[0] == n_x - 1))
+                                                    else if ((local_index.y == 0 || local_index.y == n_y - 1) && (local_index.z == 0 || local_index.z == n_z - 1)) //y const and z const borders
                                                     {
-                                                        int shift = local_index[0] == 0 ? 0 : 1;
-                                                        vertex_index = vertices_on_y_lines[(x_line + shift, 0, y_line, y_line + 1)] + y_ind - 1;
+                                                        int shift_y = local_index.y == 0 ? 0 : 1;
+                                                        int shift_z = local_index.z == 0 ? 0 : 1;
+                                                        hexagon_vertex_numbers[i] = vertices_on_x_lines[(y_line + shift_y, z_line + shift_z, x_line, x_line + 1)] + x_ind - 1;
                                                     }
-                                                    else if ((local_index[1] == 0 || local_index[1] == n_y - 1))
+                                                    else if ((local_index.x == 0 || local_index.x == n_x - 1) && (local_index.z == 0 || local_index.z == n_z - 1)) //x const and z const borders
                                                     {
-                                                        int shift = local_index[1] == 0 ? 0 : 1;
-                                                        vertex_index = vertices_on_x_lines[(y_line + shift, 0, x_line, x_line + 1)] + x_ind - 1;
+                                                        int shift_x = local_index.x == 0 ? 0 : 1;
+                                                        int shift_z = local_index.z == 0 ? 0 : 1;
+                                                        hexagon_vertex_numbers[i] = vertices_on_y_lines[(x_line + shift_x, z_line + shift_z, y_line, y_line + 1)] + y_ind - 1;
+                                                    }
+                                                    else if ((local_index.x == 0 || local_index.x == n_x - 1) && (local_index.y == 0 || local_index.y == n_y - 1)) //x const and y const borders
+                                                    {
+                                                        int shift_x = local_index.x == 0 ? 0 : 1;
+                                                        int shift_y = local_index.y == 0 ? 0 : 1;
+                                                        hexagon_vertex_numbers[i] = vertices_on_y_lines[(x_line + shift_x, y_line + shift_y, z_line, z_line + 1)] + z_ind - 1;
                                                     }
                                                     else
-                                                        vertex_index = inner_index_start + (n_x - 2) * (local_index[1] - 1) + local_index[0] - 1;
+                                                        hexagon_vertex_numbers[i] = inner_index_start + (n_x - 2) * (n_y - 2) * (local_index.z - 1) + (n_x - 2) * (local_index.y - 1) + local_index.x - 1;
                                                 }
+                                                Hexagon hexagon = new(hexagon_vertex_numbers);
+                                                switch(meshType)
+                                                {
+                                                    case GeometryType.Hexagon:
+                                                        elementsGeometry.Add((IFiniteElementGeometry<IVector>)hexagon);
+                                                        break;
+                                                    default:
+                                                        throw new NotSupportedException();
+                                                }
+                                                
                                             }
                                         }
                                     }
@@ -323,93 +369,20 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                         break;
                     }
             }
-
-
-            //for (int y_line = y0; y_line < y1 - 1; ++y_line)
-            //{
-            //    for (int x_line = x0; x_line < x1 - 1; ++x_line)
-            //    {
-            //        //vertices addition
-
-            //        int inner_index = vertices.Count;
-
-            //        for(int y_ind = 1; y_ind < y_intervals[y_line];++y_ind)
-            //        {
-            //            for(int x_ind = 1; x_ind < x_intervals[x_line]; ++x_ind)
-            //            {
-            //                Vector2D vertex = PointOnLine(lines[y_line, x_line], lines[y_line + 1, x_line + 1], x_intervals[x_line], x_stretch[x_line], y_intervals[y_line], y_stretch[y_line], x_ind, y_ind);
-            //                vertices.Add(vertex);
-            //            }
-            //        }
-            //        //quadranles forming
-            //        for (int y_ind = 0; y_ind < y_intervals[y_line]; ++y_ind)
-            //        {
-            //            for (int x_ind = 0; x_ind < x_intervals[x_line]; ++x_ind)
-            //            {
-            //                int[][] quadrangle_indices = [ [x_ind,y_ind ], [x_ind,y_ind+1 ], [ x_ind + 1, y_ind + 1 ], [ x_ind + 1, y_ind ] ];
-            //                int[] quadrangle_vertex_numbers = new int[4];
-            //                for(int i = 0; i < 4; ++i)
-            //                {
-            //                    int[] local_indices = quadrangle_indices[i];
-            //                    if(local_indices[0] == 0)
-            //                    {
-            //                        if(local_indices[1] == 0)
-            //                            quadrangle_vertex_numbers[i] = y_line * lines.GetLength(1) + x_line;
-            //                        else if(local_indices[1] == y_intervals[y_line])
-            //                    }
-
-            //                    switch(local_indices[0])
-            //                    {
-            //                        case 0:
-            //                            {
-            //                                switch(local_indices[1])
-            //                                {
-            //                                    case 0:
-            //                                        quadrangle_vertex_numbers[i] = y_line * lines.GetLength(1) + x_line;
-            //                                        break;
-            //                                    case y_intervals[y_line]:
-            //                                        quadrangle_vertex_numbers[i] = (y_line + 1) * lines.GetLength(1) + x_line;
-            //                                        break;
-
-            //                                }
-            //                                break;
-            //                            }
-            //                    }
-            //                }
-            //            }
-            //        }
-            //    }
-            //}
-            //break;
-            // }
-
-
-
-            for (int y_line = fragmentData.areaBorders[w, 2]; y_line < fragmentData.areaBorders[w, 3]; ++y_line)
-                {
-                    switch(dimension)
-                    {
-                        case Dimension.D2:
-                            {
-                                for(int y_ind = 0; y_ind < fragmentData.y_intervals.Length; ++y_ind)
-                                {
-                                    for(int x_ind = 0; x_ind < fragmentData.x_intervals.Length; ++x_ind)
-                                    {
-                                        switch(meshType)
-                                        {
-                                            case GeometryType.Quadrangle:
-                                                {
-
-                                                }
-                                        }
-                                    }
-                                }
-                            }
-                    }
-                }
+            foreach(var geometry in elementsGeometry)
+            {
+                elements.Add(FiniteElementsCreator.CreateFiniteElement(meshType, basisType, order, material, geometry));
             }
         }
-        //return new General2DMesh();
+        //return
+        switch (dimension)
+        {
+            case Dimension.D2:
+                return (IFiniteElementMesh<IVector>)new FiniteElementMesh<Vector2D>((IReadOnlyList<Vector2D>)vertices, (IReadOnlyList<IFiniteElement<Vector2D>>)elements);
+            case Dimension.D3:
+                return (IFiniteElementMesh<IVector>)new FiniteElementMesh<Vector3D>((IReadOnlyList<Vector3D>)vertices, (IReadOnlyList<IFiniteElement<Vector3D>>)elements);
+            default: throw new NotSupportedException();
+        }
     }
 
     private void FillBorder(string coordinate, List<IVector> vertices, Dictionary<(int, int , int , int ),int> borderDictionary, int x, int y, int z,int n, double k)

@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 
 namespace MKE_complex.Mesh;
 
-public class Mesh<VectorT> : IFiniteElementMesh<VectorT> where VectorT : IVector
+public class FiniteElementMesh<VectorT>(IReadOnlyList<VectorT> vertices, IReadOnlyList<IFiniteElement<VectorT>> elements) : IFiniteElementMesh<VectorT> where VectorT : IVector
 {
-    public required List<VectorT> Vertices { get; init; }
+    public List<VectorT> Vertices { get; init; } = (List<VectorT>)vertices;
     IReadOnlyList<VectorT> IFiniteElementMesh<VectorT>.Vertices => Vertices;
-    public required List<IFiniteElement<VectorT>> Elements { get; init; }
+    public List<IFiniteElement<VectorT>> Elements { get; init; } = (List<IFiniteElement<VectorT>>)elements;
     IReadOnlyList<IFiniteElement<VectorT>> IFiniteElementMesh<VectorT>.Elements => Elements;
 
     //public Mesh<VectorT> RegularMesh(string meshFileName, string meshFragmentationFile)
