@@ -34,18 +34,18 @@ public static class FiniteElementsCreator
         }
     }
 
-    public static IFiniteElement<IVector> CreateFiniteElement(GeometryType geometryType, BasisType basis, int order, string material, IFiniteElementGeometry<IVector> geometry)
+    public static IFiniteElement<VectorT> CreateFiniteElement<VectorT>(GeometryType geometryType, BasisType basis, int order, string material, IFiniteElementGeometry<VectorT> geometry) where VectorT : IVector
     {
         Type elementType;
         if (AttributeToType.TryGetValue((geometryType, basis, order), out elementType!))
         {
-            Type[] types = [typeof(string), typeof(IFiniteElementGeometry<IVector>)];
-            var constructorInfo = elementType.GetConstructor(types);
+            //Type[] types = [typeof(string), typeof(IFiniteElementGeometry<VectorT>)];
+            var constructorInfo = elementType.GetConstructors();
             if (constructorInfo is null)
                 throw new NotSupportedException("");
 
             object[] arguments = { material, geometry };
-            return (IFiniteElement<IVector>)constructorInfo!.Invoke(arguments);
+            return (IFiniteElement<VectorT>)constructorInfo[0]!.Invoke(arguments); //костыль с конструктором
         }
         else throw new NotSupportedException("");
     }

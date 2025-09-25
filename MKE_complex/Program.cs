@@ -60,7 +60,5 @@ string[] fileNames = Console.ReadLine()!.Split(' ');
 
 PseudoRegularMeshBuilder builder = new PseudoRegularMeshBuilder();
 
-IFiniteElementMesh<IVector> mesh = builder.BuildMesh(dimension,mesh_type,basis,order,fileNames);
-
-//builder.ReadFile(fileNames[0], fileNames[1], dimension);
+IFiniteElementMesh<Vector2D> mesh = builder.BuildMesh<Vector2D>(dimension,mesh_type,basis,order,fileNames); //костыль
 
