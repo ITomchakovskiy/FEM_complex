@@ -15,7 +15,7 @@ public static class FiniteElementsCreator
 
     public static void LoadFiniteElementTypes(Assembly assembly)
     {
-        var finiteElementType = typeof(IFiniteElement<IVector>);
+        //var finiteElementType = typeof(IFiniteElement<IVector>);
         //var types = assembly.GetTypes();
         //bool re = TriangleLagrangianLinearFiniteElement is typeof(IFiniteElement<IVector>);
         var elementsTypes = assembly.GetTypes().Where(t => t.GetInterfaces().Any(i => i.IsGenericType &&
@@ -39,14 +39,15 @@ public static class FiniteElementsCreator
         Type elementType;
         if (AttributeToType.TryGetValue((geometryType, basis, order), out elementType!))
         {
-            //Type[] types = [typeof(string), typeof(IFiniteElementGeometry<VectorT>)];
-            var constructorInfo = elementType.GetConstructors();
-            if (constructorInfo is null)
+            Type[] types = [typeof(string), geometry.GetType()];
+            var constructor = elementType.GetConstructor(types);
+            if (constructor is null)
                 throw new NotSupportedException("");
-
-            object[] arguments = { material, geometry };
-            return (IFiniteElement<VectorT>)constructorInfo[0]!.Invoke(arguments); //костыль с конструктором
+            
+            object[] arguments = [material, geometry];
+            return (IFiniteElement<VectorT>)constructor!.Invoke(arguments);
+            throw new NotFiniteNumberException();
         }
-        else throw new NotSupportedException("");
+        else throw new NotSupportedException();
     }
 }
