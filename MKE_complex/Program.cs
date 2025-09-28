@@ -58,3 +58,6 @@ PseudoRegularMeshBuilder builder = new PseudoRegularMeshBuilder();
 
 IFiniteElementMesh<Vector2D> mesh = builder.BuildMesh<Vector2D>(dimension,mesh_type,basis,order,fileNames); //костыль
 
+if (mesh is FiniteElementMesh<Vector2D> mesh2d)
+    mesh2d.SaveMeshGeometry("Vertex.txt", "Elements.txt");
+

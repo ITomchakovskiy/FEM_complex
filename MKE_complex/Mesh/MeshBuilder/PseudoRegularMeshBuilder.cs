@@ -232,8 +232,8 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
             {
                 case Dimension.D2:
                     {
-                        int n_x = x_intervals.Sum() + 1;
-                        int n_y = y_intervals.Sum() + 1;
+                        int n_x = Enumerable.Range(x0,x1 - x0).Select(x_line => x_intervals[x_line]).Sum() + 1;
+                        int n_y = Enumerable.Range(y0, y1 - y0).Select(y_line => y_intervals[y_line]).Sum() + 1;
 
                         int x_interval_points = 0;
                         int y_interval_points = 0;
@@ -255,21 +255,23 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                                         {
                                             (int x, int y) local_index = quadrangle_local_indices[i];
 
-                                            if ((local_index.x == 0 || local_index.x == n_x - 1) && (local_index.y == 0 || local_index.y == n_y - 1)) //vertices of subdomain
+                                            if ((local_index.x == x_interval_points || local_index.x == x_interval_points + x_intervals[x_line]) && (local_index.y == y_interval_points || local_index.y == y_interval_points + y_intervals[y_line])) //vertices of coordinate_lines
                                             {
-                                                int shift_x = local_index.x == 0 ? 0 : 1;
-                                                int shift_y = local_index.y == 0 ? 0 : 1;
+                                                int shift_x = local_index.x == x_interval_points ? 0 : 1;
+                                                int shift_y = local_index.y == y_interval_points ? 0 : 1;
                                                 quadrangle_vertex_numbers[i] = lines.GetLength(1) * (y_line + shift_y) + x_line + shift_x;
                                             }
                                             else if ((local_index.x == 0 || local_index.x == n_x - 1))  //x0 and x1 border
                                             {
-                                                int shift = local_index.x == 0 ? 0 : 1;
-                                                quadrangle_vertex_numbers[i] = vertices_on_y_lines[(x_line + shift, 0, y_line, y_line + 1)] + y_ind - 1;
+                                                int x_line_const = local_index.x == 0 ? x0 : x1;
+                                                (int, int, int, int) key = new(x_line_const, 0, y_line, y_line + 1);
+                                                quadrangle_vertex_numbers[i] = vertices_on_y_lines[key] + y_ind - 1;
                                             }
                                             else if ((local_index.y == 0 || local_index.y == n_y - 1)) //y0 and y1 border
                                             {
-                                                int shift = local_index.y == 0 ? 0 : 1;
-                                                quadrangle_vertex_numbers[i] = vertices_on_x_lines[(y_line + shift, 0, x_line, x_line + 1)] + x_ind - 1;
+                                                int y_line_const = local_index.y == 0 ? y0 : y1;
+                                                (int, int, int, int) key = new(y_line_const, 0, x_line, x_line + 1);
+                                                quadrangle_vertex_numbers[i] = vertices_on_x_lines[key] + x_ind - 1;
                                             }
                                             else  //inner vertices
                                                 quadrangle_vertex_numbers[i] = inner_index_start + (n_x - 2) * (local_index.y - 1) + local_index.x - 1;
@@ -298,9 +300,9 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                     }
                 case Dimension.D3:
                     {
-                        int n_x = x_intervals.Sum() + 1;
-                        int n_y = y_intervals.Sum() + 1;
-                        int n_z = z_intervals!.Sum() - 1;
+                        int n_x = Enumerable.Range(x0, x1 - x0).Select(x_line => x_intervals[x_line]).Sum() + 1;
+                        int n_y = Enumerable.Range(y0, y1 - y0).Select(y_line => y_intervals[y_line]).Sum() + 1;
+                        int n_z = Enumerable.Range(z0, z1 - z0).Select(z_line => z_intervals![z_line]).Sum() + 1;
 
                         int x_interval_points = 0;
                         int y_interval_points = 0;
@@ -331,30 +333,33 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                                                 {
                                                     (int x, int y, int z) local_index = hexagon_local_indices[i];
 
-                                                    if ((local_index.x == 0 || local_index.x == n_x - 1) && (local_index.y == 0 || local_index.y == n_y - 1) && (local_index.z == 0 || local_index.z == n_z - 1)) //vertices of subdomain
+                                                    if ((local_index.x == x_interval_points || local_index.x == x_interval_points + x_intervals[x_line]) && (local_index.y == y_interval_points || local_index.y == y_interval_points + y_intervals[y_line]) && (local_index.z == z_interval_points || local_index.z == z_interval_points + z_intervals[z_line])) //vertices of subdomain
                                                     {
-                                                        int shift_x = local_index.x == 0 ? 0 : 1;
-                                                        int shift_y = local_index.y == 0 ? 0 : 1;
-                                                        int shift_z = local_index.z == 0 ? 0 : 1;
+                                                        int shift_x = local_index.x == x_interval_points ? 0 : 1;
+                                                        int shift_y = local_index.y == y_interval_points ? 0 : 1;
+                                                        int shift_z = local_index.z == z_interval_points ? 0 : 1;
                                                         hexagon_vertex_numbers[i] = lines.GetLength(0)* lines.GetLength(1) * (z_line + shift_z) + lines.GetLength(1) * (y_line + shift_y) + x_line + shift_x;
                                                     }
                                                     else if ((local_index.y == 0 || local_index.y == n_y - 1) && (local_index.z == 0 || local_index.z == n_z - 1)) //y const and z const borders
                                                     {
-                                                        int shift_y = local_index.y == 0 ? 0 : 1;
-                                                        int shift_z = local_index.z == 0 ? 0 : 1;
-                                                        hexagon_vertex_numbers[i] = vertices_on_x_lines[(y_line + shift_y, z_line + shift_z, x_line, x_line + 1)] + x_ind - 1;
+                                                        int y_line_const = local_index.y == 0 ? y0 : y1;
+                                                        int z_line_const = local_index.z == 0 ? z0 : z1;
+                                                        (int, int, int, int) key = new(y_line_const, z_line_const, x_line, x_line + 1);
+                                                        hexagon_vertex_numbers[i] = vertices_on_x_lines[key] + x_ind - 1;
                                                     }
                                                     else if ((local_index.x == 0 || local_index.x == n_x - 1) && (local_index.z == 0 || local_index.z == n_z - 1)) //x const and z const borders
                                                     {
-                                                        int shift_x = local_index.x == 0 ? 0 : 1;
-                                                        int shift_z = local_index.z == 0 ? 0 : 1;
-                                                        hexagon_vertex_numbers[i] = vertices_on_y_lines[(x_line + shift_x, z_line + shift_z, y_line, y_line + 1)] + y_ind - 1;
+                                                        int x_line_const = local_index.x == 0 ? x0 : x1;
+                                                        int z_line_const = local_index.z == 0 ? z0 : z1;
+                                                        (int, int, int, int) key = new(x_line_const, z_line_const, y_line, y_line + 1);
+                                                        hexagon_vertex_numbers[i] = vertices_on_y_lines[key] + y_ind - 1;
                                                     }
                                                     else if ((local_index.x == 0 || local_index.x == n_x - 1) && (local_index.y == 0 || local_index.y == n_y - 1)) //x const and y const borders
                                                     {
-                                                        int shift_x = local_index.x == 0 ? 0 : 1;
-                                                        int shift_y = local_index.y == 0 ? 0 : 1;
-                                                        hexagon_vertex_numbers[i] = vertices_on_y_lines[(x_line + shift_x, y_line + shift_y, z_line, z_line + 1)] + z_ind - 1;
+                                                        int x_line_const = local_index.x == 0 ? x0 : x1;
+                                                        int y_line_const = local_index.y == 0 ? y0 : y1;
+                                                        (int, int, int, int) key = new(x_line_const, y_line_const, z_line, z_line + 1);
+                                                        hexagon_vertex_numbers[i] = vertices_on_y_lines[key] + z_ind - 1;
                                                     }
                                                     else
                                                         hexagon_vertex_numbers[i] = inner_index_start + (n_x - 2) * (n_y - 2) * (local_index.z - 1) + (n_x - 2) * (local_index.y - 1) + local_index.x - 1;
@@ -583,10 +588,9 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
 
             areaBorders = new int[n_w, 6];
 
-            strings = srMesh.ReadLine()!.Split(' ');
-
             for (int i = 0; i < n_w; ++i)
             {
+                strings = srMesh.ReadLine()!.Split(' ');
                 materials[i] = strings[0];
                 for(int j = 0; j < n_borders; ++j)
                     areaBorders[i, j] = int.Parse(strings[j + 1]);
