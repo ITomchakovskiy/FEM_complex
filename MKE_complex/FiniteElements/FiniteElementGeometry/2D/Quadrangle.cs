@@ -32,4 +32,13 @@ public record Quadrangle(int[] VertexNumber) : IFiniteElementGeometry<Vector2D>
             triangles[i] = new Triangle(triangleVertices_local[i].Select(j => VertexNumber[j]).ToArray());
         return triangles;
     }
+
+    public static Vector2D PointOnQuadrangle(Vector2D[] vertices, int n_x, double k_x, int ind_x, int n_y, double k_y, int ind_y) //for mesh initialization
+    {
+        Vector2D A = (Vector2D)Vector2D.PointOnLine(vertices[0], vertices[3], n_x, k_x, ind_x);
+
+        Vector2D B = (Vector2D)Vector2D.PointOnLine(vertices[1], vertices[2], n_x, k_x, ind_x);
+
+        return (Vector2D)Vector2D.PointOnLine(A, B, n_y, k_y, ind_y);
+    }
 }

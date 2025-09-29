@@ -7,17 +7,13 @@ using System.Threading.Tasks;
 
 namespace MKE_complex.Vector;
 
-public record Vector2D (double X, double Y): IVector
+public class Vector2D : VectorBase
 {
-    public static Vector2D operator +(Vector2D A, Vector2D B) => new(A.X + B.X, A.Y + B.Y);
-    public static Vector2D operator -(Vector2D A, Vector2D B) => new(A.X - B.X, A.Y - B.Y);
-    public static Vector2D operator /(Vector2D A, double l) => new(A.X / l, A.Y / l);
-    public static Vector2D operator *(Vector2D A, double l) => new(A.X * l, A.Y * l);
-    public static Vector2D operator *(double l, Vector2D A) => new(A.X * l, A.Y * l);
-
-    public double Norm() => Math.Sqrt(X * X + Y * Y);
-    //public double X;//{ get; init; }
-    // public double Y; //{ get; init; }
-
-    //public Vector2D(double x, double y) { X = x; Y = y; }
+    public double X => components![0];
+    public double Y => components![1];
+    public Vector2D(double X, double Y) => components = [X, Y];
+    protected override VectorBase CreateVector(params double[] components)
+    {
+        return new Vector2D(components[0], components[1]);
+    }
 }

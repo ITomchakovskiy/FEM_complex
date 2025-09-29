@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace MKE_complex.Mesh;
 
-public class FiniteElementMesh<VectorT>(IReadOnlyList<VectorT> vertices, IReadOnlyList<IFiniteElement<VectorT>> elements) : IFiniteElementMesh<VectorT> where VectorT : IVector
+public class FiniteElementMesh<VectorT>(IReadOnlyList<VectorT> vertices, IReadOnlyList<IFiniteElement<VectorT>> elements) : IFiniteElementMesh<VectorT> where VectorT : VectorBase
 {
     public List<VectorT> Vertices { get; init; } = (List<VectorT>)vertices;
     IReadOnlyList<VectorT> IFiniteElementMesh<VectorT>.Vertices => Vertices;

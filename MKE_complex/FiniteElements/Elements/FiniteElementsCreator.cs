@@ -34,7 +34,7 @@ public static class FiniteElementsCreator
         }
     }
 
-    public static IFiniteElement<VectorT> CreateFiniteElement<VectorT>(GeometryType geometryType, BasisType basis, int order, string material, IFiniteElementGeometry<VectorT> geometry) where VectorT : IVector
+    public static IFiniteElement<VectorT> CreateFiniteElement<VectorT>(GeometryType geometryType, BasisType basis, int order, string material, IFiniteElementGeometry<VectorT> geometry) where VectorT : VectorBase
     {
         Type elementType;
         if (AttributeToType.TryGetValue((geometryType, basis, order), out elementType!))

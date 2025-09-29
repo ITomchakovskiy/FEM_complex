@@ -6,16 +6,15 @@ using System.Threading.Tasks;
 
 namespace MKE_complex.Vector;
 
-public record Vector3D(double X, double Y, double Z) : IVector
+public class Vector3D : VectorBase
 {
-    public static Vector3D operator +(Vector3D A, Vector3D B) => new Vector3D(A.X + B.X, A.Y + B.Y, A.Z + B.Z);
-    public static Vector3D operator -(Vector3D A, Vector3D B) => new Vector3D(A.X - B.X, A.Y - B.Y, A.Z - B.Z);
-    public static Vector3D operator /(Vector3D A, double l) => new(A.X / l, A.Y / l, A.Z / l);
-    public static Vector3D operator *(Vector3D A, double l) => new(A.X * l, A.Y * l, A.Z * l);
-    public static Vector3D operator *(double l, Vector3D A) => new(A.X * l, A.Y * l, A.Z * l);
-
-    public double Norm() => Math.Sqrt(X * X + Y * Y + Z * Z);
-    //public double X;//{ get; init; }
-    //public double Y; //{ get; init; }
-    //public double Z; //{ get; init; }
+    public double X => components![0];
+    public double Y => components![1];
+    public double Z => components![2];
+    public Vector3D(double X, double Y, double Z) => components = [X, Y, Z];
+    public Vector3D(Vector2D xy, double z) => components = [xy.X, xy.Y, z];
+    protected override VectorBase CreateVector(params double[] components)
+    {
+        return new Vector3D(components[0], components[1], components[2]);
+    }
 }

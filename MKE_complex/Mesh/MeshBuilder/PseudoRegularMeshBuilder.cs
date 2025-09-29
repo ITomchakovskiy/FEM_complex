@@ -47,7 +47,7 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
     private double[]? z_stretch;
 
     private Dimension dimension;
-    public IFiniteElementMesh<VectorT> BuildMesh<VectorT>(Dimension dimension, GeometryType meshType, BasisType basisType, int order, string[] fileNames) where VectorT : IVector
+    public IFiniteElementMesh<VectorT> BuildMesh<VectorT>(Dimension dimension, GeometryType meshType, BasisType basisType, int order, string[] fileNames) where VectorT : VectorBase
     {
         this.dimension = dimension;
         ReadFile(fileNames[0], fileNames[1], dimension);
@@ -183,7 +183,8 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                                     int x_ind_start = x_line == x0 ? 1 : 0;
                                     for (int x_ind = x_ind_start; x_ind < x_intervals[x_line]; ++x_ind)
                                     {
-                                        Vector2D vertex = PointOnLine(lines[y_line, x_line], lines[y_line + 1, x_line + 1], x_intervals[x_line], x_stretch[x_line], y_intervals[y_line], y_stretch[y_line], x_ind, y_ind);
+                                        Vector2D[] quadrangle = [lines[y_line, x_line], lines[y_line + 1, x_line], lines[y_line + 1, x_line + 1], lines[y_line, x_line + 1]];
+                                        Vector2D vertex = Quadrangle.PointOnQuadrangle(quadrangle, x_intervals[x_line], x_stretch[x_line], x_ind, y_intervals[y_line], y_stretch[y_line], y_ind);
                                         if(vertices is List<Vector2D> vertices2d)
                                             vertices2d.Add(vertex);
                                     }
@@ -211,7 +212,15 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                                             {
                                                 Vector3D p1 = new(lines[y_line, x_line].X, lines[y_line, x_line].Y, z_lines![z_line]);
                                                 Vector3D p2 = new(lines[y_line + 1, x_line + 1].X, lines[y_line + 1, x_line + 1].Y, z_lines![z_line + 1]);
-                                                Vector3D vertex = PointOnLine(p1, p2, x_intervals[x_line], x_stretch[x_line], y_intervals[y_line], y_stretch[y_line], z_intervals[z_line], z_stretch![z_line], x_ind, y_ind, z_ind);
+                                                Vector3D[] hexagon = [new(lines[y_line, x_line], z_lines![z_line]),
+                                                                      new(lines[y_line + 1, x_line], z_lines![z_line]),
+                                                                      new(lines[y_line + 1, x_line + 1], z_lines![z_line]),
+                                                                      new(lines[y_line, x_line + 1], z_lines![z_line]),
+                                                                      new(lines[y_line, x_line], z_lines![z_line + 1]),
+                                                                      new(lines[y_line + 1, x_line], z_lines![z_line + 1]),
+                                                                      new(lines[y_line + 1, x_line + 1], z_lines![z_line + 1]),
+                                                                      new(lines[y_line, x_line + 1], z_lines![z_line + 1])];
+                                                Vector3D vertex = Hexagon.PointOnHexagon(hexagon, x_intervals[x_line], x_stretch[x_line], x_ind, y_intervals[y_line], y_stretch[y_line], y_ind, z_intervals[z_line], z_stretch![z_line], z_ind);
                                                 if(vertices is List<Vector3D> vertices3d)
                                                     vertices3d.Add(vertex);
                                             }
@@ -235,14 +244,14 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                         int n_x = Enumerable.Range(x0,x1 - x0).Select(x_line => x_intervals[x_line]).Sum() + 1;
                         int n_y = Enumerable.Range(y0, y1 - y0).Select(y_line => y_intervals[y_line]).Sum() + 1;
 
-                        int x_interval_points = 0;
+                        //int x_interval_points = 0;
                         int y_interval_points = 0;
 
                         for (int y_line = y0; y_line < y1; y_interval_points += y_intervals[y_line],++y_line)
                         {
                             for (int y_ind = 0; y_ind < y_intervals[y_line]; ++y_ind)
                             {
-                                for (int x_line = x0; x_line < x1;x_interval_points += x_intervals[x_line], ++x_line)
+                                for (int x_line = x0, x_interval_points = 0; x_line < x1;x_interval_points += x_intervals[x_line], ++x_line)
                                 {
                                     for (int x_ind = 0; x_ind < x_intervals[x_line]; ++x_ind)
                                     {
@@ -265,17 +274,18 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                                             {
                                                 int x_line_const = local_index.x == 0 ? x0 : x1;
                                                 (int, int, int, int) key = new(x_line_const, 0, y_line, y_line + 1);
-                                                quadrangle_vertex_numbers[i] = vertices_on_y_lines[key] + y_ind - 1;
+                                                quadrangle_vertex_numbers[i] = vertices_on_y_lines[key] + (local_index.y - y_interval_points) - 1;
                                             }
                                             else if ((local_index.y == 0 || local_index.y == n_y - 1)) //y0 and y1 border
                                             {
                                                 int y_line_const = local_index.y == 0 ? y0 : y1;
                                                 (int, int, int, int) key = new(y_line_const, 0, x_line, x_line + 1);
-                                                quadrangle_vertex_numbers[i] = vertices_on_x_lines[key] + x_ind - 1;
+                                                quadrangle_vertex_numbers[i] = vertices_on_x_lines[key] + (local_index.x - x_interval_points) - 1;
                                             }
                                             else  //inner vertices
                                                 quadrangle_vertex_numbers[i] = inner_index_start + (n_x - 2) * (local_index.y - 1) + local_index.x - 1;
                                         }
+
                                         Quadrangle quadrangle = new(quadrangle_vertex_numbers);
                                         if (elementsGeometry is List<IFiniteElementGeometry<Vector2D>> elementsGeometry2d)
                                         {
@@ -304,18 +314,18 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                         int n_y = Enumerable.Range(y0, y1 - y0).Select(y_line => y_intervals[y_line]).Sum() + 1;
                         int n_z = Enumerable.Range(z0, z1 - z0).Select(z_line => z_intervals![z_line]).Sum() + 1;
 
-                        int x_interval_points = 0;
-                        int y_interval_points = 0;
-                        int z_interval_points = 0;
-                        for (int z_line = z0; z_line < z1;z_interval_points += z_intervals![z_line],++z_line)
+                        //int x_interval_points = 0;
+                        //int y_interval_points = 0;
+                        //int z_interval_points = 0;
+                        for (int z_line = z0, z_interval_points = 0; z_line < z1; z_interval_points += z_intervals![z_line],++z_line)
                         {
                             for (int z_ind = 0; z_ind < z_intervals![z_line]; ++z_ind)
                             {
-                                for (int y_line = y0; y_line < y1; y_interval_points += y_intervals[y_line], ++y_line)
+                                for (int y_line = y0, y_interval_points = 0; y_line < y1; y_interval_points += y_intervals[y_line], ++y_line)
                                 {
                                     for (int y_ind = 0; y_ind < y_intervals[y_line]; ++y_ind)
                                     {
-                                        for (int x_line = x0; x_line < x1; x_interval_points += x_intervals[x_line], ++x_line)
+                                        for (int x_line = x0, x_interval_points = 0; x_line < x1; x_interval_points += x_intervals[x_line], ++x_line)
                                         {
                                             for (int x_ind = 0; x_ind < x_intervals[x_line]; ++x_ind)
                                             {
@@ -345,21 +355,21 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                                                         int y_line_const = local_index.y == 0 ? y0 : y1;
                                                         int z_line_const = local_index.z == 0 ? z0 : z1;
                                                         (int, int, int, int) key = new(y_line_const, z_line_const, x_line, x_line + 1);
-                                                        hexagon_vertex_numbers[i] = vertices_on_x_lines[key] + x_ind - 1;
+                                                        hexagon_vertex_numbers[i] = vertices_on_x_lines[key] + (local_index.x - x_interval_points) - 1;
                                                     }
                                                     else if ((local_index.x == 0 || local_index.x == n_x - 1) && (local_index.z == 0 || local_index.z == n_z - 1)) //x const and z const borders
                                                     {
                                                         int x_line_const = local_index.x == 0 ? x0 : x1;
                                                         int z_line_const = local_index.z == 0 ? z0 : z1;
                                                         (int, int, int, int) key = new(x_line_const, z_line_const, y_line, y_line + 1);
-                                                        hexagon_vertex_numbers[i] = vertices_on_y_lines[key] + y_ind - 1;
+                                                        hexagon_vertex_numbers[i] = vertices_on_y_lines[key] + (local_index.y - y_interval_points) - 1;
                                                     }
                                                     else if ((local_index.x == 0 || local_index.x == n_x - 1) && (local_index.y == 0 || local_index.y == n_y - 1)) //x const and y const borders
                                                     {
                                                         int x_line_const = local_index.x == 0 ? x0 : x1;
                                                         int y_line_const = local_index.y == 0 ? y0 : y1;
                                                         (int, int, int, int) key = new(x_line_const, y_line_const, z_line, z_line + 1);
-                                                        hexagon_vertex_numbers[i] = vertices_on_y_lines[key] + z_ind - 1;
+                                                        hexagon_vertex_numbers[i] = vertices_on_y_lines[key] + (local_index.z - z_interval_points) - 1;
                                                     }
                                                     else
                                                         hexagon_vertex_numbers[i] = inner_index_start + (n_x - 2) * (n_y - 2) * (local_index.z - 1) + (n_x - 2) * (local_index.y - 1) + local_index.x - 1;
@@ -392,7 +402,7 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
         return new FiniteElementMesh<VectorT>(vertices, elements);
     }
 
-    private void FillBorder<VectorT>(string coordinate, List<VectorT> vertices, Dictionary<(int, int , int , int ),int> borderDictionary, int x, int y, int z,int n, double k) where VectorT : IVector
+    private void FillBorder<VectorT>(string coordinate, List<VectorT> vertices, Dictionary<(int, int , int , int ),int> borderDictionary, int x, int y, int z,int n, double k) where VectorT : VectorBase
     {
         switch(dimension)
         {
@@ -409,8 +419,8 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                                     borderDictionary[key] = index;
                                     for (int x_ind = 1; x_ind < n; ++x_ind)
                                     {
-                                        Vector2D vector = PointOnLine(lines![y, x],
-                                                                      lines[y, x + 1], n, k, 0, 0, x_ind, 0);
+                                        Vector2D vector = (Vector2D)Vector2D.PointOnLine(lines![y, x],
+                                                                        lines[y, x + 1], n, k, x_ind);
                                         if(vertices is List<Vector2D> vertices2d)
                                             vertices2d.Add(vector);
                                     }
@@ -426,7 +436,7 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                                     borderDictionary[key] = index;
                                     for (int y_ind = 1; y_ind < n; ++y_ind)
                                     {
-                                        Vector2D vector = PointOnLine(lines![y, x], lines[y + 1, x],0,0, n, k, 0, y_ind);
+                                        Vector2D vector = (Vector2D)Vector2D.PointOnLine(lines![y, x], lines[y + 1, x],n, k,y_ind);
                                         if (vertices is List<Vector2D> vertices2d)
                                             vertices2d.Add(vector);
                                     }
@@ -453,7 +463,7 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                                                           lines[y, x].Y, z_lines![z]);
                                         Vector3D p2 = new(lines[y, x + 1].X,
                                                           lines[y, x + 1].Y, z_lines![z]);
-                                        Vector3D vector = PointOnLine(p1, p2, n, k, 0, 0, 0, 0, x_ind, 0, 0);
+                                        Vector3D vector = (Vector3D)Vector3D.PointOnLine(p1, p2, n, k, x_ind);
 
                                         if (vertices is List<Vector3D> vertices3d)
                                             vertices3d.Add(vector);
@@ -475,7 +485,7 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                                                           lines[y, x].Y, z_lines![z]);
                                         Vector3D p2 = new(lines[y + 1, x].X,
                                                           lines[y + 1, x].Y, z_lines![z]);
-                                        Vector3D vector = PointOnLine(p1, p2, 0, 0, n, k, 0, 0, 0, y_ind, 0);
+                                        Vector3D vector = (Vector3D)Vector3D.PointOnLine(p1, p2, n, k, y_ind);
 
                                         if (vertices is List<Vector3D> vertices3d)
                                             vertices3d.Add(vector);
@@ -496,7 +506,7 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                                                           lines[y, x].Y, z_lines![z]);
                                         Vector3D p2 = new(lines[y, x].X,
                                                           lines[y, x].Y, z_lines![z + 1]);
-                                        Vector3D vector = PointOnLine(p1, p2, 0, 0, 0, 0, n, k, 0, 0, z_ind);
+                                        Vector3D vector = (Vector3D)Vector3D.PointOnLine(p1, p2, n, k, z_ind);
 
                                         if (vertices is List<Vector3D> vertices3d)
                                             vertices3d.Add(vector);
@@ -652,53 +662,5 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
         }
 
         //return null;
-    }
-
-    private double PointOnLine(double p1, double p2, int n, double k, int ind)
-    {
-        if (ind == 0) return p1;
-        if (ind == n) return p2;
-        double l = p2 - p1;
-        if (Math.Abs(k - 1d) < 1.0E-13)
-            return p1 + l / n *ind;
-
-        double l_ind = l * (1d - Math.Pow(Math.Abs(k), ind)) / (1d - Math.Pow(Math.Abs(k), n));
-        l_ind = k > 0 ? l_ind : l - l_ind;
-        return p1 + l_ind;
-    }
-
-    private Vector2D PointOnLine(Vector2D p1, Vector2D p2, int n, double k, int ind)
-    {
-        if (ind == 0) return p1;
-        if (ind == n) return p2;
-        Vector2D r = p2 - p1;
-        double l = r.Norm();
-        if (Math.Abs(k - 1d) < 1.0E-13)
-            return p1 + r / n * ind;
-
-        double l_ind = l * (1d - Math.Pow(Math.Abs(k), ind)) / (1d - Math.Pow(Math.Abs(k), n));
-
-        l_ind = k > 0 ? l_ind : l - l_ind;
-        return p1 + l_ind / l * r;
-    }
-
-    private PointOnQuadrangle(Vector2D[] vertices, int n_x, int n_y, int ind_x, double k_x, double k_y, int ind_y)
-    {
-        Vector2D p1 = 
-    }
-
-    private Vector3D PointOnLine(Vector3D p1, Vector3D p2, int n, double k, int ind)
-    {
-        if (ind == 0) return p1;
-        if (ind == n) return p2;
-        Vector3D r = p2 - p1;
-        double l = r.Norm();
-        if (Math.Abs(k - 1d) < 1.0E-13)
-            return p1 + r / n * ind;
-
-        double l_ind = l * (1d - Math.Pow(Math.Abs(k), ind)) / (1d - Math.Pow(Math.Abs(k), n));
-
-        l_ind = k > 0 ? l_ind : l - l_ind;
-        return p1 + l_ind / l * r;
     }
 }
