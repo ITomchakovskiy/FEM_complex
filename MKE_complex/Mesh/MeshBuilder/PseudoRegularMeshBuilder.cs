@@ -662,22 +662,43 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
         if (Math.Abs(k - 1d) < 1.0E-13)
             return p1 + l / n *ind;
 
-        double l_ind = l * (1d - Math.Pow(k, ind)) / (1d - Math.Pow(k, n));
+        double l_ind = l * (1d - Math.Pow(Math.Abs(k), ind)) / (1d - Math.Pow(Math.Abs(k), n));
         l_ind = k > 0 ? l_ind : l - l_ind;
         return p1 + l_ind;
     }
 
-    private Vector2D PointOnLine(Vector2D p1, Vector2D p2,int n_x, double k_x, int n_y, double k_y, int x_ind, int y_ind)
+    private Vector2D PointOnLine(Vector2D p1, Vector2D p2, int n, double k, int ind)
     {
-        return new Vector2D(PointOnLine(p1.X, p2.X, n_x, k_x, x_ind),
-                   PointOnLine(p1.Y, p2.Y, n_y, k_y, y_ind));
+        if (ind == 0) return p1;
+        if (ind == n) return p2;
+        Vector2D r = p2 - p1;
+        double l = r.Norm();
+        if (Math.Abs(k - 1d) < 1.0E-13)
+            return p1 + r / n * ind;
+
+        double l_ind = l * (1d - Math.Pow(Math.Abs(k), ind)) / (1d - Math.Pow(Math.Abs(k), n));
+
+        l_ind = k > 0 ? l_ind : l - l_ind;
+        return p1 + l_ind / l * r;
     }
 
-    private Vector3D PointOnLine(Vector3D p1, Vector3D p2, int n_x, double k_x, int n_y, double k_y, int n_z, double k_z, int x_ind, int y_ind, int z_ind)
+    private PointOnQuadrangle(Vector2D[] vertices, int n_x, int n_y, int ind_x, double k_x, double k_y, int ind_y)
     {
+        Vector2D p1 = 
+    }
 
-        return new(PointOnLine(p1.X, p2.X, n_x, k_x, x_ind),
-                   PointOnLine(p1.Y, p2.Y, n_y, k_y, y_ind),
-                   PointOnLine(p1.Z, p2.Z, n_z, k_z, z_ind));
+    private Vector3D PointOnLine(Vector3D p1, Vector3D p2, int n, double k, int ind)
+    {
+        if (ind == 0) return p1;
+        if (ind == n) return p2;
+        Vector3D r = p2 - p1;
+        double l = r.Norm();
+        if (Math.Abs(k - 1d) < 1.0E-13)
+            return p1 + r / n * ind;
+
+        double l_ind = l * (1d - Math.Pow(Math.Abs(k), ind)) / (1d - Math.Pow(Math.Abs(k), n));
+
+        l_ind = k > 0 ? l_ind : l - l_ind;
+        return p1 + l_ind / l * r;
     }
 }
