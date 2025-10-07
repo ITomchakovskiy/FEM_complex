@@ -13,4 +13,6 @@ public interface IFiniteElementMesh<VectorT> where VectorT : VectorBase
     IReadOnlyList<VectorT> Vertices { get; }
 
     IReadOnlyList<IFiniteElement<VectorT>> Elements { get; }
+
+    IReadOnlyList<IFiniteElementEdge<VectorT>> Edges { get; }
 }
