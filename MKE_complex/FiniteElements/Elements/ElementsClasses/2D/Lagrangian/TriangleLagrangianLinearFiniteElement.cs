@@ -7,16 +7,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MKE_complex.FiniteElements.Elements;
+namespace MKE_complex.FiniteElements.Elements.ElementsClasses._2D.Lagrangian;
 
 [FiniteElementAttribute(GeometryType.Triangle,BasisType.Lagrangian,1)]
 public class TriangleLagrangianLinearFiniteElement(string material, Triangle geometry) : IFiniteElement<Vector2D>
 {
     public string Material { get; init; } = material;
-
-    //public BasisType BasisType => BasisType.Lagrangian;
-
-    //public int Order => 1;
 
     public IFiniteElementGeometry<Vector2D> Geometry => geometry;
 

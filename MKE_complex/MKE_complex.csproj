@@ -8,17 +8,26 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="input\Edges.txt" />
     <None Remove="input\Mesh.txt" />
     <None Remove="input\MeshFragmentation.txt" />
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="input\Edges.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="input\Mesh.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="input\MeshFragmentation.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="FiniteElements\Edges\" />
+    <Folder Include="FiniteElements\Elements\ElementsClasses\3D\" />
   </ItemGroup>
 
 </Project>
