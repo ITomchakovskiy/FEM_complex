@@ -1,5 +1,4 @@
-﻿using Microsoft.VisualBasic;
-using MKE_complex.FiniteElements;
+﻿using MKE_complex.FiniteElements;
 using MKE_complex.FiniteElements.Elements;
 using MKE_complex.FiniteElements.FiniteElementGeometry;
 using MKE_complex.FiniteElements.FiniteElementGeometry._2D;
@@ -52,13 +51,9 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
         if (lines == null || volumeMaterials == null || areaBorders == null || x_intervals == null || y_intervals == null || x_stretch == null || y_stretch == null)
             throw new Exception("Error in reading mesh file");
 
-        //List<IFiniteElementGeometry<IVector>> elementsGeometry = new();
-
         List<VectorT> vertices = new();
 
         List<IFiniteElement<VectorT>> elements = new();
-
-        //List<IFiniteElement<Vector3D>> elements3d = new();
 
         //add points on coordinate lines
         switch (dimension)
@@ -177,11 +172,20 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                             {
                                 for (int x_line = x0; x_line < x1; ++x_line)
                                 {
-                                    int x_ind_start = x_line == x0 ? 1 : 0;
+                                    int x_ind_start = x_line == x0 || y_ind == 0 ? 1 : 0;
                                     for (int x_ind = x_ind_start; x_ind < x_intervals[x_line]; ++x_ind)
                                     {
-                                        Vector2D[] quadrangle = [lines[y_line, x_line], lines[y_line + 1, x_line], lines[y_line + 1, x_line + 1], lines[y_line, x_line + 1]];
-                                        Vector2D vertex = Quadrangle.PointOnQuadrangle(quadrangle, x_intervals[x_line], x_stretch[x_line], x_ind, y_intervals[y_line], y_stretch[y_line], y_ind);
+                                        Vector2D[] quadrangle = [
+                                            lines[y_line, x_line],
+                                            lines[y_line + 1, x_line],
+                                            lines[y_line + 1, x_line + 1],
+                                            lines[y_line, x_line + 1]
+                                        ];
+                                        Vector2D vertex = Quadrangle.PointOnQuadrangle(
+                                            quadrangle,
+                                            x_intervals[x_line], x_stretch[x_line], x_ind,
+                                            y_intervals[y_line], y_stretch[y_line], y_ind
+                                        );
                                         if (vertices is List<Vector2D> vertices2d)
                                             vertices2d.Add(vertex);
                                     }
@@ -253,16 +257,22 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                                     for (int x_ind = 0; x_ind < x_intervals[x_line]; ++x_ind)
                                     {
                                         (int x, int y) local_index_start = (x_interval_points + x_ind, y_interval_points + y_ind);
-                                        (int x, int y)[] quadrangle_local_indices = [local_index_start,(local_index_start.x, local_index_start.y + 1),
-                                                                                                       (local_index_start.x + 1, local_index_start.y + 1),
-                                                                                                       (local_index_start.x + 1, local_index_start.y)];
+                                        (int x, int y)[] quadrangle_local_indices = [
+                                            local_index_start,
+                                            (local_index_start.x, local_index_start.y + 1),
+                                            (local_index_start.x + 1, local_index_start.y + 1),
+                                            (local_index_start.x + 1, local_index_start.y)
+                                        ];
                                         int[] quadrangle_vertex_numbers = new int[quadrangle_local_indices.Length];
                                         for (int i = 0; i < quadrangle_vertex_numbers.Length; ++i)
                                         {
                                             (int x, int y) local_index = quadrangle_local_indices[i];
 
-                                            if ((local_index.x == x_interval_points || local_index.x == x_interval_points + x_intervals[x_line]) && (local_index.y == y_interval_points || local_index.y == y_interval_points + y_intervals[y_line])) //vertices of coordinate_lines
-                                            {
+                                            //vertices of coordinate_lines
+                                            if (
+                                                (local_index.x == x_interval_points || local_index.x == x_interval_points + x_intervals[x_line])
+                                                && (local_index.y == y_interval_points || local_index.y == y_interval_points + y_intervals[y_line])
+                                            ) {
                                                 int shift_x = local_index.x == x_interval_points ? 0 : 1;
                                                 int shift_y = local_index.y == y_interval_points ? 0 : 1;
                                                 quadrangle_vertex_numbers[i] = lines.GetLength(1) * (y_line + shift_y) + x_line + shift_x;
@@ -391,10 +401,10 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
 
                         break;
                     }
-            }
+            } // switch (dimension)
             foreach (var geometry in elementsGeometry)
                 elements.Add(FiniteElementsCreator.CreateFiniteElement(meshType, basisType, order, material, geometry));
-        }
+        } // volumeMaterials
 
         return new FiniteElementMesh<VectorT>(vertices, elements, null);
     }
@@ -528,10 +538,6 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
             StreamReader srMesh = new StreamReader(meshPath);
             string[] strings = srMesh.ReadLine()!.Split(' ').Where(s => s != "").ToArray();
 
-            //if (strings.Length != 2) throw new Exception("Wrong parameter count");
-
-            //coordinate lines reading
-
             int n_x = int.Parse(strings[0]);
 
             int n_y = int.Parse(strings[1]);
@@ -664,9 +670,6 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
 
             srFragment.Close(); //close mesh fragmentation file
 
-
-
-            //return new(lines, z_lines, materials, areaBorders, x_intervals, y_intervals, z_intervals, x_stretch, y_stretch, z_stretch);
         }
         catch (Exception e)
         {
@@ -717,10 +720,6 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
             }
 
             srEdge.Close(); //close mesh fragmentation file
-
-
-
-            //return new(lines, z_lines, materials, areaBorders, x_intervals, y_intervals, z_intervals, x_stretch, y_stretch, z_stretch);
         }
         catch (Exception e)
         {
