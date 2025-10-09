@@ -406,7 +406,105 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                 elements.Add(FiniteElementsCreator.CreateFiniteElement(meshType, basisType, order, material, geometry));
         } // volumeMaterials
 
-        return new FiniteElementMesh<VectorT>(vertices, elements, null);
+        
+
+        List<IFiniteElementEdge<VectorT>> edges = new();
+
+        if (edgeMaterials is null || edgeBorders is null) throw new ArgumentNullException();
+
+        for(int w = 0; w < edgeMaterials.Length; ++w)
+        {
+            List<IFiniteElementGeometry<VectorT>> edgesGeometry = new();
+
+            string material = edgeMaterials[w];
+
+            int x0 = edgeBorders[w, 0];
+            int x1 = edgeBorders[w, 1];
+
+            int y0 = edgeBorders[w, 2];
+            int y1 = edgeBorders[w, 3];
+
+            int z0 = edgeBorders[w, 4];
+            int z1 = edgeBorders[w, 5];
+
+            switch (dimension)
+            {
+                case Dimension.D2:
+                    {
+                        if (x0 == x1) //x = const
+                        {
+                            int x_line = x0;
+                            for (int y_line = y0; y_line < y1; ++y_line)
+                            {
+                                int n = y_intervals[y_line];
+
+                                int global_index_y_line = y_line * lines.GetLength(1) + x_line;
+                                int global_index_y_line_next = global_index_y_line + lines.GetLength(1);
+
+                                int first_vertex_on_edge = vertices_on_y_lines[(x_line, 0, y_line, y_line + 1)];
+
+                                if (edgesGeometry is List<IFiniteElementGeometry<Vector2D>> edgesGeometry2d)
+                                {
+                                    if (n == 0) edgesGeometry2d.Add(new Line([global_index_y_line,
+                                                                              global_index_y_line_next]));
+                                    else edgesGeometry2d.Add(new Line([global_index_y_line,
+                                                                      first_vertex_on_edge]));
+                                    for (int i = 0; i < n - 2; ++i)
+                                    {
+                                        int vertex = first_vertex_on_edge + i;
+
+                                        edgesGeometry2d.Add(new Line([vertex,
+                                                                      vertex + 1]));
+                                    }
+
+                                    if (n > 0) edgesGeometry2d.Add(new Line([first_vertex_on_edge + n - 2,
+                                                                            global_index_y_line_next]));
+                                }
+                            }
+                        }
+                        else if (y0 == y1)
+                        {
+                            int y_line = y0;
+                            for (int x_line = x0; x_line < x1; ++x_line)
+                            {
+                                int n = x_intervals[x_line];
+
+                                int global_index_x_line = y_line * lines.GetLength(1) + x_line;
+                                int global_index_x_line_next = global_index_x_line + 1;
+
+                                int first_vertex_on_edge = vertices_on_x_lines[(y_line, 0, x_line, x_line + 1)];
+
+                                if (edgesGeometry is List<IFiniteElementGeometry<Vector2D>> edgesGeometry2d)
+                                {
+                                    if (n == 0) edgesGeometry2d.Add(new Line([global_index_x_line,
+                                                                              global_index_x_line_next]));
+                                    else edgesGeometry2d.Add(new Line([global_index_x_line,
+                                                                      first_vertex_on_edge]));
+                                    for (int i = 0; i < n - 2; ++i)
+                                    {
+                                        int vertex = first_vertex_on_edge + i;
+
+                                        edgesGeometry2d.Add(new Line([vertex,
+                                                                      vertex + 1]));
+                                    }
+
+                                    if (n > 0) edgesGeometry2d.Add(new Line([first_vertex_on_edge + n - 2,
+                                                                            global_index_x_line_next]));
+                                }
+                            }
+                        }
+                        else throw new Exception();
+                        break;
+                    }
+                default:
+                    throw new NotSupportedException();
+            }
+
+            foreach (var geometry in edgesGeometry)
+                edges.Add(FiniteElementsCreator.CreateFiniteElementEdge(GeometryType.Line, basisType, order, material, geometry)); //костыль с Line
+        }
+
+        return new FiniteElementMesh<VectorT>(vertices, elements, edges);
     }
 
     private void FillBorder<VectorT>(string coordinate, List<VectorT> vertices, Dictionary<(int, int, int, int), int> borderDictionary, int x, int y, int z, int n, double k) where VectorT : VectorBase
