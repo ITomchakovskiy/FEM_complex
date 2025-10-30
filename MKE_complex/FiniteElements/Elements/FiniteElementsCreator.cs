@@ -33,7 +33,7 @@ public static class FiniteElementsCreator
         }
 
         var edgeTypes = assembly.GetTypes().Where(t => t.GetInterfaces().Any(i => i.IsGenericType &&
-        i.GetGenericTypeDefinition() == typeof(IFiniteElementEdge<>)));
+        i.GetGenericTypeDefinition() == typeof(IBoundaryCondition<>)));
 
         foreach (var type in edgeTypes)
         {
@@ -64,7 +64,7 @@ public static class FiniteElementsCreator
         else throw new NotSupportedException();
     }
 
-    public static IFiniteElementEdge<VectorT> CreateFiniteElementEdge<VectorT>(GeometryType geometryType, BasisType basis, int order, string material, IFiniteElementGeometry<VectorT> geometry) where VectorT : VectorBase
+    public static IBoundaryCondition<VectorT> CreateBoundaryCondition<VectorT>(GeometryType geometryType, BasisType basis, int order, string volume_material, string boundary_material, IFiniteElementGeometry<VectorT> geometry) where VectorT : VectorBase
     {
         Type edgeType;
         if (finiteElementEdgeType.TryGetValue((geometryType, basis, order), out edgeType!))
@@ -74,8 +74,8 @@ public static class FiniteElementsCreator
             if (constructor is null)
                 throw new NotSupportedException();
 
-            object[] arguments = [material, geometry];
-            return (IFiniteElementEdge<VectorT>)constructor!.Invoke(arguments);
+            object[] arguments = [volume_material, boundary_material, geometry];
+            return (IBoundaryCondition<VectorT>)constructor!.Invoke(arguments);
         }
         else throw new NotSupportedException();
     }

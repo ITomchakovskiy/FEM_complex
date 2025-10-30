@@ -88,10 +88,10 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
             default: throw new NotImplementedException();
         }
 
-        //number of points on the subdomain borders
-        Dictionary<(int y, int z, int x_left, int x_right), int> vertices_on_x_lines = new();
-        Dictionary<(int x, int z, int y_left, int y_right), int> vertices_on_y_lines = new();
-        Dictionary<(int x, int y, int z_left, int z_right), int> vertices_on_z_lines = new();
+        //key - edge, value - number of first vertex and name of volume material for first subdomain that includes edge, it's needed for 
+        Dictionary<(int y, int z, int x_left, int x_right), (int vertex, string volume_material)> vertices_on_x_lines = new();
+        Dictionary<(int x, int z, int y_left, int y_right), (int vertex, string volume_material)> vertices_on_y_lines = new();
+        Dictionary<(int x, int y, int z_left, int z_right), (int vertex, string volume_material)> vertices_on_z_lines = new();
 
         for (int w = 0; w < volumeMaterials.Length; ++w)
         {
@@ -114,13 +114,13 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                 double k = x_stretch[x_line];
 
                 //z = z0; y = y0
-                FillBorder("x", vertices, vertices_on_x_lines, x_line, y0, z0, n, k);
+                FillBorder("x", vertices, vertices_on_x_lines, x_line, y0, z0, n, k, material);
                 //z = z0; y = y1
-                FillBorder("x", vertices, vertices_on_x_lines, x_line, y1, z0, n, k);
+                FillBorder("x", vertices, vertices_on_x_lines, x_line, y1, z0, n, k, material);
                 //z = z1; y = y0
-                FillBorder("x", vertices, vertices_on_x_lines, x_line, y0, z1, n, k);
+                FillBorder("x", vertices, vertices_on_x_lines, x_line, y0, z1, n, k, material);
                 //z = z1; y = y1
-                FillBorder("x", vertices, vertices_on_x_lines, x_line, y1, z1, n, k);
+                FillBorder("x", vertices, vertices_on_x_lines, x_line, y1, z1, n, k, material);
             }
             for (int y_line = y0; y_line < y1; ++y_line)
             {
@@ -130,13 +130,13 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                 double k = y_stretch[y_line];
 
                 //z = z0; x = x0
-                FillBorder("y", vertices, vertices_on_y_lines, x0, y_line, z0, n, k);
+                FillBorder("y", vertices, vertices_on_y_lines, x0, y_line, z0, n, k, material);
                 //z = z0; x = x1                               
-                FillBorder("y", vertices, vertices_on_y_lines, x1, y_line, z0, n, k);
+                FillBorder("y", vertices, vertices_on_y_lines, x1, y_line, z0, n, k, material);
                 //z = z1; x = x0                                  
-                FillBorder("y", vertices, vertices_on_y_lines, x0, y_line, z1, n, k);
+                FillBorder("y", vertices, vertices_on_y_lines, x0, y_line, z1, n, k, material);
                 //z = z1; x = x1                                   
-                FillBorder("y", vertices, vertices_on_y_lines, x1, y_line, z1, n, k);
+                FillBorder("y", vertices, vertices_on_y_lines, x1, y_line, z1, n, k, material);
             }
             if (dimension is Dimension.D3)
             {
@@ -148,13 +148,13 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                     double k = z_stretch![z_line];
 
                     //y = y0; x = x0
-                    FillBorder("z", vertices, vertices_on_z_lines, x0, y0, z_line, n, k);
+                    FillBorder("z", vertices, vertices_on_z_lines, x0, y0, z_line, n, k, material);
                     //z = y0; x = x1                               
-                    FillBorder("z", vertices, vertices_on_z_lines, x1, y0, z_line, n, k);
+                    FillBorder("z", vertices, vertices_on_z_lines, x1, y0, z_line, n, k, material);
                     //z = y1; x = x0                                  
-                    FillBorder("z", vertices, vertices_on_z_lines, x0, y1, z_line, n, k);
+                    FillBorder("z", vertices, vertices_on_z_lines, x0, y1, z_line, n, k, material);
                     //z = y1; x = x1                                   
-                    FillBorder("z", vertices, vertices_on_z_lines, x1, y1, z_line, n, k);
+                    FillBorder("z", vertices, vertices_on_z_lines, x1, y1, z_line, n, k, material);
                 }
             }
 
@@ -281,13 +281,13 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                                             {
                                                 int x_line_const = local_index.x == 0 ? x0 : x1;
                                                 (int, int, int, int) key = new(x_line_const, 0, y_line, y_line + 1);
-                                                quadrangle_vertex_numbers[i] = vertices_on_y_lines[key] + (local_index.y - y_interval_points) - 1;
+                                                quadrangle_vertex_numbers[i] = vertices_on_y_lines[key].vertex + (local_index.y - y_interval_points) - 1;
                                             }
                                             else if ((local_index.y == 0 || local_index.y == n_y - 1)) //y0 and y1 border
                                             {
                                                 int y_line_const = local_index.y == 0 ? y0 : y1;
                                                 (int, int, int, int) key = new(y_line_const, 0, x_line, x_line + 1);
-                                                quadrangle_vertex_numbers[i] = vertices_on_x_lines[key] + (local_index.x - x_interval_points) - 1;
+                                                quadrangle_vertex_numbers[i] = vertices_on_x_lines[key].vertex + (local_index.x - x_interval_points) - 1;
                                             }
                                             else  //inner vertices
                                                 quadrangle_vertex_numbers[i] = inner_index_start + (n_x - 2) * (local_index.y - 1) + local_index.x - 1;
@@ -362,21 +362,21 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                                                         int y_line_const = local_index.y == 0 ? y0 : y1;
                                                         int z_line_const = local_index.z == 0 ? z0 : z1;
                                                         (int, int, int, int) key = new(y_line_const, z_line_const, x_line, x_line + 1);
-                                                        hexagon_vertex_numbers[i] = vertices_on_x_lines[key] + (local_index.x - x_interval_points) - 1;
+                                                        hexagon_vertex_numbers[i] = vertices_on_x_lines[key].vertex + (local_index.x - x_interval_points) - 1;
                                                     }
                                                     else if ((local_index.x == 0 || local_index.x == n_x - 1) && (local_index.z == 0 || local_index.z == n_z - 1)) //x const and z const borders
                                                     {
                                                         int x_line_const = local_index.x == 0 ? x0 : x1;
                                                         int z_line_const = local_index.z == 0 ? z0 : z1;
                                                         (int, int, int, int) key = new(x_line_const, z_line_const, y_line, y_line + 1);
-                                                        hexagon_vertex_numbers[i] = vertices_on_y_lines[key] + (local_index.y - y_interval_points) - 1;
+                                                        hexagon_vertex_numbers[i] = vertices_on_y_lines[key].vertex + (local_index.y - y_interval_points) - 1;
                                                     }
                                                     else if ((local_index.x == 0 || local_index.x == n_x - 1) && (local_index.y == 0 || local_index.y == n_y - 1)) //x const and y const borders
                                                     {
                                                         int x_line_const = local_index.x == 0 ? x0 : x1;
                                                         int y_line_const = local_index.y == 0 ? y0 : y1;
                                                         (int, int, int, int) key = new(x_line_const, y_line_const, z_line, z_line + 1);
-                                                        hexagon_vertex_numbers[i] = vertices_on_y_lines[key] + (local_index.z - z_interval_points) - 1;
+                                                        hexagon_vertex_numbers[i] = vertices_on_y_lines[key].vertex + (local_index.z - z_interval_points) - 1;
                                                     }
                                                     else
                                                         hexagon_vertex_numbers[i] = inner_index_start + (n_x - 2) * (n_y - 2) * (local_index.z - 1) + (n_x - 2) * (local_index.y - 1) + local_index.x - 1;
@@ -391,7 +391,6 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                                                         default:
                                                             throw new NotSupportedException();
                                                     }
-
                                             }
                                         }
                                     }
@@ -406,15 +405,13 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                 elements.Add(FiniteElementsCreator.CreateFiniteElement(meshType, basisType, order, material, geometry));
         } // volumeMaterials
 
-        
-
-        List<IFiniteElementEdge<VectorT>> edges = new();
+        List<IBoundaryCondition<VectorT>> boundaries = new();
 
         if (edgeMaterials is null || edgeBorders is null) throw new ArgumentNullException();
 
         for(int w = 0; w < edgeMaterials.Length; ++w)
         {
-            List<IFiniteElementGeometry<VectorT>> edgesGeometry = new();
+            List<(IFiniteElementGeometry<VectorT> geometry, string volume_material)> boundariesInfo = new();
 
             string material = edgeMaterials[w];
 
@@ -441,24 +438,28 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                                 int global_index_y_line = y_line * lines.GetLength(1) + x_line;
                                 int global_index_y_line_next = global_index_y_line + lines.GetLength(1);
 
-                                int first_vertex_on_edge = vertices_on_y_lines[(x_line, 0, y_line, y_line + 1)];
+                                var key = (x_line, 0, y_line, y_line + 1);
 
-                                if (edgesGeometry is List<IFiniteElementGeometry<Vector2D>> edgesGeometry2d)
+                                int first_vertex_on_edge = vertices_on_y_lines[key].vertex;
+
+                                string volume_material = vertices_on_y_lines[key].volume_material;
+
+                                if (boundariesInfo is List<(IFiniteElementGeometry<Vector2D> geometry, string volume_material)> edgesGeometry2d)
                                 {
-                                    if (n == 0) edgesGeometry2d.Add(new Line([global_index_y_line,
-                                                                              global_index_y_line_next]));
-                                    else edgesGeometry2d.Add(new Line([global_index_y_line,
-                                                                      first_vertex_on_edge]));
+                                    if (n == 0) edgesGeometry2d.Add((new Line([global_index_y_line,
+                                                                              global_index_y_line_next]), volume_material));
+                                    else edgesGeometry2d.Add((new Line([global_index_y_line,
+                                                                      first_vertex_on_edge]),volume_material));
                                     for (int i = 0; i < n - 2; ++i)
                                     {
                                         int vertex = first_vertex_on_edge + i;
 
-                                        edgesGeometry2d.Add(new Line([vertex,
-                                                                      vertex + 1]));
+                                        edgesGeometry2d.Add((new Line([vertex,
+                                                                      vertex + 1]),volume_material));
                                     }
 
-                                    if (n > 0) edgesGeometry2d.Add(new Line([first_vertex_on_edge + n - 2,
-                                                                            global_index_y_line_next]));
+                                    if (n > 0) edgesGeometry2d.Add((new Line([first_vertex_on_edge + n - 2,
+                                                                            global_index_y_line_next]),volume_material));
                                 }
                             }
                         }
@@ -472,24 +473,28 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                                 int global_index_x_line = y_line * lines.GetLength(1) + x_line;
                                 int global_index_x_line_next = global_index_x_line + 1;
 
-                                int first_vertex_on_edge = vertices_on_x_lines[(y_line, 0, x_line, x_line + 1)];
+                                var key = (y_line, 0, x_line, x_line + 1);
 
-                                if (edgesGeometry is List<IFiniteElementGeometry<Vector2D>> edgesGeometry2d)
+                                int first_vertex_on_edge = vertices_on_x_lines[key].vertex;
+
+                                string volume_material = vertices_on_x_lines[key].volume_material;
+
+                                if (boundariesInfo is List<(IFiniteElementGeometry<Vector2D> geometry, string volume_material)> edgesGeometry2d)
                                 {
-                                    if (n == 0) edgesGeometry2d.Add(new Line([global_index_x_line,
-                                                                              global_index_x_line_next]));
-                                    else edgesGeometry2d.Add(new Line([global_index_x_line,
-                                                                      first_vertex_on_edge]));
+                                    if (n == 0) edgesGeometry2d.Add((new Line([global_index_x_line,
+                                                                              global_index_x_line_next]),volume_material));
+                                    else edgesGeometry2d.Add((new Line([global_index_x_line,
+                                                                      first_vertex_on_edge]),volume_material));
                                     for (int i = 0; i < n - 2; ++i)
                                     {
                                         int vertex = first_vertex_on_edge + i;
 
-                                        edgesGeometry2d.Add(new Line([vertex,
-                                                                      vertex + 1]));
+                                        edgesGeometry2d.Add((new Line([vertex,
+                                                                      vertex + 1]),volume_material));
                                     }
 
-                                    if (n > 0) edgesGeometry2d.Add(new Line([first_vertex_on_edge + n - 2,
-                                                                            global_index_x_line_next]));
+                                    if (n > 0) edgesGeometry2d.Add((new Line([first_vertex_on_edge + n - 2,
+                                                                            global_index_x_line_next]),volume_material));
                                 }
                             }
                         }
@@ -500,14 +505,20 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                     throw new NotSupportedException();
             }
 
-            foreach (var geometry in edgesGeometry)
-                edges.Add(FiniteElementsCreator.CreateFiniteElementEdge(GeometryType.Line, basisType, order, material, geometry)); //костыль с Line
+            switch(dimension)
+            {
+                case Dimension.D2:
+                    foreach (var info in boundariesInfo)
+                        boundaries.Add(FiniteElementsCreator.CreateBoundaryCondition(GeometryType.Line, basisType, order,info.volume_material, material, info.geometry)); //костыль с Line
+                    break;
+                default: throw new NotSupportedException();
+            }
         }
 
-        return new FiniteElementMesh<VectorT>(vertices, elements, edges);
+        return new FiniteElementMesh<VectorT>(vertices, elements, boundaries);
     }
 
-    private void FillBorder<VectorT>(string coordinate, List<VectorT> vertices, Dictionary<(int, int, int, int), int> borderDictionary, int x, int y, int z, int n, double k) where VectorT : VectorBase
+    private void FillBorder<VectorT>(string coordinate, List<VectorT> vertices, Dictionary<(int, int, int, int), (int vertex, string volume_material)> borderDictionary, int x, int y, int z, int n, double k, string volume_material) where VectorT : VectorBase
     {
         switch (dimension)
         {
@@ -521,7 +532,7 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                                 if (!borderDictionary.ContainsKey(key))
                                 {
                                     int index = vertices.Count;
-                                    borderDictionary[key] = index;
+                                    borderDictionary[key] = (index, volume_material);
                                     for (int x_ind = 1; x_ind < n; ++x_ind)
                                     {
                                         Vector2D vector = (Vector2D)Vector2D.PointOnLine(lines![y, x],
@@ -538,7 +549,7 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                                 if (!borderDictionary.ContainsKey(key))
                                 {
                                     int index = vertices.Count;
-                                    borderDictionary[key] = index;
+                                    borderDictionary[key] = (index, volume_material);
                                     for (int y_ind = 1; y_ind < n; ++y_ind)
                                     {
                                         Vector2D vector = (Vector2D)Vector2D.PointOnLine(lines![y, x], lines[y + 1, x], n, k, y_ind);
@@ -561,7 +572,7 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                                 if (!borderDictionary.ContainsKey(key))
                                 {
                                     int index = vertices.Count;
-                                    borderDictionary[key] = index;
+                                    borderDictionary[key] = (index, volume_material);
                                     for (int x_ind = 1; x_ind < n; ++x_ind)
                                     {
                                         Vector3D p1 = new(lines![y, x].X,
@@ -583,7 +594,7 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                                 if (!borderDictionary.ContainsKey(key))
                                 {
                                     int index = vertices.Count;
-                                    borderDictionary[key] = index;
+                                    borderDictionary[key] = (index, volume_material);
                                     for (int y_ind = 1; y_ind < n; ++y_ind)
                                     {
                                         Vector3D p1 = new(lines![y, x].X,
@@ -604,7 +615,7 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                                 if (!borderDictionary.ContainsKey(key))
                                 {
                                     int index = vertices.Count;
-                                    borderDictionary[key] = index;
+                                    borderDictionary[key] = (index, volume_material);
                                     for (int z_ind = 1; z_ind < n; ++z_ind)
                                     {
                                         Vector3D p1 = new(lines![y, x].X,

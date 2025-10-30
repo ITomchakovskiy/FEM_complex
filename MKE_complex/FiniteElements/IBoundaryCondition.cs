@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace MKE_complex.FiniteElements;
 
-public interface IFiniteElementEdge<VectorT> where VectorT : VectorBase
+public interface IBoundaryCondition<VectorT> where VectorT : VectorBase
 {
     IFiniteElementGeometry<VectorT> Geometry { get; }
-
-    string Material { get; }
+    string VolumeMaterial { get; }
+    string EdgeMaterial { get; }
 }

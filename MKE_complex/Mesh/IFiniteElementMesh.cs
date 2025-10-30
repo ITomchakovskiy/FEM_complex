@@ -14,5 +14,5 @@ public interface IFiniteElementMesh<VectorT> where VectorT : VectorBase
 
     IReadOnlyList<IFiniteElement<VectorT>> Elements { get; }
 
-    IReadOnlyList<IFiniteElementEdge<VectorT>> Edges { get; }
+    IReadOnlyList<IBoundaryCondition<VectorT>> Edges { get; }
 }
