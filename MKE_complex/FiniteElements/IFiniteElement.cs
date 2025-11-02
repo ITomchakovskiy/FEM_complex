@@ -11,8 +11,18 @@ namespace MKE_complex.FiniteElements;
 public interface IFiniteElement<VectorT> where VectorT : VectorBase
 {
     IFiniteElementGeometry<VectorT> Geometry { get;}
-
     string Material { get; }
-    //BasisType BasisType { get; }
-    //int Order { get; }
+    int[] DOFs { get; }
+    int DofsOnEdgeCount { get; }
+    int DofsOnVertexCount { get; }
+    int DofsOnElementCount { get; }
+    void SetElementDofs(int startDofNumber);
+    void SetVertexDofs(int localVertexNumber, int dofNumber);
+    void SetVericesDofs(IEnumerable<int> dofsNumbers);
+    void SetEdgeDofs(int localEdgeNumber, int dofNumber);
+    void SetEdgesDofs(IEnumerable<int> dofsNumbers);
+
+    //void SetDOFsOnVertices(int );
+    //void SetDOFsOnEdges(int );
+    //void SetDOFsOnElement();
 }

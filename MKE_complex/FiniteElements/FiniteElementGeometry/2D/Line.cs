@@ -11,6 +11,8 @@ public record Line(int[] VertexNumber) : IFiniteElementGeometry<Vector2D>
 {
     public GeometryType GeometryType => GeometryType.Line;
 
+    public int EdgesCount => 1;
+
     public (int, int) Edge(int edgeNumber)
     {
         switch (edgeNumber)

@@ -16,5 +16,33 @@ public class TriangleLagrangianLinearFiniteElement(string material, Triangle geo
 
     public IFiniteElementGeometry<Vector2D> Geometry => geometry;
 
+    public int[] DOFs { get; private set; } = new int[3];
+
+    public int DofsOnEdgeCount => 0;
+
+    public int DofsOnVertexCount => 1;
+
+    public int DofsOnElementCount => 0;
+
     private Triangle geometry { get; init; } = geometry;
+
+    public void SetEdgeDofs(int localEdgeNumber, int dofNumber) { }
+
+    public void SetEdgesDofs(IEnumerable<int> dofsNumbers) { }
+
+    public void SetElementDofs(int startDofNumber) { }
+
+    public void SetElementsDofs(int start_dof_number) { }
+
+    public void SetVericesDofs(IEnumerable<int> dofsNumbers)
+    {
+        if (dofsNumbers.Count() != DOFs.Length) throw new ArgumentException();
+        DOFs = (int[])dofsNumbers;
+    }
+
+    public void SetVertexDofs(int localVertexNumber, int dofNumber)
+    {
+        if (localVertexNumber > Geometry.VertexNumber.Length) throw new ArgumentOutOfRangeException();
+        else DOFs[localVertexNumber] = dofNumber;
+    }
 }

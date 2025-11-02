@@ -12,5 +12,7 @@ public interface IFiniteElementGeometry<VectorT> where VectorT : VectorBase
    // GeometryType GeometryType { get; }
     int[] VertexNumber { get; }
 
+    int EdgesCount { get; }
+
     (int, int) Edge(int edgeNumber);
 }

@@ -7,9 +7,11 @@ using System.Threading.Tasks;
 
 namespace MKE_complex.FiniteElements.FiniteElementGeometry._3D;
 
-public record Hexagon(int[] VertexNumber) : IFiniteElementGeometry<Vector3D>
+public record Hexahedron(int[] VertexNumber) : IFiniteElementGeometry<Vector3D>
 {
     public GeometryType GeometryType => GeometryType.Hexagon;
+
+    public int EdgesCount => 12;
 
     public (int, int) Edge(int edgeNumber)
     {

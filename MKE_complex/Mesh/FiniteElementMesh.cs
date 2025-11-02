@@ -4,6 +4,7 @@ using MKE_complex.Vector;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,11 +13,11 @@ namespace MKE_complex.Mesh;
 public class FiniteElementMesh<VectorT>(IReadOnlyList<VectorT> vertices, IReadOnlyList<IFiniteElement<VectorT>> elements, IReadOnlyList<IBoundaryCondition<VectorT>> edges) : IFiniteElementMesh<VectorT> where VectorT : VectorBase
 {
     public List<VectorT> Vertices { get; init; } = (List<VectorT>)vertices;
-    IReadOnlyList<VectorT> IFiniteElementMesh<VectorT>.Vertices => Vertices;
+    ReadOnlySpan<VectorT> IFiniteElementMesh<VectorT>.Vertices => CollectionsMarshal.AsSpan(Vertices);
     public List<IFiniteElement<VectorT>> Elements { get; init; } = (List<IFiniteElement<VectorT>>)elements;
-    IReadOnlyList<IFiniteElement<VectorT>> IFiniteElementMesh<VectorT>.Elements => Elements;
+    ReadOnlySpan<IFiniteElement<VectorT>> IFiniteElementMesh<VectorT>.Elements => CollectionsMarshal.AsSpan(Elements);
     public List<IBoundaryCondition<VectorT>> Edges { get; init; } = (List<IBoundaryCondition<VectorT>>)edges;
-    IReadOnlyList<IBoundaryCondition<VectorT>> IFiniteElementMesh<VectorT>.Edges => Edges;
+    ReadOnlySpan<IBoundaryCondition<VectorT>> IFiniteElementMesh<VectorT>.Edges => CollectionsMarshal.AsSpan(Edges);
 
     public void SaveMeshGeometry(string VertexFileName, string ElementsFileName) //функция для тестов треугольных и тетраэдральных сеток
     {
@@ -59,5 +60,22 @@ public class FiniteElementMesh<VectorT>(IReadOnlyList<VectorT> vertices, IReadOn
         {
             Console.WriteLine(ex.ToString());
         }
+    }
+
+    private class ElementComparer : Comparer<IFiniteElement<VectorT>>
+    {
+        public override int Compare(IFiniteElement<VectorT>? x, IFiniteElement<VectorT>? y)
+        {
+            if(x == null || y == null) throw new ArgumentNullException();
+            int minVertexNumberX = x.Geometry.VertexNumber.Min();
+            int minVertexNumberY = y.Geometry.VertexNumber.Min();
+            return minVertexNumberX - minVertexNumberY;
+        }
+    }
+
+    public void SortElementsByMinimumVertexNumber()
+    {
+        var comparer = new ElementComparer();
+        Elements.Sort(comparer);
     }
 }

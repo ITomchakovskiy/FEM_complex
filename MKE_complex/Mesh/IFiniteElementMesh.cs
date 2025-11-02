@@ -10,9 +10,11 @@ namespace MKE_complex.Mesh;
 
 public interface IFiniteElementMesh<VectorT> where VectorT : VectorBase
 {
-    IReadOnlyList<VectorT> Vertices { get; }
+    ReadOnlySpan<VectorT> Vertices { get; }
 
-    IReadOnlyList<IFiniteElement<VectorT>> Elements { get; }
+    ReadOnlySpan<IFiniteElement<VectorT>> Elements { get; }
 
-    IReadOnlyList<IBoundaryCondition<VectorT>> Edges { get; }
+    ReadOnlySpan<IBoundaryCondition<VectorT>> Edges { get; }
+
+    public void SortElementsByMinimumVertexNumber();
 }

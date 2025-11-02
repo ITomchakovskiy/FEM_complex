@@ -11,6 +11,8 @@ public record Triangle(int[] VertexNumber) : IFiniteElementGeometry<Vector2D>
 {
     public GeometryType GeometryType => GeometryType.Triangle;
 
+    public int EdgesCount => 3;
+
     public (int, int) Edge(int edgeNumber)
     {
         switch (edgeNumber)

@@ -221,7 +221,7 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                                                                       new(lines[y_line + 1, x_line], z_lines![z_line + 1]),
                                                                       new(lines[y_line + 1, x_line + 1], z_lines![z_line + 1]),
                                                                       new(lines[y_line, x_line + 1], z_lines![z_line + 1])];
-                                                Vector3D vertex = Hexagon.PointOnHexagon(hexagon, x_intervals[x_line], x_stretch[x_line], x_ind, y_intervals[y_line], y_stretch[y_line], y_ind, z_intervals[z_line], z_stretch![z_line], z_ind);
+                                                Vector3D vertex = Hexahedron.PointOnHexagon(hexagon, x_intervals[x_line], x_stretch[x_line], x_ind, y_intervals[y_line], y_stretch[y_line], y_ind, z_intervals[z_line], z_stretch![z_line], z_ind);
                                                 if (vertices is List<Vector3D> vertices3d)
                                                     vertices3d.Add(vertex);
                                             }
@@ -381,7 +381,7 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                                                     else
                                                         hexagon_vertex_numbers[i] = inner_index_start + (n_x - 2) * (n_y - 2) * (local_index.z - 1) + (n_x - 2) * (local_index.y - 1) + local_index.x - 1;
                                                 }
-                                                Hexagon hexagon = new(hexagon_vertex_numbers);
+                                                Hexahedron hexagon = new(hexagon_vertex_numbers);
                                                 if (elementsGeometry is List<IFiniteElementGeometry<Vector3D>> elementsGeometry3d)
                                                     switch (meshType)
                                                     {

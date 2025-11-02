@@ -11,6 +11,8 @@ public record Tetrahedron(int[] VertexNumber) : IFiniteElementGeometry<Vector3D>
 {
     public GeometryType GeometryType => GeometryType.Tetrahedron;
 
+    public int EdgesCount => throw new NotImplementedException();
+
     public (int, int) Edge(int edgeNumber)
     {
         switch(edgeNumber)
