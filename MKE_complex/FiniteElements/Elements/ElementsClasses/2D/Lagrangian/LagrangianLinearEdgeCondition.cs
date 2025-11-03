@@ -16,4 +16,25 @@ public class LagrangianLinearEdgeCondition(string volume_material, string edge_m
     public FiniteElementGeometry.IFiniteElementGeometry<Vector2D> Geometry => geomerty;
     public string VolumeMaterial { get; init; } = volume_material;
     public string EdgeMaterial { get; init; } = edge_material;
+
+    public int[] DOFs { get; private set; } = new int[2];
+
+    public int DofsOnEdgeCount => 0;
+
+    public int DofsOnVertexCount => 1;
+
+    public void SetVertexDofs(int localVertexNumber, int dofNumber)
+    {
+        DOFs[localVertexNumber] = dofNumber;
+    }
+
+    public void SetVericesDofs(IEnumerable<int> dofsNumbers)
+    {
+        if(dofsNumbers.Count() != DOFs.Length) throw new ArgumentOutOfRangeException();
+        DOFs = dofsNumbers.ToArray();
+    }
+
+    public void SetEdgeDofs(int localEdgeNumber, int dofNumber) { }
+
+    public void SetEdgesDofs(IEnumerable<int> dofsNumbers) { }
 }

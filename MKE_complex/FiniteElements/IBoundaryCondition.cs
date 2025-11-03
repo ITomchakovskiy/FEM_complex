@@ -13,4 +13,11 @@ public interface IBoundaryCondition<VectorT> where VectorT : VectorBase
     IFiniteElementGeometry<VectorT> Geometry { get; }
     string VolumeMaterial { get; }
     string EdgeMaterial { get; }
+    int[] DOFs { get; }
+    int DofsOnEdgeCount { get; }
+    int DofsOnVertexCount { get; }
+    void SetVertexDofs(int localVertexNumber, int dofNumber);
+    void SetVericesDofs(IEnumerable<int> dofsNumbers);
+    void SetEdgeDofs(int localEdgeNumber, int dofNumber);
+    void SetEdgesDofs(IEnumerable<int> dofsNumbers);
 }

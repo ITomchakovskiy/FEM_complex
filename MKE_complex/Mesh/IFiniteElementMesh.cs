@@ -14,7 +14,7 @@ public interface IFiniteElementMesh<VectorT> where VectorT : VectorBase
 
     ReadOnlySpan<IFiniteElement<VectorT>> Elements { get; }
 
-    ReadOnlySpan<IBoundaryCondition<VectorT>> Edges { get; }
+    ReadOnlySpan<IBoundaryCondition<VectorT>> Boundaries { get; }
 
     public void SortElementsByMinimumVertexNumber();
 }

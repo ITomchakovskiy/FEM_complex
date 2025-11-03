@@ -17,7 +17,7 @@ public class FiniteElementMesh<VectorT>(IReadOnlyList<VectorT> vertices, IReadOn
     public List<IFiniteElement<VectorT>> Elements { get; init; } = (List<IFiniteElement<VectorT>>)elements;
     ReadOnlySpan<IFiniteElement<VectorT>> IFiniteElementMesh<VectorT>.Elements => CollectionsMarshal.AsSpan(Elements);
     public List<IBoundaryCondition<VectorT>> Edges { get; init; } = (List<IBoundaryCondition<VectorT>>)edges;
-    ReadOnlySpan<IBoundaryCondition<VectorT>> IFiniteElementMesh<VectorT>.Edges => CollectionsMarshal.AsSpan(Edges);
+    ReadOnlySpan<IBoundaryCondition<VectorT>> IFiniteElementMesh<VectorT>.Boundaries => CollectionsMarshal.AsSpan(Edges);
 
     public void SaveMeshGeometry(string VertexFileName, string ElementsFileName) //функция для тестов треугольных и тетраэдральных сеток
     {

@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace MKE_complex.DofsEnumerators;
 
@@ -63,6 +64,18 @@ public static class DofsEnumerator
                 element.SetEdgeDofs(i,edgeDofNumber);
             }
         } //нужно сделать еще дофы для граней(3д)!!!
+
+        foreach(var boundary in mesh.Boundaries) //setting dofs to boundary conditions
+        {
+            boundary.SetVericesDofs(boundary.Geometry.VertexNumber.Select(i => vertexList[i].dofNumber));
+            for (int i = 0; i < boundary.Geometry.EdgesCount; ++i)
+            {
+                var edge = boundary.Geometry.Edge(i);
+                edge = edge.Item1 < edge.Item2 ? edge : (edge.Item2, edge.Item1);
+                int edgeDofNumber = edgeList[edge.Item1][edge.Item2].dofNumber;
+                boundary.SetEdgeDofs(i, edgeDofNumber);
+            }
+        }
     }
     private static List<Dictionary<int, (int dofsCount, int dofNumber)>> EdgesListBuilding<VectorT>(ReadOnlySpan<IFiniteElement<VectorT>> elements, int vertexCount) where VectorT : VectorBase
     {
