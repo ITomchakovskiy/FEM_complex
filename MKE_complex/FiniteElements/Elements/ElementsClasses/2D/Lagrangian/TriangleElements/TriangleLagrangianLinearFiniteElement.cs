@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MKE_complex.FiniteElements.Elements.ElementsClasses._2D.Lagrangian;
+namespace MKE_complex.FiniteElements.Elements.ElementsClasses._2D.Lagrangian.TriangleElements;
 
 [FiniteElementAttribute(GeometryType.Triangle,BasisType.Lagrangian,1)]
 public class TriangleLagrangianLinearFiniteElement(string material, Triangle geometry) : IFiniteElement<Vector2D>
@@ -28,16 +28,16 @@ public class TriangleLagrangianLinearFiniteElement(string material, Triangle geo
 
     public void SetEdgeDofs(int localEdgeNumber, int dofNumber) { }
 
-    public void SetEdgesDofs(IEnumerable<int> dofsNumbers) { }
+    public void SetEdgesDofs(ReadOnlySpan<int> dofsNumbers) { }
 
     public void SetElementDofs(int startDofNumber) { }
 
     public void SetElementsDofs(int start_dof_number) { }
 
-    public void SetVericesDofs(IEnumerable<int> dofsNumbers)
+    public void SetVericesDofs(ReadOnlySpan<int> dofsNumbers)
     {
-        if (dofsNumbers.Count() != DOFs.Length) throw new ArgumentException();
-        DOFs = (int[])dofsNumbers;
+        if (dofsNumbers.Length != DOFs.Length) throw new ArgumentException();
+        DOFs = dofsNumbers.ToArray();
     }
 
     public void SetVertexDofs(int localVertexNumber, int dofNumber)

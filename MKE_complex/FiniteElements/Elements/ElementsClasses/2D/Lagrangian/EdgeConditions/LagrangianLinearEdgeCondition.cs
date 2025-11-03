@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MKE_complex.FiniteElements.Elements.ElementsClasses._2D.Lagrangian;
+namespace MKE_complex.FiniteElements.Elements.ElementsClasses._2D.Lagrangian.EdgeConditions;
 
 [FiniteElementAttribute(GeometryType.Line,BasisType.Lagrangian,1)]
 public class LagrangianLinearEdgeCondition(string volume_material, string edge_material, Line geometry) : IBoundaryCondition<Vector2D>
@@ -28,13 +28,13 @@ public class LagrangianLinearEdgeCondition(string volume_material, string edge_m
         DOFs[localVertexNumber] = dofNumber;
     }
 
-    public void SetVericesDofs(IEnumerable<int> dofsNumbers)
+    public void SetVericesDofs(ReadOnlySpan<int> dofsNumbers)
     {
-        if(dofsNumbers.Count() != DOFs.Length) throw new ArgumentOutOfRangeException();
+        if(dofsNumbers.Length != DOFs.Length) throw new ArgumentOutOfRangeException();
         DOFs = dofsNumbers.ToArray();
     }
 
     public void SetEdgeDofs(int localEdgeNumber, int dofNumber) { }
 
-    public void SetEdgesDofs(IEnumerable<int> dofsNumbers) { }
+    public void SetEdgesDofs(ReadOnlySpan<int> dofsNumbers) { }
 }

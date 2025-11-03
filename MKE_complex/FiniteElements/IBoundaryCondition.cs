@@ -17,7 +17,7 @@ public interface IBoundaryCondition<VectorT> where VectorT : VectorBase
     int DofsOnEdgeCount { get; }
     int DofsOnVertexCount { get; }
     void SetVertexDofs(int localVertexNumber, int dofNumber);
-    void SetVericesDofs(IEnumerable<int> dofsNumbers);
+    void SetVericesDofs(ReadOnlySpan<int> dofsNumbers);
     void SetEdgeDofs(int localEdgeNumber, int dofNumber);
-    void SetEdgesDofs(IEnumerable<int> dofsNumbers);
+    void SetEdgesDofs(ReadOnlySpan<int> dofsNumbers);
 }

@@ -18,9 +18,9 @@ public interface IFiniteElement<VectorT> where VectorT : VectorBase
     int DofsOnElementCount { get; }
     void SetElementDofs(int startDofNumber);
     void SetVertexDofs(int localVertexNumber, int dofNumber);
-    void SetVericesDofs(IEnumerable<int> dofsNumbers);
+    void SetVericesDofs(ReadOnlySpan<int> dofsNumbers);
     void SetEdgeDofs(int localEdgeNumber, int dofNumber);
-    void SetEdgesDofs(IEnumerable<int> dofsNumbers);
+    void SetEdgesDofs(ReadOnlySpan<int> dofsNumbers);
 
     //void SetDOFsOnVertices(int );
     //void SetDOFsOnEdges(int );
