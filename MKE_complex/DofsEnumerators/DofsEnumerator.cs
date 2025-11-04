@@ -55,7 +55,7 @@ public static class DofsEnumerator
 
         foreach(var element in mesh.Elements) //setting dofs to elements
         {
-            element.SetVericesDofs(element.Geometry.VertexNumber.Select(i => vertexList[i].dofNumber));
+            element.SetVericesDofs(element.Geometry.VertexNumber.Select(i => vertexList[i].dofNumber).ToArray());
             for(int i = 0; i < element.Geometry.EdgesCount; ++i)
             {
                 var edge = element.Geometry.Edge(i);
@@ -67,7 +67,7 @@ public static class DofsEnumerator
 
         foreach(var boundary in mesh.Boundaries) //setting dofs to boundary conditions
         {
-            boundary.SetVericesDofs(boundary.Geometry.VertexNumber.Select(i => vertexList[i].dofNumber));
+            boundary.SetVericesDofs(boundary.Geometry.VertexNumber.Select(i => vertexList[i].dofNumber).ToArray());
             for (int i = 0; i < boundary.Geometry.EdgesCount; ++i)
             {
                 var edge = boundary.Geometry.Edge(i);
