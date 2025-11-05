@@ -17,29 +17,28 @@ public static class DofsEnumerator
     {
         mesh.SortElementsByMinimumVertexNumber();
         var edgeList = EdgesListBuilding(mesh.Elements, mesh.Vertices.Length);
-        List<(int dofsCount, int dofNumber)> vertexList = new(mesh.Vertices.Length);
-        for(int i =0;i < mesh.Vertices.Length; ++i) vertexList.Add((0,0));
-
+        int[] vertexList = new int[mesh.Vertices.Length];
+        
         foreach(var element in mesh.Elements) //dofs count on vertex calculation
         {
             int dofsCount = element.DofsOnVertexCount;
             foreach(var vertex in element.Geometry.VertexNumber)
-                vertexList[vertex] = (Math.Max(vertexList[vertex].dofsCount, dofsCount),0);
+                vertexList[vertex] = Math.Max(vertexList[vertex], dofsCount);
         }
 
         int dofNumber = 0;
         int elementIndex = 0;
         for(int vertexNumber = 0;  vertexNumber < mesh.Vertices.Length; ++vertexNumber) //dofs enumeration
         {
-            int vertexDofsCount = vertexList[vertexNumber].dofsCount; //vertex dof enumeration
-            vertexList[vertexNumber] = (vertexDofsCount, dofNumber);
+            int vertexDofsCount = vertexList[vertexNumber];    //vertex dof enumeration
+            vertexList[vertexNumber] = dofNumber; //rewrite count of dofs to a minimum dof number
             dofNumber += vertexDofsCount;
 
             var edgeDictionary = edgeList[vertexNumber];
             foreach (var edgeInfo in edgeDictionary)  //edges dofs enumeration
             {
-                int edgeDofsCount = edgeInfo.Value.dofsCount;
-                edgeDictionary[edgeInfo.Key] = (edgeDofsCount, dofNumber);
+                int edgeDofsCount = edgeInfo.Value;
+                edgeDictionary[edgeInfo.Key] = dofNumber;
                 dofNumber += edgeDofsCount;
             }
 
@@ -55,34 +54,36 @@ public static class DofsEnumerator
 
         foreach(var element in mesh.Elements) //setting dofs to elements
         {
-            element.SetVericesDofs(element.Geometry.VertexNumber.Select(i => vertexList[i].dofNumber).ToArray());
+            element.SetVericesDofs(element.Geometry.VertexNumber.Select(i => vertexList[i]).ToArray());
             for(int i = 0; i < element.Geometry.EdgesCount; ++i)
             {
                 var edge = element.Geometry.LocalEdge(i);
                 edge = (element.Geometry.VertexNumber[edge.Item1], element.Geometry.VertexNumber[edge.Item2]);
                 edge = edge.Item1 < edge.Item2 ? edge : (edge.Item2, edge.Item1);
-                int edgeDofNumber = edgeList[edge.Item1][edge.Item2].dofNumber;
+                int edgeDofNumber = edgeList[edge.Item1][edge.Item2];
                 element.SetEdgeDofs(i,edgeDofNumber);
             }
         } //нужно сделать еще дофы для граней(3д)!!!
 
         foreach (var boundary in mesh.Boundaries) //setting dofs to boundary conditions
         {
-            boundary.SetVericesDofs(boundary.Geometry.VertexNumber.Select(i => vertexList[i].dofNumber).ToArray());
+            boundary.SetVericesDofs(boundary.Geometry.VertexNumber.Select(i => vertexList[i]).ToArray());
             for (int i = 0; i < boundary.Geometry.EdgesCount; ++i)
             {
                 var edge = boundary.Geometry.LocalEdge(i);
                 edge = (boundary.Geometry.VertexNumber[edge.Item1], boundary.Geometry.VertexNumber[edge.Item2]);
                 edge = edge.Item1 < edge.Item2 ? edge : (edge.Item2, edge.Item1);
-                int edgeDofNumber = edgeList[edge.Item1][edge.Item2].dofNumber;
+                int edgeDofNumber = edgeList[edge.Item1][edge.Item2];
                 boundary.SetEdgeDofs(i, edgeDofNumber);
             }
         }
     }
-    private static List<Dictionary<int, (int dofsCount, int dofNumber)>> EdgesListBuilding<VectorT>(ReadOnlySpan<IFiniteElement<VectorT>> elements, int vertexCount) where VectorT : VectorBase
+    private static Dictionary<int, int>[] EdgesListBuilding<VectorT>(ReadOnlySpan<IFiniteElement<VectorT>> elements, int vertexCount) where VectorT : VectorBase
     {
-        List<Dictionary<int, (int dofsCount, int dofNumber)>> edgesList = new(vertexCount); //key - second vertex number; value - dofs count on edge
-        for (int i = 0; i < vertexCount; ++i) edgesList.Add(new());
+        Dictionary<int,int>[] edgesList = new Dictionary<int, int>[vertexCount]; //key - second vertex number; value - dofs count on edge
+
+        for(int i = 0; i < edgesList.Length; ++i) edgesList[i] = new Dictionary<int, int>();
+
 
         foreach (var element in elements)
         {
@@ -93,10 +94,10 @@ public static class DofsEnumerator
                 edge = edge.Item1 < edge.Item2 ? edge : (edge.Item2, edge.Item1); //ascending order
 
                 var dictionary = edgesList[edge.Item1];
-                (int dofsCount, int dofNumber) value;
+                int value;
                 if (dictionary.TryGetValue(edge.Item2,out value))
-                    dictionary[edge.Item2] = (Math.Max(value.dofsCount, element.DofsOnEdgeCount),0);
-                else dictionary[edge.Item2] = (element.DofsOnEdgeCount,0);
+                    dictionary[edge.Item2] = Math.Max(value, element.DofsOnEdgeCount);
+                else dictionary[edge.Item2] = element.DofsOnEdgeCount;
             }
         }
         return edgesList;
