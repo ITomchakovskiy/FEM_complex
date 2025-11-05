@@ -29,8 +29,8 @@ public class TriangleLagrangianCubicFiniteElement(string material, Triangle geom
     public void SetEdgeDofs(int localEdgeNumber, int dofNumber)
     {
         if (localEdgeNumber >= Geometry.EdgesCount) throw new ArgumentOutOfRangeException();
-        var edge = Geometry.Edge(localEdgeNumber);
-        var edge_global = (Geometry.VertexNumber[edge.Item1], Geometry.VertexNumber[edge.Item1]);
+        var edge = Geometry.LocalEdge(localEdgeNumber);
+        var edge_global = (Geometry.VertexNumber[edge.Item1], Geometry.VertexNumber[edge.Item2]);
         int increment = 1;
         if(edge_global.Item1 > edge_global.Item2)
         {
@@ -38,7 +38,7 @@ public class TriangleLagrangianCubicFiniteElement(string material, Triangle geom
             increment = -1;
         }
         for(int i = 0;i<DofsOnEdgeCount;++i)
-            DOFs[Geometry.VertexNumber.Length + localEdgeNumber + i] = dofNumber + increment * i;
+            DOFs[Geometry.VertexNumber.Length + localEdgeNumber * DofsOnEdgeCount + i] = dofNumber + increment * i;
     }
 
     public void SetEdgesDofs(ReadOnlySpan<int> dofsNumbers)
@@ -64,5 +64,41 @@ public class TriangleLagrangianCubicFiniteElement(string material, Triangle geom
     {
         if (localVertexNumber >= Geometry.VertexNumber.Length) throw new ArgumentOutOfRangeException();
         DOFs[localVertexNumber] = dofNumber;
+    }
+
+    public (List<double> x, List<double> y, List<int> dofs) ReturnDofs(ReadOnlySpan<Vector2D> vertices) //функция для вывода в файл дофов для отображения(только для тестов в лабе)
+    {
+        List<double> x = new();
+        List<double> y = new();
+
+        for(int i = 0;  i < Geometry.VertexNumber.Length; ++i)
+        {
+            x.Add(vertices[Geometry.VertexNumber[i]].X);
+            y.Add(vertices[Geometry.VertexNumber[i]].Y);
+        }
+
+        for(int i = 0; i < Geometry.EdgesCount; ++i)
+        {
+            Vector2D A = vertices[Geometry.VertexNumber[Geometry.LocalEdge(i).Item1]];
+            Vector2D B = vertices[Geometry.VertexNumber[Geometry.LocalEdge(i).Item2]];
+            for(int j = 0; j < DofsOnEdgeCount; ++j)
+            {
+                Vector2D newVertex = (Vector2D)((A * (DofsOnEdgeCount - j) + B * (1 + j)) / 3d);
+                int dofnum = DOFs[3 + i * 2 + j];
+                x.Add(newVertex.X);
+                y.Add(newVertex.Y);
+            }
+        }
+
+        Vector2D A_ = vertices[Geometry.VertexNumber[0]];
+        Vector2D B_ = vertices[Geometry.VertexNumber[1]];
+        Vector2D C_ = vertices[Geometry.VertexNumber[2]];
+
+        Vector2D newVertex_ = (Vector2D)((A_ + B_ + C_) / 3d);
+
+        x.Add(newVertex_.X);
+        y.Add(newVertex_.Y);
+
+        return (x, y, DOFs.ToList());
     }
 }

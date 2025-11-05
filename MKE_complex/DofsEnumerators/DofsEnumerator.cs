@@ -58,19 +58,21 @@ public static class DofsEnumerator
             element.SetVericesDofs(element.Geometry.VertexNumber.Select(i => vertexList[i].dofNumber).ToArray());
             for(int i = 0; i < element.Geometry.EdgesCount; ++i)
             {
-                var edge = element.Geometry.Edge(i);
+                var edge = element.Geometry.LocalEdge(i);
+                edge = (element.Geometry.VertexNumber[edge.Item1], element.Geometry.VertexNumber[edge.Item2]);
                 edge = edge.Item1 < edge.Item2 ? edge : (edge.Item2, edge.Item1);
                 int edgeDofNumber = edgeList[edge.Item1][edge.Item2].dofNumber;
                 element.SetEdgeDofs(i,edgeDofNumber);
             }
         } //нужно сделать еще дофы для граней(3д)!!!
 
-        foreach(var boundary in mesh.Boundaries) //setting dofs to boundary conditions
+        foreach (var boundary in mesh.Boundaries) //setting dofs to boundary conditions
         {
             boundary.SetVericesDofs(boundary.Geometry.VertexNumber.Select(i => vertexList[i].dofNumber).ToArray());
             for (int i = 0; i < boundary.Geometry.EdgesCount; ++i)
             {
-                var edge = boundary.Geometry.Edge(i);
+                var edge = boundary.Geometry.LocalEdge(i);
+                edge = (boundary.Geometry.VertexNumber[edge.Item1], boundary.Geometry.VertexNumber[edge.Item2]);
                 edge = edge.Item1 < edge.Item2 ? edge : (edge.Item2, edge.Item1);
                 int edgeDofNumber = edgeList[edge.Item1][edge.Item2].dofNumber;
                 boundary.SetEdgeDofs(i, edgeDofNumber);
@@ -86,7 +88,8 @@ public static class DofsEnumerator
         {
             for(int edgeNumber = 0; edgeNumber < element.Geometry.EdgesCount; ++edgeNumber)
             {
-                var edge = element.Geometry.Edge(edgeNumber);
+                var edge = element.Geometry.LocalEdge(edgeNumber);
+                edge = (element.Geometry.VertexNumber[edge.Item1], element.Geometry.VertexNumber[edge.Item2]);
                 edge = edge.Item1 < edge.Item2 ? edge : (edge.Item2, edge.Item1); //ascending order
 
                 var dictionary = edgesList[edge.Item1];

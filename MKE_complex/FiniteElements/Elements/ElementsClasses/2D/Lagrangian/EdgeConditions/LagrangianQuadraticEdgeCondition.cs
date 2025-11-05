@@ -28,7 +28,7 @@ public class LagrangianQuadraticEdgeCondition(string volume_material, string edg
     public void SetEdgeDofs(int localEdgeNumber, int dofNumber)
     {
         if (localEdgeNumber >= Geometry.EdgesCount) throw new ArgumentOutOfRangeException();
-        var edge = Geometry.Edge(localEdgeNumber);
+        var edge = Geometry.LocalEdge(localEdgeNumber);
         var edge_global = (Geometry.VertexNumber[edge.Item1], Geometry.VertexNumber[edge.Item1]);
         int increment = 1;
         if (edge_global.Item1 > edge_global.Item2)

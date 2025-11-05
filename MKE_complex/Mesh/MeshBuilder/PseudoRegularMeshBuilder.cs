@@ -446,7 +446,7 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
 
                                 if (boundariesInfo is List<(IFiniteElementGeometry<Vector2D> geometry, string volume_material)> edgesGeometry2d)
                                 {
-                                    if (n == 0) edgesGeometry2d.Add((new Line([global_index_y_line,
+                                    if (n == 1) edgesGeometry2d.Add((new Line([global_index_y_line,
                                                                               global_index_y_line_next]), volume_material));
                                     else edgesGeometry2d.Add((new Line([global_index_y_line,
                                                                       first_vertex_on_edge]),volume_material));
@@ -458,7 +458,7 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                                                                       vertex + 1]),volume_material));
                                     }
 
-                                    if (n > 0) edgesGeometry2d.Add((new Line([first_vertex_on_edge + n - 2,
+                                    if (n > 1) edgesGeometry2d.Add((new Line([first_vertex_on_edge + n - 2,
                                                                             global_index_y_line_next]),volume_material));
                                 }
                             }
@@ -481,7 +481,7 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
 
                                 if (boundariesInfo is List<(IFiniteElementGeometry<Vector2D> geometry, string volume_material)> edgesGeometry2d)
                                 {
-                                    if (n == 0) edgesGeometry2d.Add((new Line([global_index_x_line,
+                                    if (n == 1) edgesGeometry2d.Add((new Line([global_index_x_line,
                                                                               global_index_x_line_next]),volume_material));
                                     else edgesGeometry2d.Add((new Line([global_index_x_line,
                                                                       first_vertex_on_edge]),volume_material));
@@ -493,7 +493,7 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                                                                       vertex + 1]),volume_material));
                                     }
 
-                                    if (n > 0) edgesGeometry2d.Add((new Line([first_vertex_on_edge + n - 2,
+                                    if (n > 1) edgesGeometry2d.Add((new Line([first_vertex_on_edge + n - 2,
                                                                             global_index_x_line_next]),volume_material));
                                 }
                             }

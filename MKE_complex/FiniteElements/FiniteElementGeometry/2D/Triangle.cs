@@ -13,7 +13,7 @@ public record Triangle(int[] VertexNumber) : IFiniteElementGeometry<Vector2D>
 
     public int EdgesCount => 3;
 
-    public (int, int) Edge(int edgeNumber)
+    public (int, int) LocalEdge(int edgeNumber)
     {
         switch (edgeNumber)
         {

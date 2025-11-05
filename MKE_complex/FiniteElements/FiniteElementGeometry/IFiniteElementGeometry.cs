@@ -14,5 +14,5 @@ public interface IFiniteElementGeometry<VectorT> where VectorT : VectorBase
 
     int EdgesCount { get; }
 
-    (int, int) Edge(int edgeNumber);
+    (int, int) LocalEdge(int edgeNumber);
 }

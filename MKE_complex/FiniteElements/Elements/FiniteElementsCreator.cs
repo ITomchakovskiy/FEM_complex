@@ -69,7 +69,7 @@ public static class FiniteElementsCreator
         Type edgeType;
         if (finiteElementEdgeType.TryGetValue((geometryType, basis, order), out edgeType!))
         {
-            Type[] types = [typeof(string), geometry.GetType()];
+            Type[] types = [typeof(string), typeof(string), geometry.GetType()];
             var constructor = edgeType.GetConstructor(types);
             if (constructor is null)
                 throw new NotSupportedException();
