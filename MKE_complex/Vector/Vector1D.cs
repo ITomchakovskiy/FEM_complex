@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace MKE_complex.Vector;
 
-public class Vector1D : VectorBase
+public class Vector1D : VectorBase<double>
 {
     public double X => components![0];
     public Vector1D(double x) => components = [x];
-    protected override VectorBase CreateVector(params double[] components) => new Vector1D(components[0]);
+    protected override VectorBase<double> CreateVector(params double[] components) => new Vector1D(components[0]);
 }

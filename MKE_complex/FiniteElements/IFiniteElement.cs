@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace MKE_complex.FiniteElements;
 
-public interface IFiniteElement<VectorT> where VectorT : VectorBase
+public interface IFiniteElement<VectorT> where VectorT : VectorBase<double>
 {
     IFiniteElementGeometry<VectorT> Geometry { get;}
     string Material { get; }

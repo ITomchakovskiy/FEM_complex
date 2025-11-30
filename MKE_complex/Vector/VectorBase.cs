@@ -1,102 +1,132 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace MKE_complex.Vector;
 
-public abstract class VectorBase
+public abstract class VectorBase<T> where T : INumber<T>
 {
-    public VectorBase(params double[] components) => this.components = components;
+    public VectorBase(params T[] components) => this.components = components;
 
-    protected double[]? components { get; init; }
+    protected T[]? components { get; init; }
 
-    protected abstract VectorBase CreateVector(params double[] components);
+    protected abstract VectorBase<T> CreateVector(params T[] components);
 
-    public static VectorBase operator +(VectorBase A, VectorBase B)
+    public static VectorBase<T> operator +(VectorBase<T> A, VectorBase<T> B)
     {
         if (A.components is null || B.components is null || A.components.Length != B.components.Length)
             throw new ArgumentException();
         int n = A.components.Length;
-        double[] new_components = new double[n];
+        var new_components = new T[n];
         for(int i = 0; i < n; ++i)
             new_components[i] = A.components[i] + B.components[i];
 
         return A.CreateVector(new_components);
     }
 
-    public static VectorBase operator -(VectorBase A, VectorBase B)
+    public static VectorBase<T> operator -(VectorBase<T> A, VectorBase<T> B)
     {
         if (A.components is null || B.components is null || A.components.Length != B.components.Length)
             throw new ArgumentException();
         int n = A.components.Length;
-        double[] new_components = new double[n];
+        var new_components = new T[n];
         for (int i = 0; i < n; ++i)
             new_components[i] = A.components[i] - B.components[i];
 
         return A.CreateVector(new_components);
     }
 
-    public static VectorBase operator *(VectorBase A, double k)
+    public static VectorBase<T> operator *(VectorBase<T> A, T k)
     {
         if (A.components is null)
             throw new ArgumentException();
         int n = A.components.Length;
-        double[] new_components = new double[n];
+        var new_components = new T[n];
         for (int i = 0; i < n; ++i)
             new_components[i] = A.components[i] * k;
 
         return A.CreateVector(new_components);
     }
 
-    public static VectorBase operator *(double k, VectorBase A)
+    public static VectorBase<T> operator *(VectorBase<T> A, double k)
     {
         if (A.components is null)
             throw new ArgumentException();
         int n = A.components.Length;
-        double[] new_components = new double[n];
+        var new_components = new T[n];
         for (int i = 0; i < n; ++i)
-            new_components[i] = A.components[i] * k;
+            new_components[i] = T.CreateChecked(double.CreateChecked(A.components[i]) * k);
 
         return A.CreateVector(new_components);
     }
 
-    public static VectorBase operator /(VectorBase A, double k)
+    public static VectorBase<T> operator *(T k, VectorBase<T> A)
+    {
+        return A * k;
+    }
+
+    public static VectorBase<T> operator *(double k, VectorBase<T> A)
+    {
+        return A * k;
+    }
+
+    public static VectorBase<T> operator /(VectorBase<T> A, double k)
     {
         if (A.components is null)
             throw new ArgumentException();
         int n = A.components.Length;
-        double[] new_components = new double[n];
+        var new_components = new T[n];
+        
         for (int i = 0; i < n; ++i)
-            new_components[i] = A.components[i] / k;
+            new_components[i] = T.CreateChecked(double.CreateChecked(A.components[i]) / k);
 
-        return A.CreateVector(new_components);
+
+            return A.CreateVector(new_components);
     }
 
     public double Norm()
     {
         if (components is null)
             throw new ArgumentException();
-        double square_sum = 0;
-        foreach(double x in components)
-            square_sum += x * x;
-        return Math.Sqrt(square_sum);
+        T square_sum = T.Zero;
+        double? d_square_sum = 0;
+
+        if (components is Complex[] c_components)
+        {
+            foreach (Complex x in c_components)
+                d_square_sum += x.Magnitude * x.Magnitude;
+            return Math.Sqrt((double)d_square_sum);
+        }
+        else 
+        {
+            d_square_sum = square_sum as double?;
+            if(d_square_sum != null)
+            {
+                foreach (T x in components)
+                   square_sum += x * x;
+                return Math.Sqrt((double)(square_sum as double?)!);
+            }
+        }
+
+        return default;
     }
 
-    public VectorBase Nornmalize()
+    public VectorBase<T> Nornmalize()
     {
         double norm = Norm();
 
         return this / norm;
     }
-    public static VectorBase PointOnLine(VectorBase A, VectorBase B, int n, double k, int ind) //for mesh initialization
+    public static VectorBase<T> PointOnLine(VectorBase<T> A, VectorBase<T> B, int n, double k, int ind) //for mesh initialization
     {
         if (A.components is null || B.components is null || A.components.Length != B.components.Length)
             throw new ArgumentException();
         if (ind == 0) return A;
         if (ind == n) return B;
-        VectorBase r = B - A;
+        VectorBase<T> r = B - A;
         double l = r.Norm();
         if (Math.Abs(k - 1d) < 1.0E-13)
             return A + r / n * ind;

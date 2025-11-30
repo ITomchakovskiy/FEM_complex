@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace MKE_complex.Mesh;
 
-public interface IFiniteElementMesh<VectorT> where VectorT : VectorBase
+public interface IFiniteElementMesh<VectorT> where VectorT : VectorBase<double>
 {
     ReadOnlySpan<VectorT> Vertices { get; }
 

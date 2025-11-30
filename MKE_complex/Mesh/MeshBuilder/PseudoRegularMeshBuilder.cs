@@ -41,7 +41,7 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
     private string[]? edgeMaterials;
 
     private Dimension dimension;
-    public IFiniteElementMesh<VectorT> BuildMesh<VectorT>(Dimension dimension, GeometryType meshType, BasisType basisType, int order, string[] fileNames) where VectorT : VectorBase
+    public IFiniteElementMesh<VectorT> BuildMesh<VectorT>(Dimension dimension, GeometryType meshType, BasisType basisType, int order, string[] fileNames) where VectorT : VectorBase<double>
     {
         this.dimension = dimension;
         ReadMeshFile(fileNames[0]);
@@ -518,7 +518,7 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
         return new FiniteElementMesh<VectorT>(vertices, elements, boundaries);
     }
 
-    private void FillBorder<VectorT>(string coordinate, List<VectorT> vertices, Dictionary<(int, int, int, int), (int vertex, string volume_material)> borderDictionary, int x, int y, int z, int n, double k, string volume_material) where VectorT : VectorBase
+    private void FillBorder<VectorT>(string coordinate, List<VectorT> vertices, Dictionary<(int, int, int, int), (int vertex, string volume_material)> borderDictionary, int x, int y, int z, int n, double k, string volume_material) where VectorT : VectorBase<double>
     {
         switch (dimension)
         {

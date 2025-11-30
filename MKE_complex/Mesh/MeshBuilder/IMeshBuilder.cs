@@ -11,5 +11,5 @@ public enum MeshBuildMethod {Regular, PseudoRegular }
 
 public interface IMeshBuilder
 {
-    IFiniteElementMesh<VectorT> BuildMesh<VectorT>(Dimension dimension, GeometryType meshType, BasisType basisType,int order, string[] fileNames) where VectorT : VectorBase;
+    IFiniteElementMesh<VectorT> BuildMesh<VectorT>(Dimension dimension, GeometryType meshType, BasisType basisType,int order, string[] fileNames) where VectorT : VectorBase<double>;
 }

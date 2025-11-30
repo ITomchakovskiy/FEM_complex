@@ -48,7 +48,7 @@ public static class FiniteElementsCreator
         }
     }
 
-    public static IFiniteElement<VectorT> CreateFiniteElement<VectorT>(GeometryType geometryType, BasisType basis, int order, string material, IFiniteElementGeometry<VectorT> geometry) where VectorT : VectorBase
+    public static IFiniteElement<VectorT> CreateFiniteElement<VectorT>(GeometryType geometryType, BasisType basis, int order, string material, IFiniteElementGeometry<VectorT> geometry) where VectorT : VectorBase<double>
     {
         Type elementType;
         if (finiteElementType.TryGetValue((geometryType, basis, order), out elementType!))
@@ -64,7 +64,7 @@ public static class FiniteElementsCreator
         else throw new NotSupportedException();
     }
 
-    public static IBoundaryCondition<VectorT> CreateBoundaryCondition<VectorT>(GeometryType geometryType, BasisType basis, int order, string volume_material, string boundary_material, IFiniteElementGeometry<VectorT> geometry) where VectorT : VectorBase
+    public static IBoundaryCondition<VectorT> CreateBoundaryCondition<VectorT>(GeometryType geometryType, BasisType basis, int order, string volume_material, string boundary_material, IFiniteElementGeometry<VectorT> geometry) where VectorT : VectorBase<double>
     {
         Type edgeType;
         if (finiteElementEdgeType.TryGetValue((geometryType, basis, order), out edgeType!))

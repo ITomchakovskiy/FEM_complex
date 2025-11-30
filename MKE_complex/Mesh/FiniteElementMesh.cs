@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace MKE_complex.Mesh;
 
-public class FiniteElementMesh<VectorT>(IReadOnlyList<VectorT> vertices, IReadOnlyList<IFiniteElement<VectorT>> elements, IReadOnlyList<IBoundaryCondition<VectorT>> edges) : IFiniteElementMesh<VectorT> where VectorT : VectorBase
+public class FiniteElementMesh<VectorT>(IReadOnlyList<VectorT> vertices, IReadOnlyList<IFiniteElement<VectorT>> elements, IReadOnlyList<IBoundaryCondition<VectorT>> edges) : IFiniteElementMesh<VectorT> where VectorT : VectorBase<double>
 {
     private List<VectorT> vertices { get; init; } = (List<VectorT>)vertices;
     ReadOnlySpan<VectorT> IFiniteElementMesh<VectorT>.Vertices => CollectionsMarshal.AsSpan(vertices);
