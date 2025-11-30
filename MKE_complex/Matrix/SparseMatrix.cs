@@ -1,25 +1,27 @@
-﻿using System;
+﻿using MKE_complex.Vector;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Numerics;
 using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace MKE_complex.Matrix;
 
-public class SparseMatrix<ElementType>
+public class SparseMatrix<T> where T : INumber<T>
 {
     public int[] Ia { get; init; }
     public int[] Ja { get; init; }
-    public ElementType[] Al { get; init; }
-    public ElementType[] Au { get; init; }
-    public ElementType[] Di { get; init; }
+    public T[] Al { get; init; }
+    public T[] Au { get; init; }
+    public T[] Di { get; init; }
     public int N => Ia.Length - 1;
     public int ElementsCount => Ja.Length;
     public bool IsSymmetric => Au.Length == 0;
 
-    public ElementType? GetElement(int i, int j)
+    public T? GetElement(int i, int j)
     {
         if(i >= N || j >= N) throw new ArgumentOutOfRangeException();
         if(i == j)
@@ -45,13 +47,13 @@ public class SparseMatrix<ElementType>
         Ia = ia.ToArray();
         Ja = ja.ToArray();
 
-        Di = new ElementType[N];
-        Al = new ElementType[ElementsCount];
+        Di = new T[N];
+        Al = new T[ElementsCount];
 
-        Au = isSymmetric ? [] : new ElementType[ElementsCount];
+        Au = isSymmetric ? [] : new T[ElementsCount];
     }
 
-    public SparseMatrix(ReadOnlySpan<int> ia, ReadOnlySpan<int> ja, ReadOnlySpan<ElementType> di, ReadOnlySpan<ElementType> al)
+    public SparseMatrix(ReadOnlySpan<int> ia, ReadOnlySpan<int> ja, ReadOnlySpan<T> di, ReadOnlySpan<T> al)
     {
         Ia = ia.ToArray();
         Ja = ja.ToArray();
@@ -63,7 +65,7 @@ public class SparseMatrix<ElementType>
         Au = [];
     }
 
-    public SparseMatrix(ReadOnlySpan<int> ia, ReadOnlySpan<int> ja, ReadOnlySpan<ElementType> di, ReadOnlySpan<ElementType> al, ReadOnlySpan<ElementType> au)
+    public SparseMatrix(ReadOnlySpan<int> ia, ReadOnlySpan<int> ja, ReadOnlySpan<T> di, ReadOnlySpan<T> al, ReadOnlySpan<T> au)
     {
         Ia = ia.ToArray();
         Ja = ja.ToArray();
@@ -74,5 +76,41 @@ public class SparseMatrix<ElementType>
         Al = al.ToArray();
         if (au.Length != ElementsCount) throw new ArgumentOutOfRangeException();
         Au = au.ToArray();
+    }
+
+//    for (int i = 0; i<N; i++)
+//   {
+//      result[i] = di[i]* B[i];
+//    int i0 = ig[i];
+//    int i1 = ig[i + 1];
+//      for (int i_gg = i0; i_gg<i1; i_gg++)
+//      {
+//         int j = jg[i_gg];
+//    result[i] += ggl[i_gg]* B[j];
+//    result[j] += ggu[i_gg]* B[i];
+//}
+//   }
+
+    public static VectorBase<T> operator *(SparseMatrix<T> M, VectorBase<T> X)
+    {
+        if(M.N != X.N) throw new ArgumentOutOfRangeException();
+        int N = M.N;
+        var components = new T[N];
+
+        var xc = X.components;
+
+        for (int i = 0; i < N; i++)
+        {
+            components[i] = M.Di[i] * xc[i];
+            int i0 = M.Ia[i];
+            int i1 = M.Ia[i + 1];
+            for (int i_gg = i0; i_gg < i1; i_gg++)
+            {
+                int j = M.Ja[i_gg];
+                components[i] += M.Al[i_gg] * xc[j];
+                components[j] += (M.IsSymmetric ? M.Al[i_gg] : M.Au[i_gg]) * xc[i];
+            }
+        }
+        return new VectorBase<T>(components);
     }
 }

@@ -7,13 +7,15 @@ using System.Threading.Tasks;
 
 namespace MKE_complex.Vector;
 
-public abstract class VectorBase<T> where T : INumber<T>
+public class VectorBase<T> where T : INumber<T>
 {
     public VectorBase(params T[] components) => this.components = components;
 
-    protected T[]? components { get; init; }
+    public int N => components!.Length;
 
-    protected abstract VectorBase<T> CreateVector(params T[] components);
+    public T[] components { get; init; }
+
+    //protected abstract VectorBase<T> CreateVector(params T[] components) : base(components);
 
     public static VectorBase<T> operator +(VectorBase<T> A, VectorBase<T> B)
     {
@@ -24,7 +26,8 @@ public abstract class VectorBase<T> where T : INumber<T>
         for(int i = 0; i < n; ++i)
             new_components[i] = A.components[i] + B.components[i];
 
-        return A.CreateVector(new_components);
+        //return A.CreateVector(new_components);
+        return new VectorBase<T>(new_components);
     }
 
     public static VectorBase<T> operator -(VectorBase<T> A, VectorBase<T> B)
@@ -36,7 +39,8 @@ public abstract class VectorBase<T> where T : INumber<T>
         for (int i = 0; i < n; ++i)
             new_components[i] = A.components[i] - B.components[i];
 
-        return A.CreateVector(new_components);
+        //return A.CreateVector(new_components);
+        return new VectorBase<T>(new_components);
     }
 
     public static VectorBase<T> operator *(VectorBase<T> A, T k)
@@ -48,7 +52,8 @@ public abstract class VectorBase<T> where T : INumber<T>
         for (int i = 0; i < n; ++i)
             new_components[i] = A.components[i] * k;
 
-        return A.CreateVector(new_components);
+        //return A.CreateVector(new_components);
+        return new VectorBase<T>(new_components);
     }
 
     public static VectorBase<T> operator *(VectorBase<T> A, double k)
@@ -60,7 +65,8 @@ public abstract class VectorBase<T> where T : INumber<T>
         for (int i = 0; i < n; ++i)
             new_components[i] = T.CreateChecked(double.CreateChecked(A.components[i]) * k);
 
-        return A.CreateVector(new_components);
+        //return A.CreateVector(new_components);
+        return new VectorBase<T>(new_components);
     }
 
     public static VectorBase<T> operator *(T k, VectorBase<T> A)
@@ -84,7 +90,8 @@ public abstract class VectorBase<T> where T : INumber<T>
             new_components[i] = T.CreateChecked(double.CreateChecked(A.components[i]) / k);
 
 
-            return A.CreateVector(new_components);
+           // return A.CreateVector(new_components);
+        return new VectorBase<T>(new_components);
     }
 
     public double Norm()
