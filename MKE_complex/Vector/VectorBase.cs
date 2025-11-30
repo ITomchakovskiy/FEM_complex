@@ -102,16 +102,10 @@ public abstract class VectorBase<T> where T : INumber<T>
         }
         else 
         {
-            d_square_sum = square_sum as double?;
-            if(d_square_sum != null)
-            {
-                foreach (T x in components)
-                   square_sum += x * x;
-                return Math.Sqrt((double)(square_sum as double?)!);
-            }
+            foreach (T x in components)
+                square_sum += x * x;
+            return Math.Sqrt(double.CreateChecked(square_sum));
         }
-
-        return default;
     }
 
     public VectorBase<T> Nornmalize()
