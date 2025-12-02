@@ -115,6 +115,25 @@ public class VectorBase<T> where T : INumber<T>
         }
     }
 
+    public static T Scalar(VectorBase<T> A, VectorBase<T> B)
+    {
+        T result = T.Zero;
+        if(A.N != B.N) throw new ArgumentException();
+        int N = A.N;
+        if(A.components is Complex[] ac && B.components is Complex[] bc && result is Complex cr)
+        {
+            for (int i = 0; i < N; ++i)
+                cr += ac[i] * new Complex(bc[i].Real, -bc[i].Imaginary);
+        }
+        else
+        {
+            for (int i = 0; i < N; ++i)
+                result += A.components[i] * B.components[i];
+        }
+        
+        return result;
+    }
+
     public VectorBase<T> Nornmalize()
     {
         double norm = Norm();

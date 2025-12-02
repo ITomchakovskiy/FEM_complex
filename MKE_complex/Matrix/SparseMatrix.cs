@@ -78,37 +78,24 @@ public class SparseMatrix<T> where T : INumber<T>
         Au = au.ToArray();
     }
 
-//    for (int i = 0; i<N; i++)
-//   {
-//      result[i] = di[i]* B[i];
-//    int i0 = ig[i];
-//    int i1 = ig[i + 1];
-//      for (int i_gg = i0; i_gg<i1; i_gg++)
-//      {
-//         int j = jg[i_gg];
-//    result[i] += ggl[i_gg]* B[j];
-//    result[j] += ggu[i_gg]* B[i];
-//}
-//   }
-
     public static VectorBase<T> operator *(SparseMatrix<T> M, VectorBase<T> X)
     {
         if(M.N != X.N) throw new ArgumentOutOfRangeException();
         int N = M.N;
         var components = new T[N];
 
-        var xc = X.components;
+        var x = X.components;
 
         for (int i = 0; i < N; i++)
         {
-            components[i] = M.Di[i] * xc[i];
+            components[i] = M.Di[i] * x[i];
             int i0 = M.Ia[i];
             int i1 = M.Ia[i + 1];
             for (int i_gg = i0; i_gg < i1; i_gg++)
             {
                 int j = M.Ja[i_gg];
-                components[i] += M.Al[i_gg] * xc[j];
-                components[j] += (M.IsSymmetric ? M.Al[i_gg] : M.Au[i_gg]) * xc[i];
+                components[i] += M.Al[i_gg] * x[j];
+                components[j] += (M.IsSymmetric ? M.Al[i_gg] : M.Au[i_gg]) * x[i];
             }
         }
         return new VectorBase<T>(components);
