@@ -26,6 +26,15 @@ public class TriangleLagrangianQuadraticFiniteElement(string material, Triangle 
 
     public int DofsOnElementCount => 0;
 
+    public int[] SortedDofs => throw new NotImplementedException();
+
+    public int[] SortedDofIndices => throw new NotImplementedException();
+
+    public bool IsDofsConnected(int dof1, int dof2)
+    {
+        throw new NotImplementedException();
+    }
+
     public void SetEdgeDofs(int localEdgeNumber, int dofNumber)
     {
         if (localEdgeNumber >= Geometry.EdgesCount) throw new ArgumentOutOfRangeException();

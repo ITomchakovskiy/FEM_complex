@@ -8,13 +8,11 @@ using System.Threading.Tasks;
 
 namespace MKE_complex.Mesh;
 
-public interface IFiniteElementMesh<VectorT> where VectorT : VectorBase<double>
+public interface IFiniteElementMesh<VectorT> where VectorT : VectorBase<double, VectorT>
 {
     ReadOnlySpan<VectorT> Vertices { get; }
-
     ReadOnlySpan<IFiniteElement<VectorT>> Elements { get; }
-
     ReadOnlySpan<IBoundaryCondition<VectorT>> Boundaries { get; }
-
+    int? DofsCount { get; set; }
     public void SortElementsByMinimumVertexNumber();
 }

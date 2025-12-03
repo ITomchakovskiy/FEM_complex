@@ -24,7 +24,16 @@ public class TriangleLagrangianLinearFiniteElement(string material, Triangle geo
 
     public int DofsOnElementCount => 0;
 
+    public int[] SortedDofs => throw new NotImplementedException();
+
+    public int[] SortedDofIndices => throw new NotImplementedException();
+
     private Triangle geometry { get; init; } = geometry;
+
+    public bool IsDofsConnected(int dof1, int dof2)
+    {
+        throw new NotImplementedException();
+    }
 
     public void SetEdgeDofs(int localEdgeNumber, int dofNumber) { }
 

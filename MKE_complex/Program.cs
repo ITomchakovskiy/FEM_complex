@@ -3,6 +3,7 @@ using MKE_complex;
 using MKE_complex.DofsEnumerators;
 using MKE_complex.FiniteElements;
 using MKE_complex.FiniteElements.Elements;
+using MKE_complex.Matrix;
 using MKE_complex.Mesh;
 using MKE_complex.Mesh.MeshBuilder;
 using MKE_complex.Vector;
@@ -60,6 +61,8 @@ PseudoRegularMeshBuilder builder = new PseudoRegularMeshBuilder();
 IFiniteElementMesh<Vector2D> mesh = builder.BuildMesh<Vector2D>(dimension,mesh_type,basis,order,fileNames); //костыль
 
 DofsEnumerator.EnumerateMeshDofs(mesh);
+
+var matrix = MatrixProfileBuilder.BuildMatrixProfile<double, Vector2D>(mesh);
 
 if (mesh is FiniteElementMesh<Vector2D> mesh2d)
     mesh2d.SaveMeshGeometry("input_points", "input_triangles", "input_dofs", "input_edges", "input_edgeDofs");

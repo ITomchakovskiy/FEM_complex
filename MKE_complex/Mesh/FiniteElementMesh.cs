@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace MKE_complex.Mesh;
 
-public class FiniteElementMesh<VectorT>(IReadOnlyList<VectorT> vertices, IReadOnlyList<IFiniteElement<VectorT>> elements, IReadOnlyList<IBoundaryCondition<VectorT>> edges) : IFiniteElementMesh<VectorT> where VectorT : VectorBase<double>
+public class FiniteElementMesh<VectorT>(IReadOnlyList<VectorT> vertices, IReadOnlyList<IFiniteElement<VectorT>> elements, IReadOnlyList<IBoundaryCondition<VectorT>> edges) : IFiniteElementMesh<VectorT> where VectorT : VectorBase<double, VectorT>
 {
     private List<VectorT> vertices { get; init; } = (List<VectorT>)vertices;
     ReadOnlySpan<VectorT> IFiniteElementMesh<VectorT>.Vertices => CollectionsMarshal.AsSpan(vertices);
@@ -20,6 +20,19 @@ public class FiniteElementMesh<VectorT>(IReadOnlyList<VectorT> vertices, IReadOn
     ReadOnlySpan<IFiniteElement<VectorT>> IFiniteElementMesh<VectorT>.Elements => CollectionsMarshal.AsSpan(elements);
     public List<IBoundaryCondition<VectorT>> boundaries { get; init; } = (List<IBoundaryCondition<VectorT>>)edges;
     ReadOnlySpan<IBoundaryCondition<VectorT>> IFiniteElementMesh<VectorT>.Boundaries => CollectionsMarshal.AsSpan(boundaries);
+
+    private int? dofsCount;
+
+    public int? DofsCount
+    {
+        get => dofsCount;
+        set
+        {
+            if (dofsCount != null)
+                throw new InvalidOperationException("Dofs count has already been set");
+            dofsCount = value;
+        }
+    }
 
     public void SaveMeshGeometry(string VertexFileName, string ElementsFileName, string DofsFileName ,string EdgesFileName, string EdgeDofsFileName) //функция для тестов треугольных и тетраэдральных сеток
     {

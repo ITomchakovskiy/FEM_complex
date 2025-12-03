@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MKE_complex.FiniteElements.FiniteElementGeometry;
 
-public interface IFiniteElementGeometry<VectorT> where VectorT : VectorBase<double>
+public interface IFiniteElementGeometry<VectorT> where VectorT : VectorBase<double, VectorT>
 {
    // GeometryType GeometryType { get; }
     int[] VertexNumber { get; }

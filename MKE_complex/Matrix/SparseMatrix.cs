@@ -78,7 +78,7 @@ public class SparseMatrix<T> where T : INumber<T>
         Au = au.ToArray();
     }
 
-    public static VectorBase<T> operator *(SparseMatrix<T> M, VectorBase<T> X)
+    public static Vector.Vector<T> operator *(SparseMatrix<T> M, Vector.Vector<T> X)
     {
         if(M.N != X.N) throw new ArgumentOutOfRangeException();
         int N = M.N;
@@ -98,6 +98,6 @@ public class SparseMatrix<T> where T : INumber<T>
                 components[j] += (M.IsSymmetric ? M.Al[i_gg] : M.Au[i_gg]) * x[i];
             }
         }
-        return new VectorBase<T>(components);
+        return new Vector.Vector<T>(components);
     }
 }

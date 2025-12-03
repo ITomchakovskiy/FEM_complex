@@ -26,6 +26,26 @@ public class TriangleLagrangianCubicFiniteElement(string material, Triangle geom
 
     public int DofsOnElementCount => 1;
 
+    private int[]? sortedDofIndices;
+
+    public int[] SortedDofIndices
+    { 
+        get
+        {
+            if(sortedDofIndices != null) return sortedDofIndices;
+            var dofs = new int[DOFs.Length];
+            Array.Copy(DOFs, dofs, DOFs.Length);
+            var indices = new int[DOFs.Length];
+            for (int i = 0; i < DOFs.Length; ++i)
+                indices[i] = i;
+            Array.Sort(dofs, indices);
+            sortedDofIndices = indices;
+            return indices;
+        } 
+    }
+
+    public int[] SortedDofs => SortedDofIndices.Select(i => DOFs[i]).ToArray();
+
     public void SetEdgeDofs(int localEdgeNumber, int dofNumber)
     {
         if (localEdgeNumber >= Geometry.EdgesCount) throw new ArgumentOutOfRangeException();
@@ -100,5 +120,14 @@ public class TriangleLagrangianCubicFiniteElement(string material, Triangle geom
         y.Add(newVertex_.Y);
 
         return (x, y, DOFs.ToList());
+    }
+
+    public bool IsDofsConnected(int dof1, int dof2)
+    {
+        if(DOFs.Contains(dof1) && DOFs.Contains(dof2))
+        {
+            return true;
+        }
+        else return false;
     }
 }

@@ -13,7 +13,7 @@ namespace MKE_complex.DofsEnumerators;
 
 public static class DofsEnumerator
 {
-    public static void EnumerateMeshDofs<VectorT>(IFiniteElementMesh<VectorT> mesh) where VectorT : VectorBase<double>
+    public static void EnumerateMeshDofs<VectorT>(IFiniteElementMesh<VectorT> mesh) where VectorT : VectorBase<double, VectorT>
     {
         mesh.SortElementsByMinimumVertexNumber();
         var edgeList = EdgesListBuilding(mesh.Elements, mesh.Vertices.Length);
@@ -52,7 +52,9 @@ public static class DofsEnumerator
             }
         }
 
-        foreach(var element in mesh.Elements) //setting dofs to elements
+        mesh.DofsCount = dofNumber;
+
+        foreach (var element in mesh.Elements) //setting dofs to elements
         {
             element.SetVericesDofs(element.Geometry.VertexNumber.Select(i => vertexList[i]).ToArray());
             for(int i = 0; i < element.Geometry.EdgesCount; ++i)
@@ -78,7 +80,7 @@ public static class DofsEnumerator
             }
         }
     }
-    private static Dictionary<int, int>[] EdgesListBuilding<VectorT>(ReadOnlySpan<IFiniteElement<VectorT>> elements, int vertexCount) where VectorT : VectorBase<double>
+    private static Dictionary<int, int>[] EdgesListBuilding<VectorT>(ReadOnlySpan<IFiniteElement<VectorT>> elements, int vertexCount) where VectorT : VectorBase<double, VectorT>
     {
         Dictionary<int,int>[] edgesList = new Dictionary<int, int>[vertexCount]; //key - second vertex number; value - dofs count on edge
 

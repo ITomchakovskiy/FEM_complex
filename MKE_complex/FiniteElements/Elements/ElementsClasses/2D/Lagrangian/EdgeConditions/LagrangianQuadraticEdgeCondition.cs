@@ -25,6 +25,10 @@ public class LagrangianQuadraticEdgeCondition(string volume_material, string edg
 
     public int DofsOnVertexCount => 1;
 
+    public int[] SortedDofs => throw new NotImplementedException();
+
+    public int[] SortedDofIndices => throw new NotImplementedException();
+
     public void SetEdgeDofs(int localEdgeNumber, int dofNumber)
     {
         if (localEdgeNumber >= Geometry.EdgesCount) throw new ArgumentOutOfRangeException();
@@ -58,5 +62,10 @@ public class LagrangianQuadraticEdgeCondition(string volume_material, string edg
     {
         if (localVertexNumber >= Geometry.VertexNumber.Length) throw new ArgumentOutOfRangeException();
         DOFs[localVertexNumber] = dofNumber;
+    }
+
+    public bool IsDofsConnected(int dof1, int dof2)
+    {
+        throw new NotImplementedException();
     }
 }

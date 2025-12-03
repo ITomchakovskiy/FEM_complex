@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace MKE_complex.Vector;
 
-public class VectorBase<T> where T : INumber<T>
+public abstract class VectorBase<T, Tself> where T : INumber<T>
+                                           where Tself : VectorBase<T, Tself>
 {
     public VectorBase(params T[] components) => this.components = components;
 
@@ -15,9 +17,9 @@ public class VectorBase<T> where T : INumber<T>
 
     public T[] components { get; init; }
 
-    //protected abstract VectorBase<T> CreateVector(params T[] components) : base(components);
+    protected abstract Tself CreateVector(params T[] components);
 
-    public static VectorBase<T> operator +(VectorBase<T> A, VectorBase<T> B)
+    public static Tself operator +(VectorBase<T,Tself> A, Tself B)
     {
         if (A.components is null || B.components is null || A.components.Length != B.components.Length)
             throw new ArgumentException();
@@ -26,11 +28,10 @@ public class VectorBase<T> where T : INumber<T>
         for(int i = 0; i < n; ++i)
             new_components[i] = A.components[i] + B.components[i];
 
-        //return A.CreateVector(new_components);
-        return new VectorBase<T>(new_components);
+        return A.CreateVector(new_components);
     }
 
-    public static VectorBase<T> operator -(VectorBase<T> A, VectorBase<T> B)
+    public static Tself operator -(VectorBase<T, Tself> A, VectorBase<T, Tself> B)
     {
         if (A.components is null || B.components is null || A.components.Length != B.components.Length)
             throw new ArgumentException();
@@ -39,11 +40,11 @@ public class VectorBase<T> where T : INumber<T>
         for (int i = 0; i < n; ++i)
             new_components[i] = A.components[i] - B.components[i];
 
-        //return A.CreateVector(new_components);
-        return new VectorBase<T>(new_components);
+        return A.CreateVector(new_components);
+        //return new VectorBase<T>(new_components);
     }
 
-    public static VectorBase<T> operator *(VectorBase<T> A, T k)
+    public static Tself operator *(VectorBase<T, Tself> A, T k)
     {
         if (A.components is null)
             throw new ArgumentException();
@@ -52,11 +53,11 @@ public class VectorBase<T> where T : INumber<T>
         for (int i = 0; i < n; ++i)
             new_components[i] = A.components[i] * k;
 
-        //return A.CreateVector(new_components);
-        return new VectorBase<T>(new_components);
+        return A.CreateVector(new_components);
+        //return new VectorBase<T>(new_components);
     }
 
-    public static VectorBase<T> operator *(VectorBase<T> A, double k)
+    public static Tself operator *(VectorBase<T, Tself> A, double k)
     {
         if (A.components is null)
             throw new ArgumentException();
@@ -65,21 +66,21 @@ public class VectorBase<T> where T : INumber<T>
         for (int i = 0; i < n; ++i)
             new_components[i] = T.CreateChecked(double.CreateChecked(A.components[i]) * k);
 
-        //return A.CreateVector(new_components);
-        return new VectorBase<T>(new_components);
+        return A.CreateVector(new_components);
+        //return new VectorBase<T>(new_components);
     }
 
-    public static VectorBase<T> operator *(T k, VectorBase<T> A)
+    public static Tself operator *(T k, VectorBase<T, Tself> A)
     {
         return A * k;
     }
 
-    public static VectorBase<T> operator *(double k, VectorBase<T> A)
+    public static Tself operator *(double k, VectorBase<T, Tself> A)
     {
         return A * k;
     }
 
-    public static VectorBase<T> operator /(VectorBase<T> A, double k)
+    public static Tself operator /(VectorBase<T, Tself> A, double k)
     {
         if (A.components is null)
             throw new ArgumentException();
@@ -90,8 +91,8 @@ public class VectorBase<T> where T : INumber<T>
             new_components[i] = T.CreateChecked(double.CreateChecked(A.components[i]) / k);
 
 
-           // return A.CreateVector(new_components);
-        return new VectorBase<T>(new_components);
+        return A.CreateVector(new_components);
+        //return new VectorBase<T>(new_components);
     }
 
     public double Norm()
@@ -115,7 +116,7 @@ public class VectorBase<T> where T : INumber<T>
         }
     }
 
-    public static T Scalar(VectorBase<T> A, VectorBase<T> B)
+    public static T Scalar(Tself A, Tself B)
     {
         T result = T.Zero;
         if(A.N != B.N) throw new ArgumentException();
@@ -134,19 +135,19 @@ public class VectorBase<T> where T : INumber<T>
         return result;
     }
 
-    public VectorBase<T> Nornmalize()
+    public Tself Nornmalize()
     {
         double norm = Norm();
 
         return this / norm;
     }
-    public static VectorBase<T> PointOnLine(VectorBase<T> A, VectorBase<T> B, int n, double k, int ind) //for mesh initialization
+    public static Tself PointOnLine(Tself A, Tself B, int n, double k, int ind) //for mesh initialization
     {
         if (A.components is null || B.components is null || A.components.Length != B.components.Length)
             throw new ArgumentException();
         if (ind == 0) return A;
         if (ind == n) return B;
-        VectorBase<T> r = B - A;
+        Tself r = B - A;
         double l = r.Norm();
         if (Math.Abs(k - 1d) < 1.0E-13)
             return A + r / n * ind;

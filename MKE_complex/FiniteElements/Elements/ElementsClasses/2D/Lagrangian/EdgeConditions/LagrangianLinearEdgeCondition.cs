@@ -23,6 +23,10 @@ public class LagrangianLinearEdgeCondition(string volume_material, string edge_m
 
     public int DofsOnVertexCount => 1;
 
+    public int[] SortedDofs => throw new NotImplementedException();
+
+    public int[] SortedDofIndices => throw new NotImplementedException();
+
     public void SetVertexDofs(int localVertexNumber, int dofNumber)
     {
         DOFs[localVertexNumber] = dofNumber;
@@ -37,4 +41,9 @@ public class LagrangianLinearEdgeCondition(string volume_material, string edge_m
     public void SetEdgeDofs(int localEdgeNumber, int dofNumber) { }
 
     public void SetEdgesDofs(ReadOnlySpan<int> dofsNumbers) { }
+
+    public bool IsDofsConnected(int dof1, int dof2)
+    {
+        throw new NotImplementedException();
+    }
 }
