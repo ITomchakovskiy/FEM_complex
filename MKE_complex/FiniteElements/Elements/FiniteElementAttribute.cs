@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MKE_complex.FiniteElements.Elements;
 
-[AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = false)]
+[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
 public class FiniteElementAttribute(GeometryType geometry, BasisType basis, int order) : Attribute
 {
     public GeometryType GeometryType { get; init; } = geometry;
