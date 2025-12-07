@@ -1,4 +1,5 @@
-﻿using MKE_complex.FiniteElements.FiniteElementGeometry;
+﻿using MKE_complex.FiniteElements.Elements.LocalMatrices;
+using MKE_complex.FiniteElements.FiniteElementGeometry;
 using MKE_complex.FiniteElements.FiniteElementGeometry._2D;
 using MKE_complex.Vector;
 using System;
@@ -45,5 +46,70 @@ public class LagrangianLinearEdgeCondition(string volume_material, string edge_m
     public bool IsDofsConnected(int dof1, int dof2)
     {
         throw new NotImplementedException();
+    }
+
+    public double[][] CalcLocalMatrixForRobinCondition(Vector2D[] vertices, Func<Vector2D, double> Beta)
+    {
+        double BetaAvg = (Beta(vertices[0]) + Beta(vertices[1])) / 2.0;
+
+        double h = geometry.Length(vertices);
+
+        var localMatrix = EdgeLagrangianLinearLocalMatrices.GetMassMatrix();
+
+        for (int i = 0; i < 2; ++i)
+        {
+            for(int j = 0; j <= i; ++j)
+                localMatrix[i][j] *= BetaAvg * h;
+        }
+        return localMatrix;
+    }
+
+    public double[] CalcLocalRightPartForNeumannCondition(Vector2D[] vertices, Func<Vector2D, double> Theta)
+    {
+        double[] thetaValues = [Theta(vertices[0]), Theta(vertices[1])];
+        double h = geometry.Length(vertices);
+
+        var M = EdgeLagrangianLinearLocalMatrices.GetMassMatrix();
+
+        double[] localRightPart = new double[2];
+
+        for (int i = 0; i < 2; ++i)
+        {
+            for (int j = 0; j <= i; ++j)
+                localRightPart[i] += M[i][j] * thetaValues[j];
+            for (int j = i + 1; j < 2; ++j)
+                localRightPart[i] += M[j][i] * thetaValues[j];
+        }
+
+        for(int i = 0; i < 2; ++i)
+            localRightPart[i] *= h;
+
+        return localRightPart;
+    }
+
+    public double[] CalcLocalRightPartForRobinCondition(Vector2D[] vertices, Func<Vector2D, double> Beta, Func<Vector2D, double> UBeta)
+    {
+        double[] uBetaValues = vertices.Select(v => UBeta(v)).ToArray();
+
+        double h = geometry.Length(vertices);
+
+        double BetaAvg = vertices.Select(v => Beta(v)).Sum() / 2d;
+
+        var M = EdgeLagrangianLinearLocalMatrices.GetMassMatrix();
+
+        double[] localRightPart = new double[2];
+
+        for (int i = 0; i < 2; ++i)
+        {
+            for (int j = 0; j <= i; ++j)
+                localRightPart[i] += M[i][j] * uBetaValues[j];
+            for (int j = i + 1; j < 2; ++j)
+                localRightPart[i] += M[j][i] * uBetaValues[j];
+        }
+
+        for (int i = 0; i < 2; ++i)
+            localRightPart[i] *= h * BetaAvg;
+
+        return localRightPart;
     }
 }

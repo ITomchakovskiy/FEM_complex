@@ -24,6 +24,8 @@ public interface IFiniteElement<VectorT> where VectorT : VectorBase<double, Vect
     void SetVericesDofs(ReadOnlySpan<int> dofsNumbers);
     void SetEdgeDofs(int localEdgeNumber, int dofNumber);
     void SetEdgesDofs(ReadOnlySpan<int> dofsNumbers);
+    double[][] CalcLocalMatrix(VectorT[] vertices, Func<VectorT, double> Lambda, Func<VectorT, double> Gamma);
+    double[] CalcLocalRightPart(VectorT[] vertices, Func<VectorT, double> F);
 
     //void SetDOFsOnVertices(int );
     //void SetDOFsOnEdges(int );

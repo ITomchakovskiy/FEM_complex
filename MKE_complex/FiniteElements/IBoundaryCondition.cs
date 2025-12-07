@@ -23,4 +23,7 @@ public interface IBoundaryCondition<VectorT> where VectorT : VectorBase<double, 
     void SetVericesDofs(ReadOnlySpan<int> dofsNumbers);
     void SetEdgeDofs(int localEdgeNumber, int dofNumber);
     void SetEdgesDofs(ReadOnlySpan<int> dofsNumbers);
+    double[][] CalcLocalMatrixForRobinCondition(VectorT[] vertices, Func<VectorT, double> Beta);
+    double[] CalcLocalRightPartForNeumannCondition(VectorT[] vertices, Func<VectorT, double> Theta);
+    double[] CalcLocalRightPartForRobinCondition(VectorT[] vertices, Func<VectorT, double> Beta, Func<VectorT, double> UBeta);
 }

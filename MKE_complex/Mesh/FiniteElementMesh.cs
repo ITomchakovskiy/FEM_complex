@@ -115,6 +115,13 @@ public class FiniteElementMesh<VectorT>(IReadOnlyList<VectorT> vertices, IReadOn
                     y.AddRange(info.y);
                     dofs.AddRange(info.dofs);
                 }
+                else if(element is TriangleLagrangianLinearFiniteElement line && vertices is List<Vector2D> ver)
+                {
+                    var info = line.ReturnDofs(CollectionsMarshal.AsSpan(ver));
+                    x.AddRange(info.x);
+                    y.AddRange(info.y);
+                    dofs.AddRange(info.dofs);
+                }
             }
 
             for(int i = 0; i < x.Count; ++i)

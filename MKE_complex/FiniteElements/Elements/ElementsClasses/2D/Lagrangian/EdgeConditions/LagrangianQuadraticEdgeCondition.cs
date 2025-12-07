@@ -68,4 +68,19 @@ public class LagrangianQuadraticEdgeCondition(string volume_material, string edg
     {
         throw new NotImplementedException();
     }
+
+    public double[][] CalcLocalMatrixForRobinCondition(Vector2D[] vertices, Func<Vector2D, double> Beta)
+    {
+        throw new NotImplementedException();
+    }
+
+    public double[] CalcLocalRightPartForNeumannCondition(Vector2D[] vertices, Func<Vector2D, double> Theta)
+    {
+        throw new NotImplementedException();
+    }
+
+    public double[] CalcLocalRightPartForRobinCondition(Vector2D[] vertices, Func<Vector2D, double> Beta, Func<Vector2D, double> UBeta)
+    {
+        throw new NotImplementedException();
+    }
 }

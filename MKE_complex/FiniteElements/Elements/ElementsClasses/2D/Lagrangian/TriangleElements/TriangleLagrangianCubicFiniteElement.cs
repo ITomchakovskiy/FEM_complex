@@ -130,4 +130,19 @@ public class TriangleLagrangianCubicFiniteElement(string material, Triangle geom
         }
         else return false;
     }
+
+    public double[,] CalcLocalMatrix(Vector2D[] vertices, Func<Vector2D, double> Lambda, Func<Vector2D, double> Gamma, Func<Vector2D, double> F)
+    {
+        throw new NotImplementedException();
+    }
+
+    public double[][] CalcLocalMatrix(Vector2D[] vertices, Func<Vector2D, double> Lambda, Func<Vector2D, double> Gamma)
+    {
+        throw new NotImplementedException();
+    }
+
+    public double[] CalcLocalRightPart(Vector2D[] vertices, Func<Vector2D, double> F)
+    {
+        throw new NotImplementedException();
+    }
 }
