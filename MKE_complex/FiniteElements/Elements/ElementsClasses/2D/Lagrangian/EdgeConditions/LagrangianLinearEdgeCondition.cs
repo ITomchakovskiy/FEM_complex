@@ -24,9 +24,25 @@ public class LagrangianLinearEdgeCondition(string volume_material, string edge_m
 
     public int DofsOnVertexCount => 1;
 
-    public int[] SortedDofs => throw new NotImplementedException();
+    private int[]? sortedDofIndices;
 
-    public int[] SortedDofIndices => throw new NotImplementedException();
+    public int[] SortedDofIndices
+    {
+        get
+        {
+            if (sortedDofIndices != null) return sortedDofIndices;
+            var dofs = new int[DOFs.Length];
+            Array.Copy(DOFs, dofs, DOFs.Length);
+            var indices = new int[DOFs.Length];
+            for (int i = 0; i < DOFs.Length; ++i)
+                indices[i] = i;
+            Array.Sort(dofs, indices);
+            sortedDofIndices = indices;
+            return indices;
+        }
+    }
+
+    public int[] SortedDofs => SortedDofIndices.Select(i => DOFs[i]).ToArray();
 
     public void SetVertexDofs(int localVertexNumber, int dofNumber)
     {
@@ -111,5 +127,10 @@ public class LagrangianLinearEdgeCondition(string volume_material, string edge_m
             localRightPart[i] *= h * BetaAvg;
 
         return localRightPart;
+    }
+
+    public double[] CalcLocalRightPartForDirichletCondition(Vector2D[] vertices, Func<Vector2D, double> Ug)
+    {
+        return vertices.Select(i => Ug(i)).ToArray();
     }
 }

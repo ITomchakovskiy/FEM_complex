@@ -83,4 +83,9 @@ public class LagrangianQuadraticEdgeCondition(string volume_material, string edg
     {
         throw new NotImplementedException();
     }
+
+    public double[] CalcLocalRightPartForDirichletCondition(Vector2D[] vertices, Func<Vector2D, double> Ug)
+    {
+        throw new NotImplementedException();
+    }
 }

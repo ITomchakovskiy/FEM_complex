@@ -98,6 +98,8 @@ public class TriangleLagrangianLinearFiniteElement(string material, Triangle geo
         var Alphas = Alpha.CalcAlphas(vertices);
 
         double[][] localMatrix = new double[3][];
+        for (int i = 0; i < 3; ++i)
+            localMatrix[i] = new double[i + 1];
 
         double[][] localStiffnessMatrix = TriangleLagrangianLinearLocalMatrices.GetStiffnessMatrix(Alphas);
 

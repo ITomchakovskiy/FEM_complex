@@ -34,4 +34,10 @@
     <PackageReference Include="Flee" Version="2.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="input\LOS.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
