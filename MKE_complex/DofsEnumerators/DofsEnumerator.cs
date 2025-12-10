@@ -15,7 +15,7 @@ public static class DofsEnumerator
 {
     public static void EnumerateMeshDofs<VectorT>(IFiniteElementMesh<VectorT> mesh) where VectorT : VectorBase<double, VectorT>
     {
-        //mesh.SortElementsByMinimumVertexNumber();
+        mesh.SortElementsByMinimumVertexNumber();
         var edgeList = EdgesListBuilding(mesh.Elements, mesh.Vertices.Length);
         int[] vertexList = new int[mesh.Vertices.Length];
         

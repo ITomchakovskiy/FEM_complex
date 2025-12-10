@@ -1,4 +1,5 @@
-﻿using MKE_complex.FiniteElements.FiniteElementGeometry;
+﻿using MKE_complex.FiniteElements.Elements.LocalMatrices;
+using MKE_complex.FiniteElements.FiniteElementGeometry;
 using MKE_complex.FiniteElements.FiniteElementGeometry._2D;
 using MKE_complex.Vector;
 using System;
@@ -25,23 +26,62 @@ public class LagrangianQuadraticEdgeCondition(string volume_material, string edg
 
     public int DofsOnVertexCount => 1;
 
-    public int[] SortedDofs => throw new NotImplementedException();
+    private int[]? sortedDofIndices;
 
-    public int[] SortedDofIndices => throw new NotImplementedException();
+    public int[] SortedDofIndices
+    {
+        get
+        {
+            if (sortedDofIndices != null) return sortedDofIndices;
+            var dofs = new int[DOFs.Length];
+            Array.Copy(DOFs, dofs, DOFs.Length);
+            var indices = new int[DOFs.Length];
+            for (int i = 0; i < DOFs.Length; ++i)
+                indices[i] = i;
+            Array.Sort(dofs, indices);
+            sortedDofIndices = indices;
+            return indices;
+        }
+    }
+
+    public int[] SortedDofs => SortedDofIndices.Select(i => DOFs[i]).ToArray();
+
+    public (List<double> x, List<double> y, List<int> dofs) ReturnDofs(ReadOnlySpan<Vector2D> vertices) //функция для вывода в файл дофов для отображения(только для тестов в лабе)
+    {
+        List<double> x = new();
+        List<double> y = new();
+
+        for (int i = 0; i < Geometry.VertexNumber.Length; ++i)
+        {
+            x.Add(vertices[Geometry.VertexNumber[i]].X);
+            y.Add(vertices[Geometry.VertexNumber[i]].Y);
+        }
+
+        for (int i = 0; i < Geometry.EdgesCount; ++i)
+        {
+            Vector2D A = vertices[Geometry.VertexNumber[Geometry.LocalEdge(i).Item1]];
+            Vector2D B = vertices[Geometry.VertexNumber[Geometry.LocalEdge(i).Item2]];
+            for (int j = 0; j < DofsOnEdgeCount; ++j)
+            {
+                Vector2D newVertex = (Vector2D)((A * (DofsOnEdgeCount - j) + B * (1 + j)) / 2d);
+                int dofnum = DOFs[2 + j];
+                x.Add(newVertex.X);
+                y.Add(newVertex.Y);
+            }
+        }
+
+        return (x, y, DOFs.ToList());
+    }
 
     public void SetEdgeDofs(int localEdgeNumber, int dofNumber)
     {
         if (localEdgeNumber >= Geometry.EdgesCount) throw new ArgumentOutOfRangeException();
-        var edge = Geometry.LocalEdge(localEdgeNumber);
-        var edge_global = (Geometry.VertexNumber[edge.Item1], Geometry.VertexNumber[edge.Item1]);
-        int increment = 1;
-        if (edge_global.Item1 > edge_global.Item2)
+        switch(localEdgeNumber)
         {
-            ++dofNumber;
-            increment = -1;
+            case 0:
+                DOFs[1] = dofNumber;
+                break;
         }
-        for (int i = 0; i < DofsOnEdgeCount; ++i)
-            DOFs[Geometry.VertexNumber.Length + localEdgeNumber + i] = dofNumber + increment * i;
     }
 
     public void SetEdgesDofs(ReadOnlySpan<int> dofsNumbers)
@@ -61,7 +101,15 @@ public class LagrangianQuadraticEdgeCondition(string volume_material, string edg
     public void SetVertexDofs(int localVertexNumber, int dofNumber)
     {
         if (localVertexNumber >= Geometry.VertexNumber.Length) throw new ArgumentOutOfRangeException();
-        DOFs[localVertexNumber] = dofNumber;
+        switch(localVertexNumber)
+        {
+            case 0:
+                DOFs[0] = dofNumber;
+                break;
+            case 1:
+                DOFs[2] = dofNumber;
+                break;
+        }
     }
 
     public bool IsDofsConnected(int dof1, int dof2)
@@ -71,21 +119,75 @@ public class LagrangianQuadraticEdgeCondition(string volume_material, string edg
 
     public double[][] CalcLocalMatrixForRobinCondition(Vector2D[] vertices, Func<Vector2D, double> Beta)
     {
-        throw new NotImplementedException();
+        double BetaAvg = (Beta(vertices[0]) + Beta(vertices[1])) / 2.0;
+
+        double h = geometry.Length(vertices);
+
+        var localMatrix = EdgeLagrangianQuadraticLocalMatrices.GetMassMatrix();
+
+        for (int i = 0; i < 3; ++i)
+        {
+            for (int j = 0; j <= i; ++j)
+                localMatrix[i][j] *= BetaAvg * h;
+        }
+        return localMatrix;
     }
 
     public double[] CalcLocalRightPartForNeumannCondition(Vector2D[] vertices, Func<Vector2D, double> Theta)
     {
-        throw new NotImplementedException();
+        double[] thetaValues = [Theta(vertices[0]), Theta((vertices[0] + vertices[1])/2d), Theta(vertices[1])];
+        double h = geometry.Length(vertices);
+
+        var M = EdgeLagrangianQuadraticLocalMatrices.GetMassMatrix();
+
+        double[] localRightPart = new double[3];
+
+        for (int i = 0; i < localRightPart.Length; ++i)
+        {
+            for (int j = 0; j <= i; ++j)
+                localRightPart[i] += M[i][j] * thetaValues[j];
+            for (int j = i + 1; j < localRightPart.Length; ++j)
+                localRightPart[i] += M[j][i] * thetaValues[j];
+        }
+
+        for (int i = 0; i < localRightPart.Length; ++i)
+            localRightPart[i] *= h;
+
+        return localRightPart;
     }
 
     public double[] CalcLocalRightPartForRobinCondition(Vector2D[] vertices, Func<Vector2D, double> Beta, Func<Vector2D, double> UBeta)
     {
-        throw new NotImplementedException();
+        Vector2D[] all_vertices = [vertices[0], (vertices[0] + vertices[1]) / 2d, vertices[1]];
+        double[] uBetaValues = all_vertices.Select(v => UBeta(v)).ToArray();
+
+        double h = geometry.Length(vertices);
+
+        double BetaAvg = vertices.Select(v => Beta(v)).Sum() / 2d;
+
+        var M = EdgeLagrangianQuadraticLocalMatrices.GetMassMatrix();
+
+        double[] localRightPart = new double[3];
+
+        for (int i = 0; i < localRightPart.Length; ++i)
+        {
+            for (int j = 0; j <= i; ++j)
+                localRightPart[i] += M[i][j] * uBetaValues[j];
+            for (int j = i + 1; j < localRightPart.Length; ++j)
+                localRightPart[i] += M[j][i] * uBetaValues[j];
+        }
+
+        for (int i = 0; i < localRightPart.Length; ++i)
+            localRightPart[i] *= h * BetaAvg;
+
+        return localRightPart;
     }
 
     public double[] CalcLocalRightPartForDirichletCondition(Vector2D[] vertices, Func<Vector2D, double> Ug)
     {
-        throw new NotImplementedException();
+        Vector2D midPoint = (vertices[0] + vertices[1]) / 2d;
+        return [Ug(vertices[0]), Ug(midPoint), Ug(vertices[1])];
     }
+
+
 }

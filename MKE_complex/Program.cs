@@ -51,7 +51,7 @@ FiniteElementsCreator.LoadFiniteElementTypes(assembly);
 ////Console.WriteLine($"Choose basis order");
 
 ////int order = 3; //int.Parse(Console.ReadLine()!);
-//int order = 1;
+//int order = 2;
 
 //if (order < 1) throw new Exception();
 
@@ -61,7 +61,7 @@ FiniteElementsCreator.LoadFiniteElementTypes(assembly);
 
 //PseudoRegularMeshBuilder builder = new PseudoRegularMeshBuilder();
 
-//IFiniteElementMesh<Vector2D> mesh = builder.BuildMesh<Vector2D>(dimension,mesh_type,basis,order,fileNames); //костыль
+//IFiniteElementMesh<Vector2D> mesh = builder.BuildMesh<Vector2D>(dimension, mesh_type, basis, order, fileNames); //костыль
 
 //DofsEnumerator.EnumerateMeshDofs(mesh);
 
@@ -73,7 +73,7 @@ FiniteElementsCreator.LoadFiniteElementTypes(assembly);
 //Console.WriteLine("Done");
 
 ////
-//Console.WriteLine(new SpecificMaterials().Iron.Lambda(new Vector2D(0d,0d)));
+//Console.WriteLine(new SpecificMaterials().Iron.Lambda(new Vector2D(0d, 0d)));
 //Console.WriteLine(new SpecificMaterials().Iron.Gamma(new Vector2D(0d, 0d)));
 //Console.WriteLine(new SpecificMaterials().Iron.F(new Vector2D(0d, 0d)));
 //Console.WriteLine(new SpecificMaterials().Iron.F(new Vector2D(1d, 0d)));

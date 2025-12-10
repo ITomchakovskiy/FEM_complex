@@ -51,40 +51,13 @@ public static class TriangleLinearLagrangianBases
 
 public static class TriangleQuadraticLagrangianBases
 {
-    public static Func<Vector2D, double[,], double>[] Psi = 
+    public static Func<double[], double>[] Psi = 
     [
-        (Vector2D p,  double [,] alpha) =>
-        {
-            double L1 = TriangleLinearLagrangianBases.Psi[0](p, alpha);
-            return L1 * (2d * L1 - 1d);
-        },
-        (Vector2D p,  double [,] alpha) =>
-        {
-            double L2 = TriangleLinearLagrangianBases.Psi[1](p, alpha);
-            return L2 * (2d * L2 - 1d);
-        },
-        (Vector2D p,  double [,] alpha) =>
-        {
-            double L3 = TriangleLinearLagrangianBases.Psi[2](p, alpha);
-            return L3 * (2d * L3 - 1d);
-        },
-        (Vector2D p,  double [,] alpha) =>
-        {
-            double L1 = TriangleLinearLagrangianBases.Psi[0](p, alpha);
-            double L2 = TriangleLinearLagrangianBases.Psi[1](p, alpha);
-            return 4d * L1 * L2;
-        },
-        (Vector2D p,  double [,] alpha) =>
-        {
-            double L2 = TriangleLinearLagrangianBases.Psi[1](p, alpha);
-            double L3 = TriangleLinearLagrangianBases.Psi[2](p, alpha);
-            return 4d * L2 * L3;
-        },
-        (Vector2D p,  double [,] alpha) =>
-        {
-            double L1 = TriangleLinearLagrangianBases.Psi[0](p, alpha);
-            double L3 = TriangleLinearLagrangianBases.Psi[2](p, alpha);
-            return 4d * L1 * L3;
-        },
+        (double[] L) => L[0] * (2d * L[0] - 1d),
+        (double[] L) => L[1] * (2d * L[1] - 1d),
+        (double[] L) => L[2] * (2d * L[2] - 1d),
+        (double[] L) => 4d * L[0] * L[1],
+        (double[] L) => 4d * L[1] * L[2],
+        (double[] L) => 4d * L[0] * L[2],
     ];
 }

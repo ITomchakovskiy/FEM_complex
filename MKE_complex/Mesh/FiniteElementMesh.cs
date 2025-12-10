@@ -122,6 +122,13 @@ public class FiniteElementMesh<VectorT>(IReadOnlyList<VectorT> vertices, IReadOn
                     y.AddRange(info.y);
                     dofs.AddRange(info.dofs);
                 }
+                else if(element is TriangleLagrangianQuadraticFiniteElement quad && vertices is List<Vector2D> ver22)
+                {
+                    var info = quad.ReturnDofs(CollectionsMarshal.AsSpan(ver22));
+                    x.AddRange(info.x);
+                    y.AddRange(info.y);
+                    dofs.AddRange(info.dofs);
+                }
             }
 
             for(int i = 0; i < x.Count; ++i)
@@ -147,6 +154,13 @@ public class FiniteElementMesh<VectorT>(IReadOnlyList<VectorT> vertices, IReadOn
                 if (edge is LagrangianCubicEdgeCondition cube && vertices is List<Vector2D> ver2)
                 {
                     var info = cube.ReturnDofs(CollectionsMarshal.AsSpan(ver2));
+                    x.AddRange(info.x);
+                    y.AddRange(info.y);
+                    dofs.AddRange(info.dofs);
+                }
+                else if(edge is LagrangianQuadraticEdgeCondition quad && vertices is List<Vector2D> ver22)
+                {
+                    var info = quad.ReturnDofs(CollectionsMarshal.AsSpan(ver22));
                     x.AddRange(info.x);
                     y.AddRange(info.y);
                     dofs.AddRange(info.dofs);

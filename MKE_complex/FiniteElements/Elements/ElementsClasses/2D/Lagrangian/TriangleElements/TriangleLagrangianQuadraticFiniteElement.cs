@@ -1,4 +1,6 @@
-﻿using MKE_complex.FiniteElements.FiniteElementGeometry;
+﻿using MKE_complex.FiniteElements.Elements.BasisFunctions;
+using MKE_complex.FiniteElements.Elements.LocalMatrices;
+using MKE_complex.FiniteElements.FiniteElementGeometry;
 using MKE_complex.FiniteElements.FiniteElementGeometry._2D;
 using MKE_complex.Vector;
 using System;
@@ -26,28 +28,80 @@ public class TriangleLagrangianQuadraticFiniteElement(string material, Triangle 
 
     public int DofsOnElementCount => 0;
 
-    public int[] SortedDofs => throw new NotImplementedException();
+    private int[]? sortedDofIndices;
 
-    public int[] SortedDofIndices => throw new NotImplementedException();
-
-    public double[,] CalcLocalMatrix(Vector2D[] vertices, Func<Vector2D, double> Lambda, Func<Vector2D, double> Gamma, Func<Vector2D, double> F)
+    public int[] SortedDofIndices
     {
-        throw new NotImplementedException();
+        get
+        {
+            if (sortedDofIndices != null) return sortedDofIndices;
+            var dofs = new int[DOFs.Length];
+            Array.Copy(DOFs, dofs, DOFs.Length);
+            var indices = new int[DOFs.Length];
+            for (int i = 0; i < DOFs.Length; ++i)
+                indices[i] = i;
+            Array.Sort(dofs, indices);
+            sortedDofIndices = indices;
+            return indices;
+        }
     }
+
+    public int[] SortedDofs => SortedDofIndices.Select(i => DOFs[i]).ToArray();
 
     public double[][] CalcLocalMatrix(Vector2D[] vertices, Func<Vector2D, double> Lambda, Func<Vector2D, double> Gamma)
     {
-        throw new NotImplementedException();
+        var detD = Alpha.CalcDetD(vertices);
+
+        var Alphas = Alpha.CalcAlphas(vertices);
+
+        double[][] localMatrix = new double[6][];
+        for (int i = 0; i < localMatrix.GetLength(0); ++i)
+            localMatrix[i] = new double[i + 1];
+
+        double[][] localStiffnessMatrix = TriangleLagrangianQuadraticLocalMatrices.GetStiffnessMatrix(Alphas);
+
+        double[][] localMassMatrix = TriangleLagrangianQuadraticLocalMatrices.GetMassMatrix();
+
+        double avgLambda = (Lambda(vertices[0]) +
+                           Lambda(vertices[1]) +
+                           Lambda(vertices[2])) / 3d;
+
+        double avgGamma = (Gamma(vertices[0]) +
+                           Gamma(vertices[1]) +
+                           Gamma(vertices[2])) / 3d;
+        for (int i = 0; i < 6; ++i)
+        {
+            for (int j = 0; j <= i; ++j)
+                localMatrix[i][j] = Math.Abs(detD) * (avgLambda * localStiffnessMatrix[i][j] + avgGamma * localMassMatrix[i][j]);
+        }
+
+        return localMatrix;
     }
 
     public double[] CalcLocalRightPart(Vector2D[] vertices, Func<Vector2D, double> F)
     {
-        throw new NotImplementedException();
+        double[][] localMassMatrix = TriangleLagrangianQuadraticLocalMatrices.GetMassMatrix();
+        Vector2D[] all_vertices = [vertices[0], vertices[1], vertices[2], (vertices[0] + vertices[1])/2d, (vertices[1] + vertices[2]) / 2d, (vertices[2] + vertices[0]) / 2d];
+        double[] f_values = all_vertices.Select(v => F(v)).ToArray();
+        double[] localRightPart = new double[6];
+        for (int i = 0; i < localRightPart.Length; ++i)
+        {
+            for (int j = 0; j <= i; ++j)
+                localRightPart[i] += localMassMatrix[i][j] * f_values[j];
+            for (int j = i + 1; j < localRightPart.Length; ++j)
+                localRightPart[i] += localMassMatrix[j][i] * f_values[j];
+        }
+
+        return localRightPart;
     }
 
     public bool IsDofsConnected(int dof1, int dof2)
     {
-        throw new NotImplementedException();
+        if (DOFs.Contains(dof1) && DOFs.Contains(dof2))
+        {
+            return true;
+        }
+        else return false;
     }
 
     public void SetEdgeDofs(int localEdgeNumber, int dofNumber)
@@ -76,5 +130,32 @@ public class TriangleLagrangianQuadraticFiniteElement(string material, Triangle 
     {
         if(localVertexNumber >= Geometry.VertexNumber.Length) throw new ArgumentOutOfRangeException();
         DOFs[localVertexNumber] = dofNumber;
+    }
+
+    public (List<double> x, List<double> y, List<int> dofs) ReturnDofs(ReadOnlySpan<Vector2D> vertices) //функция для вывода в файл дофов для отображения(только для тестов в лабе)
+    {
+        List<double> x = new();
+        List<double> y = new();
+
+        for (int i = 0; i < Geometry.VertexNumber.Length; ++i)
+        {
+            x.Add(vertices[Geometry.VertexNumber[i]].X);
+            y.Add(vertices[Geometry.VertexNumber[i]].Y);
+        }
+
+        for (int i = 0; i < Geometry.EdgesCount; ++i)
+        {
+            Vector2D A = vertices[Geometry.VertexNumber[Geometry.LocalEdge(i).Item1]];
+            Vector2D B = vertices[Geometry.VertexNumber[Geometry.LocalEdge(i).Item2]];
+            for (int j = 0; j < DofsOnEdgeCount; ++j)
+            {
+                Vector2D newVertex = (Vector2D)((A * (DofsOnEdgeCount - j) + B * (1 + j)) / 2d);
+                int dofnum = DOFs[3 + i];
+                x.Add(newVertex.X);
+                y.Add(newVertex.Y);
+            }
+        }
+
+        return (x, y, DOFs.ToList());
     }
 }

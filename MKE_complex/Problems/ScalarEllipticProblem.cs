@@ -58,7 +58,7 @@ public class ScalarEllipticProblem<VectorT> where VectorT : VectorBase<double, V
         //Console.WriteLine($"Choose basis order");
 
         //int order = 3; //int.Parse(Console.ReadLine()!);
-        int order = 1;
+        int order = 2;
 
         if (order < 1) throw new Exception();
 
@@ -72,14 +72,14 @@ public class ScalarEllipticProblem<VectorT> where VectorT : VectorBase<double, V
 
         Vector2D[] Vertices_ = [new(2d, 0d), new(2d, 1d), new(3d, 1d), new(2d, 4d), new(7d, 4d)];
 
-        IFiniteElement<Vector2D>[] Elements_ = [new TriangleLagrangianLinearFiniteElement("1", new([0,1,2])),
-                                                             new TriangleLagrangianLinearFiniteElement("2", new([4,2,3])),
-                                                             new TriangleLagrangianLinearFiniteElement("2", new([3,2,1]))];
-        IBoundaryCondition<Vector2D>[] Edges_ = [new LagrangianLinearEdgeCondition("0", "11", new([0, 2])),
-                                                  new  LagrangianLinearEdgeCondition("0", "21", new([4, 3])),
-                                                  new LagrangianLinearEdgeCondition("0", "22", new([0, 1])),
-                                                  new LagrangianLinearEdgeCondition("0", "22", new([3, 1])),
-                                                  new LagrangianLinearEdgeCondition("0", "31", new([4, 2]))];
+        IFiniteElement<Vector2D>[] Elements_ = [new TriangleLagrangianQuadraticFiniteElement("1", new([0,1,2])),
+                                                             new TriangleLagrangianQuadraticFiniteElement("2", new([4,2,3])),
+                                                             new TriangleLagrangianQuadraticFiniteElement("2", new([3,2,1]))];
+        IBoundaryCondition<Vector2D>[] Edges_ = [new LagrangianQuadraticEdgeCondition("0", "11", new([0, 2])),
+                                                  new  LagrangianQuadraticEdgeCondition("0", "21", new([4, 3])),
+                                                  new LagrangianQuadraticEdgeCondition("0", "22", new([0, 1])),
+                                                  new LagrangianQuadraticEdgeCondition("0", "22", new([3, 1])),
+                                                  new LagrangianQuadraticEdgeCondition("0", "31", new([4, 2]))];
         Mesh = (IFiniteElementMesh<VectorT>)(object)new FiniteElementMesh<Vector2D>(Vertices_.ToList(), Elements_.ToList(), Edges_.ToList());
 
         DofsEnumerator.EnumerateMeshDofs(Mesh);
@@ -158,6 +158,8 @@ public class ScalarEllipticProblem<VectorT> where VectorT : VectorBase<double, V
         var solver = new LOSSolver("LOS.txt");
 
         Solution = solver.Solve(Preconditioning.None, Matrix, Pr).components;
+
+        Mesh.Save
 
         Console.WriteLine("Done");
 
