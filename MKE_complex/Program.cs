@@ -81,3 +81,28 @@ FiniteElementsCreator.LoadFiniteElementTypes(assembly);
 
 var problem = new ScalarEllipticProblem<Vector2D>();
 problem.Solve();
+Vector2D[] vertices = [];
+
+double x_min = 0.5;
+double x_max = 7.6;
+double y_min = 0.5;
+double y_max = 3.6;
+
+//double x_min = 0.5;
+//double x_max = 3.6;
+//double y_min = 5.5;
+//double y_max = 9.6;
+
+double dx = 0.5;
+double dy = 0.5;
+
+for(double x = x_min; x <= x_max; x += dx)
+    for(double y = y_min; y <= y_max; y += dy)
+        vertices = vertices.Append(new Vector2D(x, y)).ToArray();
+
+Func<Vector2D, double> u = (Vector2D v) => 5d * v.X + 10d * v.Y + 10;
+
+//Func<Vector2D, double> u = (Vector2D v) => v.X + 6d * v.Y - 2d;
+
+double discrepancy = problem.EvaluateDiscrepancy(vertices, u);
+Console.WriteLine($"Discrepancy: {discrepancy:E3}");

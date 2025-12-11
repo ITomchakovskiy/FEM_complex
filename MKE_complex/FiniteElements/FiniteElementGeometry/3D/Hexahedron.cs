@@ -49,4 +49,9 @@ public record Hexahedron(int[] VertexNumber) : IFiniteElementGeometry<Vector3D>
 
         return (Vector3D)Vector3D.PointOnLine(MAB, MCD, n_y, k_y, ind_y);
     }
+
+    public bool IsPointInElement(Vector3D point, Vector3D[] vertices)
+    {
+        throw new NotImplementedException();
+    }
 }

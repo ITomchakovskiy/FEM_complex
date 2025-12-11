@@ -145,4 +145,9 @@ public class TriangleLagrangianCubicFiniteElement(string material, Triangle geom
     {
         throw new NotImplementedException();
     }
+
+    public double CalcResultAtPoint(Vector2D[] vertices, ReadOnlySpan<double> localSolution, Vector2D point)
+    {
+        throw new NotImplementedException();
+    }
 }

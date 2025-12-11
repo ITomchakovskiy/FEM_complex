@@ -13,6 +13,11 @@ public record Tetrahedron(int[] VertexNumber) : IFiniteElementGeometry<Vector3D>
 
     public int EdgesCount => throw new NotImplementedException();
 
+    public bool IsPointInElement(Vector3D point, Vector3D[] vertices)
+    {
+        throw new NotImplementedException();
+    }
+
     public (int, int) LocalEdge(int edgeNumber)
     {
         switch(edgeNumber)

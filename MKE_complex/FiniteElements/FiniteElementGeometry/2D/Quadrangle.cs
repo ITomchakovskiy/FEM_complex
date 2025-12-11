@@ -43,4 +43,9 @@ public record Quadrangle(int[] VertexNumber) : IFiniteElementGeometry<Vector2D>
 
         return (Vector2D)Vector2D.PointOnLine(A, B, n_y, k_y, ind_y);
     }
+
+    public bool IsPointInElement(Vector2D point, Vector2D[] vertices)
+    {
+        throw new NotImplementedException();
+    }
 }

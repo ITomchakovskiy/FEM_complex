@@ -84,12 +84,13 @@ public class TriangleLagrangianQuadraticFiniteElement(string material, Triangle 
         Vector2D[] all_vertices = [vertices[0], vertices[1], vertices[2], (vertices[0] + vertices[1])/2d, (vertices[1] + vertices[2]) / 2d, (vertices[2] + vertices[0]) / 2d];
         double[] f_values = all_vertices.Select(v => F(v)).ToArray();
         double[] localRightPart = new double[6];
+        double detD = Math.Abs(Alpha.CalcDetD(vertices));
         for (int i = 0; i < localRightPart.Length; ++i)
         {
             for (int j = 0; j <= i; ++j)
-                localRightPart[i] += localMassMatrix[i][j] * f_values[j];
+                localRightPart[i] += detD *localMassMatrix[i][j] * f_values[j];
             for (int j = i + 1; j < localRightPart.Length; ++j)
-                localRightPart[i] += localMassMatrix[j][i] * f_values[j];
+                localRightPart[i] += detD * localMassMatrix[j][i] * f_values[j];
         }
 
         return localRightPart;
@@ -157,5 +158,20 @@ public class TriangleLagrangianQuadraticFiniteElement(string material, Triangle 
         }
 
         return (x, y, DOFs.ToList());
+    }
+
+    public double CalcResultAtPoint(Vector2D[] vertices, ReadOnlySpan<double> localSolution, Vector2D point)
+    {
+        var alphas = Alpha.CalcAlphas(vertices);
+
+        double[] L = TriangleLinearLagrangianBases.Psi.Select(psi => psi(point,alphas) ).ToArray();
+
+        double[] BasesValues = TriangleQuadraticLagrangianBases.Psi.Select(psi => psi(L)).ToArray();
+
+        double result = 0d;
+
+        for (int i = 0; i < BasesValues.Length; ++i)
+            result += BasesValues[i] * localSolution[i];
+        return result;
     }
 }

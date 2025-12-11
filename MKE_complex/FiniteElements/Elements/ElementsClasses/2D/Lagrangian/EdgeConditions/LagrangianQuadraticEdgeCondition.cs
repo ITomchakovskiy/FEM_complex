@@ -51,24 +51,29 @@ public class LagrangianQuadraticEdgeCondition(string volume_material, string edg
         List<double> x = new();
         List<double> y = new();
 
-        for (int i = 0; i < Geometry.VertexNumber.Length; ++i)
-        {
-            x.Add(vertices[Geometry.VertexNumber[i]].X);
-            y.Add(vertices[Geometry.VertexNumber[i]].Y);
-        }
+        x.Add(vertices[Geometry.VertexNumber[0]].X);
+        y.Add(vertices[Geometry.VertexNumber[0]].Y);
 
-        for (int i = 0; i < Geometry.EdgesCount; ++i)
-        {
-            Vector2D A = vertices[Geometry.VertexNumber[Geometry.LocalEdge(i).Item1]];
-            Vector2D B = vertices[Geometry.VertexNumber[Geometry.LocalEdge(i).Item2]];
-            for (int j = 0; j < DofsOnEdgeCount; ++j)
-            {
-                Vector2D newVertex = (Vector2D)((A * (DofsOnEdgeCount - j) + B * (1 + j)) / 2d);
-                int dofnum = DOFs[2 + j];
-                x.Add(newVertex.X);
-                y.Add(newVertex.Y);
-            }
-        }
+        Vector2D newVertex = (vertices[Geometry.VertexNumber[0]] + vertices[Geometry.VertexNumber[1]]) / 2d;
+
+        x.Add(newVertex.X);
+        y.Add(newVertex.Y);
+
+        x.Add(vertices[Geometry.VertexNumber[1]].X);
+        y.Add(vertices[Geometry.VertexNumber[1]].Y);
+
+        //for (int i = 0; i < Geometry.EdgesCount; ++i)
+        //{
+        //    Vector2D A = vertices[Geometry.VertexNumber[Geometry.LocalEdge(i).Item1]];
+        //    Vector2D B = vertices[Geometry.VertexNumber[Geometry.LocalEdge(i).Item2]];
+        //    for (int j = 0; j < DofsOnEdgeCount; ++j)
+        //    {
+        //        Vector2D newVertex = (Vector2D)((A * (DofsOnEdgeCount - j) + B * (1 + j)) / 2d);
+        //        int dofnum = DOFs[2 + j];
+        //        x.Add(newVertex.X);
+        //        y.Add(newVertex.Y);
+        //    }
+        //}
 
         return (x, y, DOFs.ToList());
     }

@@ -28,4 +28,9 @@ public record Line(int[] VertexNumber) : IFiniteElementGeometry<Vector2D>
                                                          (vertices[1].X - vertices[0].X) +
                                                          (vertices[1].Y - vertices[0].Y) *
                                                          (vertices[1].Y - vertices[0].Y));
+
+    public bool IsPointInElement(Vector2D point, Vector2D[] vertices)
+    {
+        throw new NotImplementedException();
+    }
 }

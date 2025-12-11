@@ -15,4 +15,6 @@ public interface IFiniteElementGeometry<VectorT> where VectorT : VectorBase<doub
     int EdgesCount { get; }
 
     (int, int) LocalEdge(int edgeNumber);
+
+    bool IsPointInElement(VectorT point, VectorT[] vertices);
 }

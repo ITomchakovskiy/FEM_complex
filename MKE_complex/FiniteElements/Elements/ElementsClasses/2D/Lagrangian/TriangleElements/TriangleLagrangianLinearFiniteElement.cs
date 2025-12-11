@@ -124,16 +124,22 @@ public class TriangleLagrangianLinearFiniteElement(string material, Triangle geo
     public double[] CalcLocalRightPart(Vector2D[] vertices, Func<Vector2D, double> F)
     {
         double[][] localMassMatrix = TriangleLagrangianLinearLocalMatrices.GetMassMatrix();
+        double detd = Math.Abs(Alpha.CalcDetD(vertices));
         double[] f_values = vertices.Select(v => F(v)).ToArray();
         double[] localRightPart = new double[3];
         for(int i = 0; i < 3; ++i)
         {
             for (int j = 0; j <= i; ++j)
-                localRightPart[i] += localMassMatrix[i][j] * f_values[j];
+                localRightPart[i] += detd * localMassMatrix[i][j] * f_values[j];
             for(int j = i + 1; j < 3; ++j)
-                localRightPart[i] += localMassMatrix[j][i] * f_values[j];
+                localRightPart[i] += detd * localMassMatrix[j][i] * f_values[j];
         }
 
         return localRightPart;
+    }
+
+    public double CalcResultAtPoint(Vector2D[] vertices, ReadOnlySpan<double> localSolution, Vector2D point)
+    {
+        throw new NotImplementedException();
     }
 }
