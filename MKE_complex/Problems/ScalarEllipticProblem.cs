@@ -168,7 +168,7 @@ public class ScalarEllipticProblem<VectorT> where VectorT : VectorBase<double, V
             //{"1", new("1", "1","5","25*x + 50*y + 50", CoordinateSystem.Cartesian) },
             //{"2", new("2","1","1","5*x + 10*y + 10",CoordinateSystem.Cartesian)}
 
-            {"1", new("1", "1","0","-6*(x+y)", CoordinateSystem.Cartesian) },
+            {"1", new("1", "1","0","2 * cos(x) * cos(y)", CoordinateSystem.Cartesian) },
         };
 
         Dictionary<string, IMaterial<VectorT>> boundaryMaterials = new Dictionary<string, IMaterial<VectorT>>()
@@ -189,11 +189,11 @@ public class ScalarEllipticProblem<VectorT> where VectorT : VectorBase<double, V
             //{"31", new RobinConditionForScalarEllipticProblem<VectorT>("31","1.0/5.0","5*x -40",CoordinateSystem.Cartesian) },
             //{"32", new RobinConditionForScalarEllipticProblem<VectorT>("32","2","5*x + 35",CoordinateSystem.Cartesian) },
 
-            {"1",  new DirichletConditionForScalarEllipticProblem<VectorT>("11","x^3 + y^3",CoordinateSystem.Cartesian)},
-            {"21", new NeumannConditionForScalarEllipticProblem<VectorT>("21","-3*x^2",CoordinateSystem.Cartesian) },
-            {"22", new NeumannConditionForScalarEllipticProblem<VectorT>("21","3*y^2",CoordinateSystem.Cartesian) },
-            {"23", new NeumannConditionForScalarEllipticProblem<VectorT>("21","3*x^2",CoordinateSystem.Cartesian) },
-            {"24", new NeumannConditionForScalarEllipticProblem<VectorT>("21","-3*y^2",CoordinateSystem.Cartesian) },
+            {"1",  new DirichletConditionForScalarEllipticProblem<VectorT>("11","cos(x) * cos(y)",CoordinateSystem.Cartesian)},
+            {"21", new NeumannConditionForScalarEllipticProblem<VectorT>("21","sin(x)*cos(y)",CoordinateSystem.Cartesian) },
+            {"22", new NeumannConditionForScalarEllipticProblem<VectorT>("21","-cos(x)*sin(y)",CoordinateSystem.Cartesian) },
+            {"23", new NeumannConditionForScalarEllipticProblem<VectorT>("21","-sin(x)*cos(y)",CoordinateSystem.Cartesian) },
+            {"24", new NeumannConditionForScalarEllipticProblem<VectorT>("21","cos(x)*sin(y)",CoordinateSystem.Cartesian) },
 
         };
 

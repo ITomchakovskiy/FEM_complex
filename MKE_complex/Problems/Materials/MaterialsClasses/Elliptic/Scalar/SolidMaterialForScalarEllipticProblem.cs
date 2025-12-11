@@ -43,8 +43,9 @@ public class SolidMaterialForScalarEllipticProblem<VectorT> : IMaterial<VectorT>
         Name = name;
 
         context = new ExpressionContext();
+        context.Imports.AddType(typeof(Math));
 
-        switch(system)
+        switch (system)
         {
             case CoordinateSystem.Cartesian:
                 coordinates = ["x", "y", "z" ];
