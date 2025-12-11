@@ -108,3 +108,31 @@ Func<Vector2D, double> u = (Vector2D v) => v.X * v.X * v.X + v.Y * v.Y * v.Y;
 
 double discrepancy = problem.EvaluateDiscrepancy(vertices, u);
 Console.WriteLine($"Discrepancy: {discrepancy:E3}");
+
+var Vertices = problem.Mesh.Vertices;
+
+List<double> X = new();
+List<double> Y = new();
+List<double> U = new();
+
+
+foreach (var v in Vertices)
+{
+    X.Add(v.X);
+    Y.Add(v.Y);
+    double val;
+    problem.CalculateFunctionAtPoint(v, out val);
+    U.Add(val);
+}
+
+var writer = new StreamWriter("input_points");
+for (int i = 0; i < X.Count; ++i)
+    writer.Write($"{X[i]} ");
+writer.Write("\n");
+for (int i = 0; i < Y.Count; ++i)
+    writer.Write($"{Y[i]} ");
+writer.Write("\n");
+for (int i = 0; i < U.Count; ++i)
+    writer.Write($"{U[i]} ");
+writer.Write("\n");
+writer.Close();
