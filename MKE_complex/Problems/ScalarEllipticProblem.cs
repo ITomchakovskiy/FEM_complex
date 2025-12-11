@@ -34,13 +34,13 @@ public class ScalarEllipticProblem<VectorT> where VectorT : VectorBase<double, V
                 double value = 0;
                 if (CalculateFunctionAtPoint(vertices[i], out value))
                 {
-                    Console.WriteLine($"{v2[i].X}    {v2[i].Y}     {value}      {u(vertices[i])}     {Math.Abs(value - u(vertices[i]))}");
+                    Console.WriteLine($"{v2[i].X:F1}    {v2[i].Y:F1}     {value}      {u(vertices[i])}     {Math.Abs(value - u(vertices[i])):E3}");
                     ++n;
                     discrepancy += Math.Abs(value - u(vertices[i])) * Math.Abs(value - u(vertices[i]));
                 }
                 else
                 {
-                    Console.WriteLine($"{v2[i].X}    {v2[i].Y}     not found");
+                    Console.WriteLine($"{v2[i].X:F1}    {v2[i].Y:F1}     not found");
                 }
             }
             
@@ -165,8 +165,10 @@ public class ScalarEllipticProblem<VectorT> where VectorT : VectorBase<double, V
             //{"2", new("1", "1","0","0", CoordinateSystem.Cartesian) },
 
 
-            {"1", new("1", "1","5","25*x + 50*y + 50", CoordinateSystem.Cartesian) },
-            {"2", new("2","1","1","5*x + 10*y + 10",CoordinateSystem.Cartesian)}
+            //{"1", new("1", "1","5","25*x + 50*y + 50", CoordinateSystem.Cartesian) },
+            //{"2", new("2","1","1","5*x + 10*y + 10",CoordinateSystem.Cartesian)}
+
+            {"1", new("1", "2","1","2 * x^2 + 3* y^2 + 6*x*y - 20", CoordinateSystem.Cartesian) },
         };
 
         Dictionary<string, IMaterial<VectorT>> boundaryMaterials = new Dictionary<string, IMaterial<VectorT>>()
@@ -178,18 +180,20 @@ public class ScalarEllipticProblem<VectorT> where VectorT : VectorBase<double, V
             //{"31", new RobinConditionForScalarEllipticProblem<VectorT>("32","10","6*y +2.1",CoordinateSystem.Cartesian) },
 
 
+                        //{"12",  new DirichletConditionForScalarEllipticProblem<VectorT>("12","5*x + 10*y + 10",CoordinateSystem.Cartesian)},
+            //{"21", new NeumannConditionForScalarEllipticProblem<VectorT>("21","-5",CoordinateSystem.Cartesian) },
+            //{"22", new NeumannConditionForScalarEllipticProblem<VectorT>("22","10",CoordinateSystem.Cartesian) },
+            //{"23", new NeumannConditionForScalarEllipticProblem<VectorT>("23","5",CoordinateSystem.Cartesian) },
+            //{"24", new NeumannConditionForScalarEllipticProblem<VectorT>("24","-5",CoordinateSystem.Cartesian) },
+            //{"25", new NeumannConditionForScalarEllipticProblem<VectorT>("25","5",CoordinateSystem.Cartesian) },
+            //{"31", new RobinConditionForScalarEllipticProblem<VectorT>("31","1.0/5.0","5*x -40",CoordinateSystem.Cartesian) },
+            //{"32", new RobinConditionForScalarEllipticProblem<VectorT>("32","2","5*x + 35",CoordinateSystem.Cartesian) },
 
-
-            {"11",  new DirichletConditionForScalarEllipticProblem<VectorT>("11","5*x + 10*y + 10",CoordinateSystem.Cartesian)},
-            {"12",  new DirichletConditionForScalarEllipticProblem<VectorT>("12","5*x + 10*y + 10",CoordinateSystem.Cartesian)},
-            {"21", new NeumannConditionForScalarEllipticProblem<VectorT>("21","-5",CoordinateSystem.Cartesian) },
-            {"22", new NeumannConditionForScalarEllipticProblem<VectorT>("22","10",CoordinateSystem.Cartesian) },
-            {"23", new NeumannConditionForScalarEllipticProblem<VectorT>("23","5",CoordinateSystem.Cartesian) },
-            {"24", new NeumannConditionForScalarEllipticProblem<VectorT>("24","-5",CoordinateSystem.Cartesian) },
-            {"25", new NeumannConditionForScalarEllipticProblem<VectorT>("25","5",CoordinateSystem.Cartesian) },
-            {"31", new RobinConditionForScalarEllipticProblem<VectorT>("31","1.0/5.0","5*x -40",CoordinateSystem.Cartesian) },
-            {"32", new RobinConditionForScalarEllipticProblem<VectorT>("32","2","5*x + 35",CoordinateSystem.Cartesian) },
-
+            {"1",  new DirichletConditionForScalarEllipticProblem<VectorT>("11","2 * x^2 + 3* y^2 + 6*x*y",CoordinateSystem.Cartesian)},
+            {"21", new NeumannConditionForScalarEllipticProblem<VectorT>("21","-(8*x + 12*y)",CoordinateSystem.Cartesian) },
+            {"22", new NeumannConditionForScalarEllipticProblem<VectorT>("21","12 * (x + y)",CoordinateSystem.Cartesian) },
+            {"23", new NeumannConditionForScalarEllipticProblem<VectorT>("21","8*x + 12*y",CoordinateSystem.Cartesian) },
+            {"24", new NeumannConditionForScalarEllipticProblem<VectorT>("21","-12 * (x + y)",CoordinateSystem.Cartesian) },
 
         };
 

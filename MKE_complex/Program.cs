@@ -93,14 +93,16 @@ double y_max = 3.6;
 //double y_min = 5.5;
 //double y_max = 9.6;
 
-double dx = 0.5;
-double dy = 0.5;
+double dx = 0.7;
+double dy = 0.7;
 
 for(double x = x_min; x <= x_max; x += dx)
     for(double y = y_min; y <= y_max; y += dy)
         vertices = vertices.Append(new Vector2D(x, y)).ToArray();
 
-Func<Vector2D, double> u = (Vector2D v) => 5d * v.X + 10d * v.Y + 10;
+//Func<Vector2D, double> u = (Vector2D v) => 5d * v.X + 10d * v.Y + 10;
+
+Func<Vector2D, double> u = (Vector2D v) => 2d * v.X * v.X + 3d * v.Y * v.Y + 6d * v.X * v.Y;
 
 //Func<Vector2D, double> u = (Vector2D v) => v.X + 6d * v.Y - 2d;
 
