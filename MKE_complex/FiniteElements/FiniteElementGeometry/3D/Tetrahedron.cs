@@ -13,6 +13,11 @@ public record Tetrahedron(int[] VertexNumber) : IFiniteElementGeometry<Vector3D>
 
     public int EdgesCount => throw new NotImplementedException();
 
+    public Vector3D CalculateCenterVertex(ReadOnlySpan<Vector3D> vertices)
+    {
+        throw new NotImplementedException();
+    }
+
     public bool IsPointInElement(Vector3D point, Vector3D[] vertices)
     {
         throw new NotImplementedException();
@@ -30,5 +35,10 @@ public record Tetrahedron(int[] VertexNumber) : IFiniteElementGeometry<Vector3D>
                 case 5 : return (2, 3);
             default: throw new Exception("Wrong edge number");
         }
+    }
+
+    public IFiniteElementGeometry<Vector3D>[] Refine(ReadOnlySpan<int> FaceVertices, ReadOnlySpan<int> EdgeVertices, int ElementVertex, out bool IsElementVertexNeeded)
+    {
+        throw new NotImplementedException();
     }
 }

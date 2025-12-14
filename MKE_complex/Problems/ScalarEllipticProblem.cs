@@ -111,7 +111,12 @@ public class ScalarEllipticProblem<VectorT> where VectorT : VectorBase<double, V
 
         PseudoRegularMeshBuilder builder = new PseudoRegularMeshBuilder();
 
-        Mesh = builder.BuildMesh<VectorT>(dimension, mesh_type, basis, order, fileNames); //костыль
+        Mesh = builder.BuildMesh<VectorT>(dimension, mesh_type, basis, order, fileNames);
+
+        int refinement = 6;
+
+        for (int i = 0; i < refinement; ++i)
+               Mesh = Mesh.Refine();
 
         //Vector2D[] Vertices_ = [new(2d, 0d), new(2d, 1d), new(3d, 1d), new(2d, 4d), new(7d, 4d)];
 
@@ -148,7 +153,7 @@ public class ScalarEllipticProblem<VectorT> where VectorT : VectorBase<double, V
         //                                          new LagrangianQuadraticEdgeCondition("0", "23", new([8, 9])),
         //                                          new LagrangianQuadraticEdgeCondition("0", "31", new([5, 7])),
         //                                          new LagrangianQuadraticEdgeCondition("0", "31", new([7, 9])),
-         //                                      ];
+        //                                      ];
         //Mesh = (IFiniteElementMesh<VectorT>)(object)new FiniteElementMesh<Vector2D>(Vertices_.ToList(), Elements_.ToList(), Edges_.ToList());
 
         DofsEnumerator.EnumerateMeshDofs(Mesh);

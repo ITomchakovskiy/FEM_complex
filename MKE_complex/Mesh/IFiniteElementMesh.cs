@@ -15,4 +15,5 @@ public interface IFiniteElementMesh<VectorT> where VectorT : VectorBase<double, 
     ReadOnlySpan<IBoundaryCondition<VectorT>> Boundaries { get; }
     int? DofsCount { get; set; }
     public void SortElementsByMinimumVertexNumber();
+    IFiniteElementMesh<VectorT> Refine();
 }

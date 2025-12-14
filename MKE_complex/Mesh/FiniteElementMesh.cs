@@ -1,4 +1,5 @@
-﻿using MKE_complex.FiniteElements;
+﻿using MKE_complex.DofsEnumerators;
+using MKE_complex.FiniteElements;
 using MKE_complex.FiniteElements.Elements.ElementsClasses._2D.Lagrangian.EdgeConditions;
 using MKE_complex.FiniteElements.Elements.ElementsClasses._2D.Lagrangian.TriangleElements;
 using MKE_complex.FiniteElements.FiniteElementGeometry._2D;
@@ -9,6 +10,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace MKE_complex.Mesh;
 
@@ -199,5 +201,69 @@ public class FiniteElementMesh<VectorT>(IReadOnlyList<VectorT> vertices, IReadOn
     {
         var comparer = new ElementComparer();
         elements.Sort(comparer);
+    }
+
+    public IFiniteElementMesh<VectorT> Refine()
+    {
+        //ДОБАВИТЬ СПИСОК ГРАНЕЙ ДЛЯ 3Д
+
+        var EdgesList = DofsEnumerator.EdgesListBuilding<VectorT>(CollectionsMarshal.AsSpan(elements), vertices.Count);
+
+        List<VectorT> NewVertexList = vertices.ToList();
+
+        List<IFiniteElement<VectorT>> NewElementList = new();
+
+        List<IBoundaryCondition<VectorT>> NewBoundaryList = new();
+
+        for (int i = 0; i < EdgesList.Length; ++i) //adding points on edges
+        {
+            VectorT A = vertices[i];
+            var dict = EdgesList[i];
+            foreach(var val in dict)
+            {
+                VectorT B = vertices[val.Key];
+                VectorT C = (A + B) / 2d;
+                NewVertexList.Add(C);
+                dict[val.Key] = NewVertexList.Count - 1;
+            }
+        }
+
+        foreach(var element in elements) //elements refinement and adding element center if needed
+        {
+            bool isElementVertexNeeded = false;
+            List<int> edgeVertices = new();
+            for(int i = 0; i < element.Geometry.EdgesCount;++i)
+            {
+                var edge = element.Geometry.LocalEdge(i);
+                (int i, int j) globalEdge = (element.Geometry.VertexNumber[edge.Item1],
+                                             element.Geometry.VertexNumber[edge.Item2]);
+                globalEdge = globalEdge.i < globalEdge.j ? globalEdge : (globalEdge.j, globalEdge.i);
+                edgeVertices.Add(EdgesList[globalEdge.i][globalEdge.j]);
+            }
+            NewElementList.AddRange(element.Refine([], edgeVertices.ToArray(), NewVertexList.Count,out isElementVertexNeeded));
+
+            if(isElementVertexNeeded)
+            {
+                var local_vertices = element.Geometry.VertexNumber.Select(i => vertices[i]).ToArray();
+                VectorT elementCenter = element.Geometry.CalculateCenterVertex(local_vertices);
+                NewVertexList.Add(elementCenter);
+            }
+        }
+
+        foreach(var boundary in boundaries) //refining boundary conditions
+        {
+            List<int> edgeVertices = new();
+            for (int i = 0; i < boundary.Geometry.EdgesCount; ++i)
+            {
+                var edge = boundary.Geometry.LocalEdge(i);
+                (int i, int j) globalEdge = (boundary.Geometry.VertexNumber[edge.Item1],
+                                             boundary.Geometry.VertexNumber[edge.Item2]);
+                globalEdge = globalEdge.i < globalEdge.j ? globalEdge : (globalEdge.j, globalEdge.i);
+                edgeVertices.Add(EdgesList[globalEdge.i][globalEdge.j]);
+            }
+            NewBoundaryList.AddRange(boundary.Refine([], edgeVertices.ToArray()));
+        }
+
+        return new FiniteElementMesh<VectorT>(NewVertexList, NewElementList, NewBoundaryList);
     }
 }

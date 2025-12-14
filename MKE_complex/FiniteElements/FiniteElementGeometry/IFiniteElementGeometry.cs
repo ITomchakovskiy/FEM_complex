@@ -17,4 +17,8 @@ public interface IFiniteElementGeometry<VectorT> where VectorT : VectorBase<doub
     (int, int) LocalEdge(int edgeNumber);
 
     bool IsPointInElement(VectorT point, VectorT[] vertices);
+
+    IFiniteElementGeometry<VectorT>[] Refine(ReadOnlySpan<int> FaceVertices, ReadOnlySpan<int> EdgeVertices, int ElementVertex, out bool IsElementVertexNeeded);
+
+    VectorT CalculateCenterVertex(ReadOnlySpan<VectorT> vertices);
 }

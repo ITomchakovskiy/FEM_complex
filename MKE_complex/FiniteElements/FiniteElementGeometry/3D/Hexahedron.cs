@@ -33,7 +33,7 @@ public record Hexahedron(int[] VertexNumber) : IFiniteElementGeometry<Vector3D>
         }
     }
 
-    public static Vector3D PointOnHexagon(Vector3D[] vertices, int n_x, double k_x, int ind_x, int n_y, double k_y, int ind_y, int n_z, double k_z, int ind_z) //for mesh initialization
+    public static Vector3D PointOnHexahedron(Vector3D[] vertices, int n_x, double k_x, int ind_x, int n_y, double k_y, int ind_y, int n_z, double k_z, int ind_z) //for mesh initialization
     {
         Vector3D A = (Vector3D)Vector3D.PointOnLine(vertices[0], vertices[3], n_x, k_x, ind_x);
 
@@ -51,6 +51,16 @@ public record Hexahedron(int[] VertexNumber) : IFiniteElementGeometry<Vector3D>
     }
 
     public bool IsPointInElement(Vector3D point, Vector3D[] vertices)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IFiniteElementGeometry<Vector3D>[] Refine(ReadOnlySpan<int> FaceVertices, ReadOnlySpan<int> EdgeVertices, int ElementVertex, out bool IsElementVertexNeeded)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Vector3D CalculateCenterVertex(ReadOnlySpan<Vector3D> vertices)
     {
         throw new NotImplementedException();
     }

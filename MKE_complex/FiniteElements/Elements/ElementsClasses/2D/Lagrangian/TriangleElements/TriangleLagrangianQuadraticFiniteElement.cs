@@ -174,4 +174,11 @@ public class TriangleLagrangianQuadraticFiniteElement(string material, Triangle 
             result += BasesValues[i] * localSolution[i];
         return result;
     }
+
+    public IFiniteElement<Vector2D>[] Refine(ReadOnlySpan<int> FaceVertices, ReadOnlySpan<int> EdgeVertices, int ElementVertex, out bool IsElementVertexNeeded)
+    {
+        var geometries = geometry.Refine(FaceVertices, EdgeVertices, ElementVertex, out IsElementVertexNeeded);
+        var refinedElements = geometries.Select(g => new TriangleLagrangianQuadraticFiniteElement(Material,(Triangle)g));
+        return refinedElements.ToArray();
+    }
 }

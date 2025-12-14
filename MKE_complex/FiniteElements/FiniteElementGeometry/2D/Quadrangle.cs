@@ -48,4 +48,14 @@ public record Quadrangle(int[] VertexNumber) : IFiniteElementGeometry<Vector2D>
     {
         throw new NotImplementedException();
     }
+
+    public IFiniteElementGeometry<Vector2D>[] Refine(ReadOnlySpan<int> FaceVertices, ReadOnlySpan<int> EdgeVertices, int ElementVertex, out bool IsElementVertexNeeded)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Vector2D CalculateCenterVertex(ReadOnlySpan<Vector2D> vertices)
+    {
+        throw new NotImplementedException();
+    }
 }

@@ -33,4 +33,21 @@ public record Line(int[] VertexNumber) : IFiniteElementGeometry<Vector2D>
     {
         throw new NotImplementedException();
     }
+
+    public IFiniteElementGeometry<Vector2D>[] Refine(ReadOnlySpan<int> FaceVertices, ReadOnlySpan<int> EdgeVertices, int ElementVertex, out bool IsElementVertexNeeded)
+    {
+        IsElementVertexNeeded = false;
+        return [new Line([VertexNumber[0], EdgeVertices[0]]),
+                new Line([EdgeVertices[0], VertexNumber[1]])];
+    }
+
+    public Vector2D CalculateCenterVertex(ReadOnlySpan<Vector2D> vertices)
+    {
+        var center = new Vector2D(0d,0d);
+        for (int i = 0; i < vertices.Length; i++)
+            center += vertices[i];
+        center /= vertices.Length;
+
+        return center;
+    }
 }

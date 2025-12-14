@@ -194,5 +194,9 @@ public class LagrangianQuadraticEdgeCondition(string volume_material, string edg
         return [Ug(vertices[0]), Ug(midPoint), Ug(vertices[1])];
     }
 
-
+    public IBoundaryCondition<Vector2D>[] Refine(ReadOnlySpan<int> FaceVertices, ReadOnlySpan<int> EdgeVertices)
+    {
+        var geometries = geometry.Refine(FaceVertices, EdgeVertices, 0, out _);
+        return geometries.Select(g => new LagrangianQuadraticEdgeCondition(VolumeMaterial, EdgeMaterial, (Line)g)).ToArray();
+    }
 }

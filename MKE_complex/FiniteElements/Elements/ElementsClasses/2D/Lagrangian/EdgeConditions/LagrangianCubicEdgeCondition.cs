@@ -136,4 +136,10 @@ public class LagrangianCubicEdgeCondition(string volume_material, string edge_ma
     {
         throw new NotImplementedException();
     }
+
+    public IBoundaryCondition<Vector2D>[] Refine(ReadOnlySpan<int> FaceVertices, ReadOnlySpan<int> EdgeVertices)
+    {
+        var geometries = (Line[])geometry.Refine(FaceVertices, EdgeVertices, 0, out _);
+        return geometries.Select(g => new LagrangianCubicEdgeCondition(VolumeMaterial, EdgeMaterial, g)).ToArray();
+    }
 }

@@ -27,4 +27,5 @@ public interface IBoundaryCondition<VectorT> where VectorT : VectorBase<double, 
     double[] CalcLocalRightPartForNeumannCondition(VectorT[] vertices, Func<VectorT, double> Theta);
     double[] CalcLocalRightPartForRobinCondition(VectorT[] vertices, Func<VectorT, double> Beta, Func<VectorT, double> UBeta);
     double[] CalcLocalRightPartForDirichletCondition(VectorT[] vertices, Func<VectorT, double> Ug);
+    IBoundaryCondition<VectorT>[] Refine(ReadOnlySpan<int> FaceVertices, ReadOnlySpan<int> EdgeVertices);
 }

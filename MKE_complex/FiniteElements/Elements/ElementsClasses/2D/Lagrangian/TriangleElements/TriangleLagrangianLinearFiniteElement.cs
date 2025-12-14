@@ -142,4 +142,9 @@ public class TriangleLagrangianLinearFiniteElement(string material, Triangle geo
     {
         throw new NotImplementedException();
     }
+
+    public IFiniteElement<Vector2D>[] Refine(ReadOnlySpan<int> FaceVertices, ReadOnlySpan<int> EdgeVertices, int ElementVertex, out bool IsElementVertexNeeded)
+    {
+        throw new NotImplementedException();
+    }
 }
