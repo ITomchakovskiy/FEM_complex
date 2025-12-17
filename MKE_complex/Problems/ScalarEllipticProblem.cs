@@ -113,7 +113,7 @@ public class ScalarEllipticProblem<VectorT> where VectorT : VectorBase<double, V
 
         Mesh = builder.BuildMesh<VectorT>(dimension, mesh_type, basis, order, fileNames);
 
-        int refinement = 6;
+        int refinement = 0;
 
         for (int i = 0; i < refinement; ++i)
                Mesh = Mesh.Refine();

@@ -114,7 +114,11 @@ Func<Vector2D, double> u = (Vector2D v) => Math.Cos(v.X) * Math.Cos(v.Y);
 double discrepancy = problem.EvaluateDiscrepancy(vertices, u);
 Console.WriteLine($"Discrepancy: {discrepancy:E3}");
 
-var Vertices = problem.Mesh.Vertices;
+var Mesh = problem.Mesh.Refine();
+
+var Vertices = Mesh.Vertices;
+
+//var Mesh = problem.Mesh.Refine();
 
 List<double> X = new();
 List<double> Y = new();
@@ -130,6 +134,9 @@ foreach(var v in Vertices)
     U.Add(val);
 }
 
+if (Mesh is FiniteElementMesh<Vector2D> mesh2d)
+    mesh2d.SaveMeshGeometry("input_points", "input_triangles", "input_dofs", "input_edges", "input_edgeDofs");
+
 var writer = new StreamWriter("input_points");
 for(int i = 0;i < X.Count;++i)
     writer.Write($"{X[i]} ");
@@ -141,4 +148,5 @@ for (int i = 0; i < U.Count; ++i)
     writer.Write($"{U[i]} ");
 writer.Write("\n");
 writer.Close();
+
 
