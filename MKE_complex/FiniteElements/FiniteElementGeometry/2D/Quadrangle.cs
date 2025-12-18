@@ -1,6 +1,7 @@
 ﻿using MKE_complex.Vector;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -51,11 +52,18 @@ public record Quadrangle(int[] VertexNumber) : IFiniteElementGeometry<Vector2D>
 
     public IFiniteElementGeometry<Vector2D>[] Refine(ReadOnlySpan<int> FaceVertices, ReadOnlySpan<int> EdgeVertices, int ElementVertex, out bool IsElementVertexNeeded)
     {
-        throw new NotImplementedException();
+        IsElementVertexNeeded = true;
+        return [new Quadrangle([VertexNumber[0], EdgeVertices[0], ElementVertex, EdgeVertices[3]]),
+                new Quadrangle([EdgeVertices[0], VertexNumber[1], EdgeVertices[1], ElementVertex]),
+                new Quadrangle([ElementVertex, EdgeVertices[1], VertexNumber[2], EdgeVertices[2]]),
+                new Quadrangle([EdgeVertices[3], ElementVertex, EdgeVertices[2], VertexNumber[3]]),];
     }
 
     public Vector2D CalculateCenterVertex(ReadOnlySpan<Vector2D> vertices)
     {
-        throw new NotImplementedException();
+        Vector2D center = new(0d,0d);
+        foreach(var vertex in vertices)
+               center = center + vertex;
+        return (center) / 4d;
     }
 }
