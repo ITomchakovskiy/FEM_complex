@@ -89,9 +89,9 @@ Vector2D[] vertices = [];
 //double y_max = 3.6;
 
 double x_min = 0.1;
-double x_max = 7.99;
+double x_max = 2;
 double y_min = 0.1;
-double y_max = 3.99;
+double y_max = 2.5;
 
 //double x_min = 0.5;
 //double x_max = 3.6;
@@ -107,7 +107,7 @@ for(double x = x_min; x <= x_max; x += dx)
 
 //Func<Vector2D, double> u = (Vector2D v) => 5d * v.X + 10d * v.Y + 10;
 
-Func<Vector2D, double> u = (Vector2D v) => Math.Cos(v.X) * Math.Cos(v.Y);
+Func<Vector2D, double> u = (Vector2D v) => v.X * v.X + v.Y * v.Y;
 
 //Func<Vector2D, double> u = (Vector2D v) => v.X + 6d * v.Y - 2d;
 
@@ -117,8 +117,6 @@ Console.WriteLine($"Discrepancy: {discrepancy:E3}");
 var Mesh = problem.Mesh.Refine();
 
 var Vertices = Mesh.Vertices;
-
-//var Mesh = problem.Mesh.Refine();
 
 List<double> X = new();
 List<double> Y = new();
@@ -138,7 +136,7 @@ if (Mesh is FiniteElementMesh<Vector2D> mesh2d)
     mesh2d.SaveMeshGeometry("input_points", "input_triangles", "input_dofs", "input_edges", "input_edgeDofs");
 
 var writer = new StreamWriter("input_points");
-for(int i = 0;i < X.Count;++i)
+for (int i = 0; i < X.Count; ++i)
     writer.Write($"{X[i]} ");
 writer.Write("\n");
 for (int i = 0; i < Y.Count; ++i)
