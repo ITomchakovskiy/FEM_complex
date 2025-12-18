@@ -89,9 +89,9 @@ Vector2D[] vertices = [];
 //double y_max = 3.6;
 
 double x_min = 0.1;
-double x_max = 2;
+double x_max = 10;
 double y_min = 0.1;
-double y_max = 2.5;
+double y_max = 5d;
 
 //double x_min = 0.5;
 //double x_max = 3.6;
