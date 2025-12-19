@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 
 namespace MKE_complex.FiniteElements.FiniteElementGeometry._2D;
 
-public record Rectangle(int[] VertexNumber) : Quadrangle(VertexNumber)
+public record Rectangle(int[] VertexNumber) : Quadrangle(VertexNumber) // VertexNumber order: bottom-left, bottom-right, top-right, top-left
+    , IFiniteElementGeometryWithTriangulation<Vector2D>
 {
     public new GeometryType GeometryType => GeometryType.Rectangle;
 

@@ -16,4 +16,5 @@ public interface IFiniteElementMesh<VectorT> where VectorT : VectorBase<double, 
     int? DofsCount { get; set; }
     public void SortElementsByMinimumVertexNumber();
     IFiniteElementMesh<VectorT> Refine();
+    IFiniteElementMesh<VectorT> Triangulate();
 }

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace MKE_complex.FiniteElements.FiniteElementGeometry._2D;
 
-public record Quadrangle(int[] VertexNumber) : IFiniteElementGeometry<Vector2D>
+public record Quadrangle(int[] VertexNumber) : IFiniteElementGeometryWithTriangulation<Vector2D>
 {
     public GeometryType GeometryType => GeometryType.Quadrangle;
 
@@ -26,7 +26,7 @@ public record Quadrangle(int[] VertexNumber) : IFiniteElementGeometry<Vector2D>
         }
     }
 
-    public Triangle[] ToTriangles()
+    public IFiniteElementGeometry<Vector2D>[] Triangulate()
     {
         int[][] triangleVertices_local = [[0, 1, 3], [1, 2, 3]];
         // int[][] triangleVertices = 
@@ -66,4 +66,14 @@ public record Quadrangle(int[] VertexNumber) : IFiniteElementGeometry<Vector2D>
                center = center + vertex;
         return (center) / 4d;
     }
+
+    //public IFiniteElementGeometry<Vector2D>[] Triangulate()
+    //{
+    //    int[][] triangleVertices_local = [[0, 1, 3], [1, 2, 3]];
+    //    // int[][] triangleVertices = 
+    //    Triangle[] triangles = new Triangle[2];
+    //    for (int i = 0; i < triangles.Length; ++i)
+    //        triangles[i] = new Triangle(triangleVertices_local[i].Select(j => VertexNumber[j]).ToArray());
+    //    return triangles;
+    //}
 }

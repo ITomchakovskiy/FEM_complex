@@ -266,4 +266,14 @@ public class FiniteElementMesh<VectorT>(IReadOnlyList<VectorT> vertices, IReadOn
 
         return new FiniteElementMesh<VectorT>(NewVertexList, NewElementList, NewBoundaryList);
     }
+
+    public IFiniteElementMesh<VectorT> Triangulate()
+    {
+        List<IFiniteElement<VectorT>> newElements = new();
+
+        foreach(var elem in elements)
+            newElements.AddRange(elem.Triangulate());
+
+        return new FiniteElementMesh<VectorT>(vertices, newElements, boundaries);
+    }
 }

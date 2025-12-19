@@ -147,4 +147,9 @@ public class TriangleLagrangianLinearFiniteElement(string material, Triangle geo
     {
         throw new NotImplementedException();
     }
+
+    public IFiniteElement<Vector2D>[] Triangulate()
+    {
+        throw new NotImplementedException();
+    }
 }

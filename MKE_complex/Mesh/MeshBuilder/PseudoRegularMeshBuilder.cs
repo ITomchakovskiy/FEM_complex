@@ -299,7 +299,7 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                                             switch (meshType)
                                             {
                                                 case GeometryType.Triangle:
-                                                    elementsGeometry2d.AddRange(quadrangle.ToTriangles());
+                                                    elementsGeometry2d.AddRange(quadrangle.Triangulate());
                                                     break;
                                                 case GeometryType.Quadrangle:
                                                     elementsGeometry2d.Add(quadrangle);

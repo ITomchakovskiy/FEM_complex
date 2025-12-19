@@ -155,4 +155,9 @@ public class TriangleLagrangianCubicFiniteElement(string material, Triangle geom
     {
         throw new NotImplementedException();
     }
+
+    public IFiniteElement<Vector2D>[] Triangulate()
+    {
+        throw new NotImplementedException();
+    }
 }

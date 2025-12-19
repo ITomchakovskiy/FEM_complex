@@ -22,3 +22,8 @@ public interface IFiniteElementGeometry<VectorT> where VectorT : VectorBase<doub
 
     VectorT CalculateCenterVertex(ReadOnlySpan<VectorT> vertices);
 }
+
+public interface IFiniteElementGeometryWithTriangulation<VectorT> : IFiniteElementGeometry<VectorT> where VectorT : VectorBase<double, VectorT>
+{
+    IFiniteElementGeometry<VectorT>[] Triangulate();
+}

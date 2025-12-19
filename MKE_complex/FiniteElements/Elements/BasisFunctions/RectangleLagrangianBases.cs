@@ -41,7 +41,7 @@ public static class RectangleLagrangianBases
         return eta;
     }
 
-    public static class RectangleLagrangianLinearBases
+    public static class LinearBases
     {
         public static Func<int, double, double, double> Psi =
                           (int i, double xi, double eta) => LineLagrangianLinearBases.Psi[localXDofNum(i, 1)](xi) * 
@@ -49,13 +49,13 @@ public static class RectangleLagrangianBases
        
     }
 
-    public static class RectangleLagrangianQuadraticBases
+    public static class QuadraticBases
     {
         public static Func<int, double, double, double> Psi =
                            (int i, double xi, double eta) => LineLagrangianQuadraticBases.Psi[localXDofNum(i, 2)](xi) *
                                                              LineLagrangianQuadraticBases.Psi[localYDofNum(i, 2)](eta);
     }
-    public static class RectangleLagrangianCubicBases
+    public static class CubicBases
     {
         public static Func<int, double, double, double> Psi =
                            (int i, double xi, double eta) => LineLagrangianCubicBases.Psi[localXDofNum(i, 3)](xi) *

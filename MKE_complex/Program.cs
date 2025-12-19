@@ -114,7 +114,9 @@ Func<Vector2D, double> u = (Vector2D v) => v.X * v.X + v.Y * v.Y;
 double discrepancy = problem.EvaluateDiscrepancy(vertices, u);
 Console.WriteLine($"Discrepancy: {discrepancy:E3}");
 
-var Mesh = problem.Mesh.Refine();
+//var Mesh = problem.Mesh.Refine();
+
+var Mesh = problem.Mesh.Triangulate();
 
 var Vertices = Mesh.Vertices;
 
@@ -135,16 +137,16 @@ foreach(var v in Vertices)
 if (Mesh is FiniteElementMesh<Vector2D> mesh2d)
     mesh2d.SaveMeshGeometry("input_points", "input_triangles", "input_dofs", "input_edges", "input_edgeDofs");
 
-var writer = new StreamWriter("input_points");
-for (int i = 0; i < X.Count; ++i)
-    writer.Write($"{X[i]} ");
-writer.Write("\n");
-for (int i = 0; i < Y.Count; ++i)
-    writer.Write($"{Y[i]} ");
-writer.Write("\n");
-for (int i = 0; i < U.Count; ++i)
-    writer.Write($"{U[i]} ");
-writer.Write("\n");
-writer.Close();
+//var writer = new StreamWriter("input_points");
+//for (int i = 0; i < X.Count; ++i)
+//    writer.Write($"{X[i]} ");
+//writer.Write("\n");
+//for (int i = 0; i < Y.Count; ++i)
+//    writer.Write($"{Y[i]} ");
+//writer.Write("\n");
+//for (int i = 0; i < U.Count; ++i)
+//    writer.Write($"{U[i]} ");
+//writer.Write("\n");
+//writer.Close();
 
 

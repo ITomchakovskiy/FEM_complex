@@ -98,11 +98,7 @@ public class TriangleLagrangianQuadraticFiniteElement(string material, Triangle 
 
     public bool IsDofsConnected(int dof1, int dof2)
     {
-        if (DOFs.Contains(dof1) && DOFs.Contains(dof2))
-        {
-            return true;
-        }
-        else return false;
+        return DOFs.Contains(dof1) && DOFs.Contains(dof2);
     }
 
     public void SetEdgeDofs(int localEdgeNumber, int dofNumber)
@@ -180,5 +176,10 @@ public class TriangleLagrangianQuadraticFiniteElement(string material, Triangle 
         var geometries = geometry.Refine(FaceVertices, EdgeVertices, ElementVertex, out IsElementVertexNeeded);
         var refinedElements = geometries.Select(g => new TriangleLagrangianQuadraticFiniteElement(Material,(Triangle)g));
         return refinedElements.ToArray();
+    }
+
+    public IFiniteElement<Vector2D>[] Triangulate()
+    {
+        return [this];
     }
 }
