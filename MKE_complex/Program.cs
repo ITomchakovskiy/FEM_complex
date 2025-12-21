@@ -88,10 +88,10 @@ Vector2D[] vertices = [];
 //double y_min = 0.5;
 //double y_max = 3.6;
 
-double x_min = 0.1;
-double x_max = 10;
-double y_min = 0.1;
-double y_max = 5d;
+double x_min = 1.1;
+double x_max = 8.99d;
+double y_min = 0.6;
+double y_max = 3.99d;
 
 //double x_min = 0.5;
 //double x_max = 3.6;
@@ -107,7 +107,7 @@ for(double x = x_min; x <= x_max; x += dx)
 
 //Func<Vector2D, double> u = (Vector2D v) => 5d * v.X + 10d * v.Y + 10;
 
-Func<Vector2D, double> u = (Vector2D v) => v.X * v.X + v.Y * v.Y;
+Func<Vector2D, double> u = (Vector2D v) => v.X/v.Y*Math.Log(v.X);
 
 //Func<Vector2D, double> u = (Vector2D v) => v.X + 6d * v.Y - 2d;
 
@@ -134,7 +134,7 @@ foreach(var v in Vertices)
     U.Add(val);
 }
 
-if (Mesh is FiniteElementMesh<Vector2D> mesh2d)
+if (Mesh.Triangulate() is FiniteElementMesh<Vector2D> mesh2d)
     mesh2d.SaveMeshGeometry("input_points", "input_triangles", "input_dofs", "input_edges", "input_edgeDofs");
 
 //var writer = new StreamWriter("input_points");

@@ -35,7 +35,7 @@ public class ScalarEllipticProblem<VectorT> where VectorT : VectorBase<double, V
                 double value = 0;
                 if (CalculateFunctionAtPoint(vertices[i], out value))
                 {
-                    Console.WriteLine($"{v2[i].X:F1}    {v2[i].Y:F1}     {value}      {u(vertices[i])}     {Math.Abs(value - u(vertices[i])):E3}");
+                    Console.WriteLine($"{v2[i].X:F1}    {v2[i].Y:F2}     {value}      {u(vertices[i])}     {Math.Abs(value - u(vertices[i])):E3}");
                     ++n;
                     discrepancy += Math.Abs(value - u(vertices[i])) * Math.Abs(value - u(vertices[i]));
                 }
@@ -116,14 +116,38 @@ public class ScalarEllipticProblem<VectorT> where VectorT : VectorBase<double, V
 
         //Mesh = builder.BuildMesh<VectorT>(dimension, mesh_type, basis, order, fileNames);
 
-        Vector2D[] Vertices_ = [new(0d, 0d), new(0d, 10d), new(10d, 10d), new(10d, 0d),];
+        Vector2D[] Vertices_ = [new(1d, 0.5d), new(2d, 0.5d), new(3d, 0.5d), new(5d, 0.5d), new(7d, 0.5d), new(9d, 0.5d) ,
+                                new(1d, 2d),   new(2d, 2d),   new(3d, 2d),   new(5d, 2d),   new(7d, 2d),   new(9d, 2d),
+                                new(1d, 3d),   new(2d, 4d),   new(3d, 4d),   new(7d, 2.5),  new(9d, 3d)];
 
-        IFiniteElement<Vector2D>[] Elements_ = [new RectangleLagrangianQuadraticFiniteElement("1", new([0, 1, 2, 3])),];
+        IFiniteElement<Vector2D>[] Elements_ = [new RectangleLagrangianQuadraticFiniteElement("1", new([0, 6, 7, 1])),
+                                                new RectangleLagrangianQuadraticFiniteElement("1", new([1, 7, 8, 2])),
+                                                new RectangleLagrangianQuadraticFiniteElement("1", new([2, 8, 9, 3])),
+                                                new RectangleLagrangianQuadraticFiniteElement("1", new([3, 9, 10, 4])),
+                                                new RectangleLagrangianQuadraticFiniteElement("1", new([4, 10, 11, 5])),
+                                                new TriangleLagrangianQuadraticFiniteElement("1", new([6, 12, 7])),
+                                                new TriangleLagrangianQuadraticFiniteElement("1", new([12, 13, 7])),
+                                                new TriangleLagrangianQuadraticFiniteElement("1", new([7, 13, 8])),
+                                                new TriangleLagrangianQuadraticFiniteElement("1", new([8, 13, 14])),
+                                                new TriangleLagrangianQuadraticFiniteElement("1", new([10, 15, 11])),
+                                                new TriangleLagrangianQuadraticFiniteElement("1", new([15, 16, 11])),];
 
-        IBoundaryCondition<Vector2D>[] Edges_ = [new LagrangianQuadraticEdgeCondition("0", "1", new([0, 1])),
-                                                  new  LagrangianQuadraticEdgeCondition("0", "1", new([1, 2])),
-                                                  new LagrangianQuadraticEdgeCondition("0", "1", new([3, 2])),
-                                                  new LagrangianQuadraticEdgeCondition("0", "1", new([0, 3]))];
+        IBoundaryCondition<Vector2D>[] Edges_ = [new LagrangianQuadraticEdgeCondition("0", "21", new([0, 6])),
+                                                  new LagrangianQuadraticEdgeCondition("0", "21", new([6, 12])),
+                                                  new LagrangianQuadraticEdgeCondition("0", "1", new([12, 13])),
+                                                  new LagrangianQuadraticEdgeCondition("0", "22", new([13, 14])),
+                                                  new LagrangianQuadraticEdgeCondition("0", "23", new([14, 8])),
+                                                  new LagrangianQuadraticEdgeCondition("0", "22", new([8, 9])),
+                                                  new LagrangianQuadraticEdgeCondition("0", "22", new([9, 10])),
+                                                  new LagrangianQuadraticEdgeCondition("0", "21", new([10, 15])),
+                                                  new LagrangianQuadraticEdgeCondition("0", "1", new([15, 16])),
+                                                  new LagrangianQuadraticEdgeCondition("0", "23", new([16, 11])),
+                                                  new LagrangianQuadraticEdgeCondition("0", "23", new([11, 5])),
+                                                  new LagrangianQuadraticEdgeCondition("0", "24", new([5, 4])),
+                                                  new LagrangianQuadraticEdgeCondition("0", "24", new([4, 3])),
+                                                  new LagrangianQuadraticEdgeCondition("0", "24", new([3, 2])),
+                                                  new LagrangianQuadraticEdgeCondition("0", "24", new([2, 1])),
+                                                  new LagrangianQuadraticEdgeCondition("0", "24", new([1, 0])),];
         //Mesh = (IFiniteElementMesh<VectorT>)(object)new FiniteElementMesh<Vector2D>(Vertices_.ToList(), Elements_.ToList(), Edges_.ToList());
 
 
@@ -166,66 +190,55 @@ public class ScalarEllipticProblem<VectorT> where VectorT : VectorBase<double, V
     //                                       ];
         Mesh = (IFiniteElementMesh<VectorT>)(object)new FiniteElementMesh<Vector2D>(Vertices_.ToList(), Elements_.ToList(), Edges_.ToList());
 
-        int refinement = 0;
+        int refinement = 6;
 
         for (int i = 0; i < refinement; ++i)
             Mesh = Mesh.Refine();
+
+        Mesh = Mesh.Triangulate();
 
         DofsEnumerator.EnumerateMeshDofs(Mesh);
 
         var Matrix = MatrixProfileBuilder.BuildMatrixProfile<double, VectorT>(Mesh);
         var Pr = new Vector.Vector<double>(new double[Matrix.N]);
 
-        if (Mesh is FiniteElementMesh<Vector2D> mesh2d)
-            mesh2d.SaveMeshGeometry("input_points", "input_triangles", "input_dofs", "input_edges", "input_edgeDofs");
+        //if (Mesh is FiniteElementMesh<Vector2D> mesh2d)
+        //    mesh2d.SaveMeshGeometry("input_points", "input_triangles", "input_dofs", "input_edges", "input_edgeDofs");
 
         Dictionary<string, SolidMaterialForScalarEllipticProblem<VectorT>> solidMaterials = new Dictionary<string, SolidMaterialForScalarEllipticProblem<VectorT>>()
         {
-            //{"1", new("1", "1","5","5*x + 30*y - 10", CoordinateSystem.Cartesian) },
-            //{"2", new("1", "1","0","0", CoordinateSystem.Cartesian) },
-
-
-            //{"1", new("1", "1","5","25*x + 50*y + 50", CoordinateSystem.Cartesian) },
-            //{"2", new("2","1","1","5*x + 10*y + 10",CoordinateSystem.Cartesian)}
-
-            {"1", new("1", "1","0","-4", CoordinateSystem.Cartesian) },
+            //{"1", new("1", "2","1","2 * x^2 + 3* y^2 + 6*x*y - 20", CoordinateSystem.Cartesian) },
+            //{"1", new("1", "1","0","-6*(x+y)", CoordinateSystem.Cartesian) },
+            //{"1", new("1", "1","0","2 * cos(x) * cos(y)", CoordinateSystem.Cartesian) },
+            {"1", new("1", "1","1","-(1.0/(x*y) + 2.0*x*log(x)/y^3) + x/y*log(x)", CoordinateSystem.Cartesian) },
         };
 
         Dictionary<string, IMaterial<VectorT>> boundaryMaterials = new Dictionary<string, IMaterial<VectorT>>()
         {
-            //{"11",  new DirichletConditionForScalarEllipticProblem<VectorT>("11","6*y + 2",CoordinateSystem.Cartesian)},
-            //{"21", new NeumannConditionForScalarEllipticProblem<VectorT>("21","-6",CoordinateSystem.Cartesian) },
-            //{"22", new NeumannConditionForScalarEllipticProblem<VectorT>("21","-1",CoordinateSystem.Cartesian) },
-            //{"23", new NeumannConditionForScalarEllipticProblem<VectorT>("21","6",CoordinateSystem.Cartesian) },
-            //{"31", new RobinConditionForScalarEllipticProblem<VectorT>("32","10","6*y +2.1",CoordinateSystem.Cartesian) },
 
+            //{"1",  new DirichletConditionForScalarEllipticProblem<VectorT>("11","2 * x^2 + 3* y^2 + 6*x*y",CoordinateSystem.Cartesian)},
+            //{"21", new NeumannConditionForScalarEllipticProblem<VectorT>("21","-(8*x + 12*y)",CoordinateSystem.Cartesian) },
+            //{"22", new NeumannConditionForScalarEllipticProblem<VectorT>("21","12 * (x + y)",CoordinateSystem.Cartesian) },
+            //{"23", new NeumannConditionForScalarEllipticProblem<VectorT>("21","8*x + 12*y",CoordinateSystem.Cartesian) },
+            //{"24", new NeumannConditionForScalarEllipticProblem<VectorT>("21","-12 * (x + y)",CoordinateSystem.Cartesian) },
 
-                        //{"12",  new DirichletConditionForScalarEllipticProblem<VectorT>("12","5*x + 10*y + 10",CoordinateSystem.Cartesian)},
-            //{"21", new NeumannConditionForScalarEllipticProblem<VectorT>("21","-5",CoordinateSystem.Cartesian) },
-            //{"22", new NeumannConditionForScalarEllipticProblem<VectorT>("22","10",CoordinateSystem.Cartesian) },
-            //{"23", new NeumannConditionForScalarEllipticProblem<VectorT>("23","5",CoordinateSystem.Cartesian) },
-            //{"24", new NeumannConditionForScalarEllipticProblem<VectorT>("24","-5",CoordinateSystem.Cartesian) },
-            //{"25", new NeumannConditionForScalarEllipticProblem<VectorT>("25","5",CoordinateSystem.Cartesian) },
-            //{"31", new RobinConditionForScalarEllipticProblem<VectorT>("31","1.0/5.0","5*x -40",CoordinateSystem.Cartesian) },
-            //{"32", new RobinConditionForScalarEllipticProblem<VectorT>("32","2","5*x + 35",CoordinateSystem.Cartesian) },
+            //{"1",  new DirichletConditionForScalarEllipticProblem<VectorT>("11","x^3 + y^3",CoordinateSystem.Cartesian)},
+            //{"21", new NeumannConditionForScalarEllipticProblem<VectorT>("21","-3*x^2",CoordinateSystem.Cartesian) },
+            //{"22", new NeumannConditionForScalarEllipticProblem<VectorT>("21","3*y^2",CoordinateSystem.Cartesian) },
+            //{"23", new NeumannConditionForScalarEllipticProblem<VectorT>("21","3*x^2",CoordinateSystem.Cartesian) },
+            //{"24", new NeumannConditionForScalarEllipticProblem<VectorT>("21","-3*y^2",CoordinateSystem.Cartesian) },
 
-            {"1",  new DirichletConditionForScalarEllipticProblem<VectorT>("11","x^2 + y^2",CoordinateSystem.Cartesian)},
-            //{"ed2",  new DirichletConditionForScalarEllipticProblem<VectorT>("11","x^2 + y^2",CoordinateSystem.Cartesian)},
-            //{"ed3",  new DirichletConditionForScalarEllipticProblem<VectorT>("11","x^2 + y^2",CoordinateSystem.Cartesian)},
-            //{"ed4",  new DirichletConditionForScalarEllipticProblem<VectorT>("11","x^2 + y^2",CoordinateSystem.Cartesian)},
-            //{"ed5",  new DirichletConditionForScalarEllipticProblem<VectorT>("11","x^2 + y^2",CoordinateSystem.Cartesian)},
-            //{"ed6",  new DirichletConditionForScalarEllipticProblem<VectorT>("11","x^2 + y^2",CoordinateSystem.Cartesian)},
-            //{"ed7",  new DirichletConditionForScalarEllipticProblem<VectorT>("11","x^2 + y^2",CoordinateSystem.Cartesian)},
-            //{"ed8",  new DirichletConditionForScalarEllipticProblem<VectorT>("11","x^2 + y^2",CoordinateSystem.Cartesian)},
-            //{"ed9",  new DirichletConditionForScalarEllipticProblem<VectorT>("11","x^2 + y^2",CoordinateSystem.Cartesian)},
-            //{"ed10",  new DirichletConditionForScalarEllipticProblem<VectorT>("11","x^2 + y^2",CoordinateSystem.Cartesian)},
-            //{"ed11",  new DirichletConditionForScalarEllipticProblem<VectorT>("11","x^2 + y^2",CoordinateSystem.Cartesian)},
-            //{"ed12",  new DirichletConditionForScalarEllipticProblem<VectorT>("11","x^2 + y^2",CoordinateSystem.Cartesian)},
+            //{"1",  new DirichletConditionForScalarEllipticProblem<VectorT>("11","cos(x) * cos(y)",CoordinateSystem.Cartesian)},
             //{"21", new NeumannConditionForScalarEllipticProblem<VectorT>("21","sin(x)*cos(y)",CoordinateSystem.Cartesian) },
             //{"22", new NeumannConditionForScalarEllipticProblem<VectorT>("21","-cos(x)*sin(y)",CoordinateSystem.Cartesian) },
             //{"23", new NeumannConditionForScalarEllipticProblem<VectorT>("21","-sin(x)*cos(y)",CoordinateSystem.Cartesian) },
             //{"24", new NeumannConditionForScalarEllipticProblem<VectorT>("21","cos(x)*sin(y)",CoordinateSystem.Cartesian) },
 
+            {"1",  new DirichletConditionForScalarEllipticProblem<VectorT>("11","x/y*log(x)",CoordinateSystem.Cartesian)},
+            {"21", new DirichletConditionForScalarEllipticProblem<VectorT>("21","x/y*log(x)",CoordinateSystem.Cartesian) },
+            {"22", new DirichletConditionForScalarEllipticProblem<VectorT>("21","x/y*log(x)",CoordinateSystem.Cartesian) },
+            {"23", new DirichletConditionForScalarEllipticProblem<VectorT>("21","x/y*log(x)",CoordinateSystem.Cartesian) },
+            {"24", new DirichletConditionForScalarEllipticProblem<VectorT>("21","x/y*log(x)",CoordinateSystem.Cartesian) },
         };
 
         //Dictionary<string, DirichletConditionForScalarEllipticProblem<VectorT>> dirichletConditions = [];
