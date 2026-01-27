@@ -11,8 +11,7 @@ namespace MKE_complex.FiniteElements;
 public interface IBoundaryCondition<VectorT> where VectorT : VectorBase<double, VectorT>
 {
     IFiniteElementGeometry<VectorT> Geometry { get; }
-    string VolumeMaterial { get; }
-    string EdgeMaterial { get; }
+    string Material { get; }
     int[] DOFs { get; }
     int[] SortedDofs { get; }
     int[] SortedDofIndices { get; }

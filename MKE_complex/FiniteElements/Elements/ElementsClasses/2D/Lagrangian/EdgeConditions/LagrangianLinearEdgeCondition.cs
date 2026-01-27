@@ -10,12 +10,11 @@ using System.Threading.Tasks;
 namespace MKE_complex.FiniteElements.Elements.ElementsClasses._2D.Lagrangian.EdgeConditions;
 
 [FiniteElementAttribute(GeometryType.Line,BasisType.Lagrangian,1)]
-public class LagrangianLinearEdgeCondition(string volume_material, string edge_material, Line geometry) : IBoundaryCondition<Vector2D>
+public class LagrangianLinearEdgeCondition(string material, Line geometry) : IBoundaryCondition<Vector2D>
 {
     private Line geomerty { get; init; } = geometry;
     public FiniteElementGeometry.IFiniteElementGeometry<Vector2D> Geometry => geomerty;
-    public string VolumeMaterial { get; init; } = volume_material;
-    public string EdgeMaterial { get; init; } = edge_material;
+    public string Material { get; init; } = material;
 
     public int[] DOFs { get; private set; } = new int[2];
 

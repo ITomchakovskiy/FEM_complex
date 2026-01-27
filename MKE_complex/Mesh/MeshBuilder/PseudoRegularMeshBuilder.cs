@@ -411,7 +411,7 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
 
         for(int w = 0; w < edgeMaterials.Length; ++w)
         {
-            List<(IFiniteElementGeometry<VectorT> geometry, string volume_material)> boundariesInfo = new();
+            List<IFiniteElementGeometry<VectorT>> geometriesList = new();
 
             string material = edgeMaterials[w];
 
@@ -442,24 +442,22 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
 
                                 int first_vertex_on_edge = vertices_on_y_lines[key].vertex;
 
-                                string volume_material = vertices_on_y_lines[key].volume_material;
-
-                                if (boundariesInfo is List<(IFiniteElementGeometry<Vector2D> geometry, string volume_material)> edgesGeometry2d)
+                                if (geometriesList is List<IFiniteElementGeometry<Vector2D>> edgesGeometry2d)
                                 {
-                                    if (n == 1) edgesGeometry2d.Add((new Line([global_index_y_line,
-                                                                              global_index_y_line_next]), volume_material));
-                                    else edgesGeometry2d.Add((new Line([global_index_y_line,
-                                                                      first_vertex_on_edge]),volume_material));
+                                    if (n == 1) edgesGeometry2d.Add(new Line([global_index_y_line,
+                                                                              global_index_y_line_next]));
+                                    else edgesGeometry2d.Add(new Line([global_index_y_line,
+                                                                       first_vertex_on_edge]));
                                     for (int i = 0; i < n - 2; ++i)
                                     {
                                         int vertex = first_vertex_on_edge + i;
 
-                                        edgesGeometry2d.Add((new Line([vertex,
-                                                                      vertex + 1]),volume_material));
+                                        edgesGeometry2d.Add(new Line([vertex,
+                                                                      vertex + 1]));
                                     }
 
-                                    if (n > 1) edgesGeometry2d.Add((new Line([first_vertex_on_edge + n - 2,
-                                                                            global_index_y_line_next]),volume_material));
+                                    if (n > 1) edgesGeometry2d.Add(new Line([first_vertex_on_edge + n - 2,
+                                                                             global_index_y_line_next]));
                                 }
                             }
                         }
@@ -479,22 +477,22 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
 
                                 string volume_material = vertices_on_x_lines[key].volume_material;
 
-                                if (boundariesInfo is List<(IFiniteElementGeometry<Vector2D> geometry, string volume_material)> edgesGeometry2d)
+                                if (geometriesList is List<IFiniteElementGeometry<Vector2D>> edgesGeometry2d)
                                 {
-                                    if (n == 1) edgesGeometry2d.Add((new Line([global_index_x_line,
-                                                                              global_index_x_line_next]),volume_material));
-                                    else edgesGeometry2d.Add((new Line([global_index_x_line,
-                                                                      first_vertex_on_edge]),volume_material));
+                                    if (n == 1) edgesGeometry2d.Add(new Line([global_index_x_line,
+                                                                              global_index_x_line_next]));
+                                    else edgesGeometry2d.Add(new Line([global_index_x_line,
+                                                                      first_vertex_on_edge]));
                                     for (int i = 0; i < n - 2; ++i)
                                     {
                                         int vertex = first_vertex_on_edge + i;
 
-                                        edgesGeometry2d.Add((new Line([vertex,
-                                                                      vertex + 1]),volume_material));
+                                        edgesGeometry2d.Add(new Line([vertex,
+                                                                      vertex + 1]));
                                     }
 
-                                    if (n > 1) edgesGeometry2d.Add((new Line([first_vertex_on_edge + n - 2,
-                                                                            global_index_x_line_next]),volume_material));
+                                    if (n > 1) edgesGeometry2d.Add(new Line([first_vertex_on_edge + n - 2,
+                                                                             global_index_x_line_next]));
                                 }
                             }
                         }
@@ -508,8 +506,8 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
             switch(dimension)
             {
                 case Dimension.D2:
-                    foreach (var info in boundariesInfo)
-                        boundaries.Add(FiniteElementsCreator.CreateBoundaryCondition(GeometryType.Line, basisType, order,info.volume_material, material, info.geometry)); //костыль с Line
+                    foreach (var geometry in geometriesList)
+                        boundaries.Add(FiniteElementsCreator.CreateBoundaryCondition(GeometryType.Line, basisType, order, material, geometry)); //костыль с Line
                     break;
                 default: throw new NotSupportedException();
             }
@@ -815,7 +813,7 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                 default:
                     throw new Exception("");
             }
-
+            
             edgeBorders = new int[n_ed, 6];
 
             for (int i = 0; i < n_ed; ++i)

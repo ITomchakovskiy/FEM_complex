@@ -11,14 +11,12 @@ namespace MKE_complex.FiniteElements.Elements.ElementsClasses._2D.Lagrangian.Edg
 
 [FiniteElementAttribute(GeometryType.Line, BasisType.Lagrangian, 3)]
 
-public class LagrangianCubicEdgeCondition(string volume_material, string edge_material, Line geometry) : IBoundaryCondition<Vector2D>
+public class LagrangianCubicEdgeCondition(string material, Line geometry) : IBoundaryCondition<Vector2D>
 {
     private Line geometry { get; } = geometry;
     public IFiniteElementGeometry<Vector2D> Geometry => geometry;
 
-    public string VolumeMaterial { get; } = volume_material;
-
-    public string EdgeMaterial { get; } = edge_material;
+    public string Material { get; } = material;
 
     public int[] DOFs { get; private set; } = new int[4];
 
