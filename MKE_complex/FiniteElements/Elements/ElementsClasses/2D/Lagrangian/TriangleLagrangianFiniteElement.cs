@@ -9,30 +9,44 @@ using System.Threading.Tasks;
 
 namespace MKE_complex.FiniteElements.Elements.ElementsClasses._2D.Lagrangian.TriangleElements;
 
-[FiniteElementAttribute(GeometryType.Triangle, BasisType.Lagrangian, 3)]
-
-public class TriangleLagrangianCubicFiniteElement(string material, Triangle geometry) : IFiniteElement<Vector2D>
+[FiniteElementAttribute(GeometryType.Triangle, BasisType.Lagrangian)]
+public class TriangleLagrangianFiniteElement : IFiniteElement<Vector2D>
 {
-    private Triangle geometry { get; init; } = geometry;
+    public TriangleLagrangianFiniteElement(string material, Triangle geometry, int order)
+    {
+        if (order < 1) throw new ArgumentException("");
+        Material = material;
+        this.geometry = geometry;
+        Order = order;
+
+        DOFs = new int[DofsOnVertexCount * geometry.VertexNumber.Length + 
+                       DofsOnEdgeCount * geometry.EdgesCount + 
+                       DofsOnElementCount];
+    }
+
+    private Triangle geometry;
+
     public IFiniteElementGeometry<Vector2D> Geometry => geometry;
 
-    public string Material { get; init; } = material;
+    public int Order { get; }
 
-    public int[] DOFs { get; } = new int[10];
+    public string Material { get; }
 
-    public int DofsOnEdgeCount => 2;
+    public int[] DOFs { get; private set; }
+
+    public int DofsOnEdgeCount => Order - 1;
 
     public int DofsOnVertexCount => 1;
 
-    public int DofsOnElementCount => 1;
+    public int DofsOnElementCount => (Order - 2) * (Order - 1) / 2;
 
     private int[]? sortedDofIndices;
 
     public int[] SortedDofIndices
-    { 
+    {
         get
         {
-            if(sortedDofIndices != null) return sortedDofIndices;
+            if (sortedDofIndices != null) return sortedDofIndices;
             var dofs = new int[DOFs.Length];
             Array.Copy(DOFs, dofs, DOFs.Length);
             var indices = new int[DOFs.Length];
@@ -41,10 +55,17 @@ public class TriangleLagrangianCubicFiniteElement(string material, Triangle geom
             Array.Sort(dofs, indices);
             sortedDofIndices = indices;
             return indices;
-        } 
+        }
     }
 
     public int[] SortedDofs => SortedDofIndices.Select(i => DOFs[i]).ToArray();
+
+    public bool IsDofsConnected(int dof1, int dof2)
+    {
+        if (DOFs.Contains(dof1) && DOFs.Contains(dof2)) return true;
+
+        else return false;
+    }
 
     public void SetEdgeDofs(int localEdgeNumber, int dofNumber)
     {
@@ -52,37 +73,38 @@ public class TriangleLagrangianCubicFiniteElement(string material, Triangle geom
         var edge = Geometry.LocalEdge(localEdgeNumber);
         var edge_global = (Geometry.VertexNumber[edge.Item1], Geometry.VertexNumber[edge.Item2]);
         int increment = 1;
-        if(edge_global.Item1 > edge_global.Item2)
+        if (edge_global.Item1 > edge_global.Item2)
         {
-            ++dofNumber;
+            dofNumber += DofsOnEdgeCount - 1;
             increment = -1;
         }
-        for(int i = 0;i<DofsOnEdgeCount;++i)
+        for (int i = 0; i < DofsOnEdgeCount; ++i)
             DOFs[Geometry.VertexNumber.Length + localEdgeNumber * DofsOnEdgeCount + i] = dofNumber + increment * i;
     }
 
     public void SetEdgesDofs(ReadOnlySpan<int> dofsNumbers)
     {
-        if (dofsNumbers.Length != Geometry.EdgesCount * DofsOnEdgeCount) throw new ArgumentOutOfRangeException();
-        for (int i = 0; i < dofsNumbers.Length; ++i)
+        if(dofsNumbers.Length != Geometry.EdgesCount * DofsOnEdgeCount) throw new ArgumentOutOfRangeException();
+        for(int i = 0; i < dofsNumbers.Length; ++i)
             SetEdgeDofs(i, dofsNumbers[i]);
     }
 
     public void SetElementDofs(int startDofNumber)
     {
-        DOFs[Geometry.VertexNumber.Length * DofsOnVertexCount + Geometry.EdgesCount * DofsOnEdgeCount] = startDofNumber;
+        for(int i = 0; i < DofsOnElementCount; ++i)
+            DOFs[Geometry.VertexNumber.Length * DofsOnVertexCount + Geometry.EdgesCount * DofsOnEdgeCount + i] = startDofNumber + i;
     }
 
     public void SetVericesDofs(ReadOnlySpan<int> dofsNumbers)
     {
-        if (dofsNumbers.Length != Geometry.VertexNumber.Length) throw new ArgumentOutOfRangeException();
+        if(dofsNumbers.Length != Geometry.VertexNumber.Length) throw new ArgumentOutOfRangeException();
         for (int i = 0; i < dofsNumbers.Length; ++i)
             SetVertexDofs(i, dofsNumbers[i]);
     }
 
     public void SetVertexDofs(int localVertexNumber, int dofNumber)
     {
-        if (localVertexNumber >= Geometry.VertexNumber.Length) throw new ArgumentOutOfRangeException();
+        if(localVertexNumber >= Geometry.VertexNumber.Length) throw new ArgumentOutOfRangeException();
         DOFs[localVertexNumber] = dofNumber;
     }
 
@@ -91,20 +113,20 @@ public class TriangleLagrangianCubicFiniteElement(string material, Triangle geom
         List<double> x = new();
         List<double> y = new();
 
-        for(int i = 0;  i < Geometry.VertexNumber.Length; ++i)
+        for (int i = 0; i < Geometry.VertexNumber.Length; ++i)
         {
             x.Add(vertices[Geometry.VertexNumber[i]].X);
             y.Add(vertices[Geometry.VertexNumber[i]].Y);
         }
 
-        for(int i = 0; i < Geometry.EdgesCount; ++i)
+        for (int i = 0; i < Geometry.EdgesCount; ++i)
         {
             Vector2D A = vertices[Geometry.VertexNumber[Geometry.LocalEdge(i).Item1]];
             Vector2D B = vertices[Geometry.VertexNumber[Geometry.LocalEdge(i).Item2]];
-            for(int j = 0; j < DofsOnEdgeCount; ++j)
+            for (int j = 0; j < DofsOnEdgeCount; ++j)
             {
-                Vector2D newVertex = (Vector2D)((A * (DofsOnEdgeCount - j) + B * (1 + j)) / 3d);
-                int dofnum = DOFs[3 + i * 2 + j];
+                Vector2D newVertex = (A * (DofsOnEdgeCount - j) + B * (1 + j)) / (double)(DofsOnEdgeCount + 1);
+                //int dofnum = DOFs[3 + i * 2 + j];
                 x.Add(newVertex.X);
                 y.Add(newVertex.Y);
             }
@@ -114,20 +136,17 @@ public class TriangleLagrangianCubicFiniteElement(string material, Triangle geom
         Vector2D B_ = vertices[Geometry.VertexNumber[1]];
         Vector2D C_ = vertices[Geometry.VertexNumber[2]];
 
-        Vector2D newVertex_ = (Vector2D)((A_ + B_ + C_) / 3d);
-
-        x.Add(newVertex_.X);
-        y.Add(newVertex_.Y);
+        for (int i = 0; i < Order - 2; ++i)
+        {
+            for (int j = 0; j < Order - 2 - i; ++j)
+            {
+                Vector2D newVertex = (A_ * (Order - 2 - i - j) + B_ * (j + 1) + C_ * (i + 1)) / (double)Order;
+                x.Add(newVertex.X);
+                y.Add(newVertex.Y);
+            }
+        }
+        
 
         return (x, y, DOFs.ToList());
-    }
-
-    public bool IsDofsConnected(int dof1, int dof2)
-    {
-        if(DOFs.Contains(dof1) && DOFs.Contains(dof2))
-        {
-            return true;
-        }
-        else return false;
     }
 }

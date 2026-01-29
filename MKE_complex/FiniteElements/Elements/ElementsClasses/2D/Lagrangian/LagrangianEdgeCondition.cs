@@ -9,18 +9,19 @@ using System.Threading.Tasks;
 
 namespace MKE_complex.FiniteElements.Elements.ElementsClasses._2D.Lagrangian.EdgeConditions;
 
-[FiniteElementAttribute(GeometryType.Line, BasisType.Lagrangian, 3)]
-
-public class LagrangianCubicEdgeCondition(string material, Line geometry) : IBoundaryCondition<Vector2D>
+[FiniteElementAttribute(GeometryType.Line, BasisType.Lagrangian)]
+public class LagrangianEdgeCondition(string material, Line geometry, int order) : IBoundaryCondition<Vector2D>
 {
-    private Line geometry { get; } = geometry;
+    private Line geometry { get; init; } = geometry;
     public IFiniteElementGeometry<Vector2D> Geometry => geometry;
 
-    public string Material { get; } = material;
+    public int Order { get; } = order;
 
-    public int[] DOFs { get; private set; } = new int[4];
+    public string Material { get; init; } = material;
 
-    public int DofsOnEdgeCount => 2;
+    public int[] DOFs { get; private set; } = new int[order + 1];
+
+    public int DofsOnEdgeCount => Order - 1;
 
     public int DofsOnVertexCount => 1;
 
@@ -48,15 +49,15 @@ public class LagrangianCubicEdgeCondition(string material, Line geometry) : IBou
     {
         if (localEdgeNumber >= Geometry.EdgesCount) throw new ArgumentOutOfRangeException();
         var edge = Geometry.LocalEdge(localEdgeNumber);
-        var edge_global = (Geometry.VertexNumber[edge.Item1], Geometry.VertexNumber[edge.Item2]);
+        var edge_global = (Geometry.VertexNumber[edge.Item1], Geometry.VertexNumber[edge.Item1]);
         int increment = 1;
         if (edge_global.Item1 > edge_global.Item2)
         {
-            ++dofNumber;
+            dofNumber += DofsOnEdgeCount -1;
             increment = -1;
         }
         for (int i = 0; i < DofsOnEdgeCount; ++i)
-            DOFs[Geometry.VertexNumber.Length + localEdgeNumber * DofsOnEdgeCount + i] = dofNumber + increment * i;
+            DOFs[1 + i] = dofNumber + increment * i;
     }
 
     public void SetEdgesDofs(ReadOnlySpan<int> dofsNumbers)
@@ -75,8 +76,18 @@ public class LagrangianCubicEdgeCondition(string material, Line geometry) : IBou
 
     public void SetVertexDofs(int localVertexNumber, int dofNumber)
     {
-        if(localVertexNumber >= Geometry.VertexNumber.Length) throw new ArgumentOutOfRangeException();
-        DOFs[localVertexNumber] = dofNumber;
+        //if (localVertexNumber >= Geometry.VertexNumber.Length) throw new ArgumentOutOfRangeException();
+        switch(localVertexNumber)
+        {
+            case 0:
+                DOFs[0] = dofNumber;
+                break;
+            case 1:
+                DOFs[^1] = dofNumber;
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
     }
 
     public (List<double> x, List<double> y, List<int> dofs) ReturnDofs(ReadOnlySpan<Vector2D> vertices) //функция для вывода в файл дофов для отображения(только для тестов в лабе)
@@ -84,34 +95,40 @@ public class LagrangianCubicEdgeCondition(string material, Line geometry) : IBou
         List<double> x = new();
         List<double> y = new();
 
-        for (int i = 0; i < Geometry.VertexNumber.Length; ++i)
-        {
-            x.Add(vertices[Geometry.VertexNumber[i]].X);
-            y.Add(vertices[Geometry.VertexNumber[i]].Y);
-        }
+        x.Add(vertices[Geometry.VertexNumber[0]].X);
+        y.Add(vertices[Geometry.VertexNumber[0]].Y);
 
-        for (int i = 0; i < Geometry.EdgesCount; ++i)
-        {
-            Vector2D A = vertices[Geometry.VertexNumber[Geometry.LocalEdge(i).Item1]];
-            Vector2D B = vertices[Geometry.VertexNumber[Geometry.LocalEdge(i).Item2]];
+        //for (int i = 0; i < Geometry.VertexNumber.Length; ++i)
+        //{
+        //    x.Add(vertices[Geometry.VertexNumber[i]].X);
+        //    y.Add(vertices[Geometry.VertexNumber[i]].Y);
+        //}
+
+        //for (int i = 0; i < Geometry.EdgesCount; ++i)
+        //{
+            Vector2D A = vertices[Geometry.VertexNumber[Geometry.LocalEdge(0).Item1]];
+            Vector2D B = vertices[Geometry.VertexNumber[Geometry.LocalEdge(0).Item2]];
             for (int j = 0; j < DofsOnEdgeCount; ++j)
             {
-                Vector2D newVertex = (Vector2D)((A * (DofsOnEdgeCount - j) + B * (1 + j)) / 3d);
-                int dofnum = DOFs[2 + j];
+                Vector2D newVertex = (Vector2D)((A * (DofsOnEdgeCount - j) + B * (1 + j)) / (double)(DofsOnEdgeCount + 1));
+                //int dofnum = DOFs[3 + i * 2 + j];
                 x.Add(newVertex.X);
                 y.Add(newVertex.Y);
             }
-        }
+        //}
+
+        x.Add(vertices[Geometry.VertexNumber[1]].X);
+        y.Add(vertices[Geometry.VertexNumber[1]].Y);
+
+        //Vector2D A_ = vertices[Geometry.VertexNumber[0]];
+        //Vector2D B_ = vertices[Geometry.VertexNumber[1]];
+        //Vector2D C_ = vertices[Geometry.VertexNumber[2]];
+
+        //Vector2D newVertex_ = (Vector2D)((A_ + B_ + C_) / 3d);
+
+        //x.Add(newVertex_.X);
+        //y.Add(newVertex_.Y);
 
         return (x, y, DOFs.ToList());
-    }
-
-    public bool IsDofsConnected(int dof1, int dof2)
-    {
-        if (DOFs.Contains(dof1) && DOFs.Contains(dof2))
-        {
-            return true;
-        }
-        else return false;
     }
 }

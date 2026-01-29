@@ -108,7 +108,7 @@ public class FiniteElementMesh<VectorT>(IReadOnlyList<VectorT> vertices, IReadOn
 
             foreach (var element in elements)
             {
-                if(element is TriangleLagrangianCubicFiniteElement cube && vertices is List<Vector2D> ver2)
+                if(element is TriangleLagrangianFiniteElement cube && vertices is List<Vector2D> ver2)
                 {
                     var info = cube.ReturnDofs(CollectionsMarshal.AsSpan(ver2));
                     x.AddRange(info.x);
@@ -137,7 +137,7 @@ public class FiniteElementMesh<VectorT>(IReadOnlyList<VectorT> vertices, IReadOn
 
             foreach (var edge in edges)
             {
-                if (edge is LagrangianCubicEdgeCondition cube && vertices is List<Vector2D> ver2)
+                if (edge is LagrangianEdgeCondition cube && vertices is List<Vector2D> ver2)
                 {
                     var info = cube.ReturnDofs(CollectionsMarshal.AsSpan(ver2));
                     x.AddRange(info.x);

@@ -49,7 +49,7 @@ BasisType basis = BasisType.Lagrangian; //(BasisType)int.Parse(Console.ReadLine(
 
 //Console.WriteLine($"Choose basis order");
 
-int order = 3; //int.Parse(Console.ReadLine()!);
+int order = 4; //int.Parse(Console.ReadLine()!);
 
 if (order < 1) throw new Exception();
 

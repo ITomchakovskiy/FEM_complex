@@ -10,7 +10,8 @@ namespace MKE_complex.FiniteElements;
 
 public interface IFiniteElement<VectorT> where VectorT : VectorBase<double, VectorT>
 {
-    IFiniteElementGeometry<VectorT> Geometry { get;}
+    IFiniteElementGeometry<VectorT> Geometry { get; }
+    int Order { get; }
     string Material { get; }
     int[] DOFs { get; }
     int[] SortedDofs { get; }
@@ -24,8 +25,8 @@ public interface IFiniteElement<VectorT> where VectorT : VectorBase<double, Vect
     void SetVericesDofs(ReadOnlySpan<int> dofsNumbers);
     void SetEdgeDofs(int localEdgeNumber, int dofNumber);
     void SetEdgesDofs(ReadOnlySpan<int> dofsNumbers);
-
-    //void SetDOFsOnVertices(int );
-    //void SetDOFsOnEdges(int );
-    //void SetDOFsOnElement();
+    //double[][] CalcLocalMatrix(VectorT[] vertices, Func<VectorT, double> Lambda, Func<VectorT, double> Gamma);
+    //double[] CalcLocalRightPart(VectorT[] vertices, Func<VectorT, double> F);
+    //double CalcResultAtPoint(VectorT[] vertices, ReadOnlySpan<double> localSolution, VectorT point);
+    //IFiniteElement<VectorT>[] Refine(ReadOnlySpan<int> FaceVertices, ReadOnlySpan<int> EdgeVertices, int ElementVertex, out bool IsElementVertexNeeded);
 }
