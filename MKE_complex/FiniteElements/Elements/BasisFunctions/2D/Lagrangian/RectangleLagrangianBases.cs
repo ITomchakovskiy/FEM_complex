@@ -40,24 +40,10 @@ public class RectangleLagrangianBases
         return eta;
     }
 
-    public static class LinearBases
+    public Func<int, double, double, double> Psi(int order)
     {
-        public static Func<int, double, double, double> Psi =
-                          (int i, double xi, double eta) => LineLagrangianBases.Psi(1)[localXDofNum(i, 1)](xi) * 
-                                                            LineLagrangianBases.Psi(1)[localYDofNum(i, 1)](eta);
-       
-    }
-
-    public static class QuadraticBases
-    {
-        public static Func<int, double, double, double> Psi =
-                           (int i, double xi, double eta) => LineLagrangianBases.Psi(2)[localXDofNum(i, 2)](xi) *
-                                                             LineLagrangianBases.Psi(2)[localYDofNum(i, 2)](eta);
-    }
-    public static class CubicBases
-    {
-        public static Func<int, double, double, double> Psi =
-                           (int i, double xi, double eta) => LineLagrangianBases.Psi(3)[localXDofNum(i, 3)](xi) *
-                                                             LineLagrangianBases.Psi(3)[localYDofNum(i, 3)](eta);
+        if(order < 1) throw new ArgumentException("wrong element order");
+        return (int i, double xi, double eta) => LineLagrangianBases.Psi(order)[localXDofNum(i, order)](xi) * 
+                                                 LineLagrangianBases.Psi(order)[localYDofNum(i, order)](eta);
     }
 }
