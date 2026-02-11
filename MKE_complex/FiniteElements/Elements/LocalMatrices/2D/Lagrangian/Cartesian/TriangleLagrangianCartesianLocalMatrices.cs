@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace MKE_complex.FiniteElements.Elements.LocalMatrices._2D.Lagrangian;
-public class TriangleLagrangianLocalMatrices
+namespace MKE_complex.FiniteElements.Elements.LocalMatrices._2D.Lagrangian.Cartesian;
+public class TriangleLagrangianCartesianLocalMatrices
 {
 
     public static double[][] CalculateLocalStiffnessMatrix(int order, double[,] alphas, double detD, double Coefficient)
