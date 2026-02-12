@@ -95,6 +95,11 @@ public abstract class VectorBase<T, Tself> where T : INumber<T>
         //return new VectorBase<T>(new_components);
     }
 
+    public static double Length(VectorBase<T, Tself> A, VectorBase<T, Tself> B)
+    {
+        return (B - A).Norm();
+    }
+
     public double Norm()
     {
         if (components is null)

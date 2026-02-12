@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,15 +11,28 @@ namespace MKE_complex.FiniteElements.Elements.BasisFunctions._1D.Lagrangian;
 
 public static class LineLagrangianBases
 {
-    public static double Xi(ReadOnlySpan<Vector1D> vertices, Vector1D point)
+    public static double Xi<VectorT>(ReadOnlySpan<VectorT> vertices, VectorT point) where VectorT : VectorBase<double, VectorT>
     {
-        return (point.X - vertices[0].X) / (vertices[1].X - vertices[0].X);
+        return VectorBase<double, VectorT>.Length(vertices[0], point) / (vertices[1] - vertices[0]).Norm();
     }
 
     public static double Xi(ReadOnlySpan<double> vertices, double point)
     {
         return (point - vertices[0]) / (vertices[1] - vertices[0]);
     }
+
+    public static double LocarCoordinatesToGlobal(ReadOnlySpan<double> vertices, double xi)
+    {
+        double h = vertices[1] - vertices[0];
+        return h * xi + vertices[0];
+    }
+
+    public static VectorT LocarCoordinatesToGlobal<VectorT>(ReadOnlySpan<VectorT> vertices, double xi) where VectorT : VectorBase<double, VectorT>
+    {
+        var h = vertices[1] - vertices[0];
+        return h * xi + vertices[0];
+    }
+
 
     public static Func<double, double>[] Psi(int order)
     {

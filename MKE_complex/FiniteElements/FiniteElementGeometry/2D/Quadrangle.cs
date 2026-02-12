@@ -15,7 +15,7 @@ public record Quadrangle(int[] VertexNumber) : IFiniteElementGeometry<Vector2D>
 
     public (int, int) LocalEdge(int edgeNumber)
     {
-        switch(edgeNumber)
+        switch(edgeNumber) //x0y0 -> x0y1 -> x1y1 -> x1y0
         {
             case 0: return (0, 1);
             case 1: return (1, 2);

@@ -40,6 +40,13 @@ public class RectangleLagrangianBases
         return eta;
     }
 
+    public static Vector2D LocalCoordinatesToGlobal(ReadOnlySpan<Vector2D> vertices, (double xi, double eta) localCoordinates)
+    {
+        double x = LineLagrangianBases.LocarCoordinatesToGlobal([vertices[0].X, vertices[2].X], localCoordinates.xi);
+        double y = LineLagrangianBases.LocarCoordinatesToGlobal([vertices[0].Y, vertices[2].Y], localCoordinates.eta);
+        return new(x,y);
+    }
+
     public Func<int, double, double, double> Psi(int order)
     {
         if(order < 1) throw new ArgumentException("wrong element order");

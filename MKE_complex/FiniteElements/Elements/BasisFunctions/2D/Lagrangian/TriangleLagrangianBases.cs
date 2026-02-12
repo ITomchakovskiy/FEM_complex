@@ -47,6 +47,19 @@ public class TriangleLagrangianBases
         (Vector2D p,  double [,] alpha) => alpha[2,0] + alpha[2,1] * p.X + alpha[2,2] * p.Y,
     ];
 
+    public static Vector2D LocalCoordinatesToGlobal(ReadOnlySpan<Vector2D> vertices, ReadOnlySpan<double> localCoordinates)
+    {
+        double x = 0d;
+        for(int i = 0; i < localCoordinates.Length; ++i)
+            x += localCoordinates[i] * vertices[i].X;
+
+        double y = 0d;
+        for(int i = 0; i < localCoordinates.Length; ++i)
+            y += localCoordinates[i] * vertices[i].Y;
+        
+        return new(x,y);
+    }
+
     public static Func<double[], double>[] Psi(int order)
     {
         switch(order)

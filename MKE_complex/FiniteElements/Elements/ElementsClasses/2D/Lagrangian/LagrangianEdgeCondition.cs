@@ -1,4 +1,6 @@
-﻿using MKE_complex.FiniteElements.FiniteElementGeometry;
+﻿using MKE_complex.FiniteElements.Elements.BasisFunctions._1D.Lagrangian;
+using MKE_complex.FiniteElements.Elements.LocalMatrices._1D.Lagrangian.Cartesian;
+using MKE_complex.FiniteElements.FiniteElementGeometry;
 using MKE_complex.FiniteElements.FiniteElementGeometry._2D;
 using MKE_complex.Vector;
 using System;
@@ -130,5 +132,55 @@ public class LagrangianEdgeCondition(string material, Line geometry, int order) 
         //y.Add(newVertex_.Y);
 
         return (x, y, DOFs.ToList());
+    }
+
+    private double[] GetLocalCoordinatesForDofs()
+    {
+        var LocalCoordinates = new double[DOFs.Length];
+        LocalCoordinates[0] = 0d;
+        LocalCoordinates[^1] = 1d;
+        for(int i = 1; i < DOFs.Length - 1; ++i)
+            LocalCoordinates[i] = (double)i/(double)Order;
+        return LocalCoordinates;
+    }
+
+    public double[][] CalcLocalMatrixForRobinCondition(Vector2D[] vertices, Func<Vector2D, double> Beta)
+    {
+
+    }
+    public double[] CalcLocalRightPartForNeumannCondition(Vector2D[] vertices, Func<Vector2D, double> Theta)
+    {
+        var VerticesAtDofs = GetLocalCoordinatesForDofs().
+                             Select(i => LineLagrangianBases.LocarCoordinatesToGlobal(vertices,i));
+        var thetaValues = VerticesAtDofs.Select(i => Theta(i)).ToArray();
+        double h = VectorBase<double, Vector2D>.Length(vertices[0], vertices[1]);
+
+        var C = LineLagrangianCartesianLocalMatrices.CalculateLocalMassMatrix(Order, h, 1d);
+
+        var localRightPart = new double[DOFs.Length];
+
+        for (int i = 0; i < localRightPart.Length; ++i)
+        {
+            for (int j = 0; j <= i; ++j)
+                localRightPart[i] += C[i][j] * thetaValues[j];
+            for (int j = i + 1; j < localRightPart.Length; ++j)
+                localRightPart[i] += C[j][i] * thetaValues[j];
+        }
+
+        return localRightPart;
+    }
+    double[] CalcLocalRightPartForRobinCondition(Vector2D[] vertices, Func<Vector2D, double> Beta, Func<Vector2D, double> UBeta)
+    {
+        
+    }
+    public double[] CalcLocalRightPartForDirichletCondition(Vector2D[] vertices, Func<Vector2D, double> Ug)
+    {
+        var VerticesAtDofs = GetLocalCoordinatesForDofs().
+                             Select(i => LineLagrangianBases.LocarCoordinatesToGlobal(vertices,i));
+        return VerticesAtDofs.Select(i => Ug(i)).ToArray();
+    }
+    IBoundaryCondition<VectorT>[] Refine(ReadOnlySpan<int> FaceVertices, ReadOnlySpan<int> EdgeVertices)
+    {
+        
     }
 }
