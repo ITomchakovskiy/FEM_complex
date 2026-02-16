@@ -181,7 +181,7 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                                             lines[y_line + 1, x_line + 1],
                                             lines[y_line, x_line + 1]
                                         ];
-                                        Vector2D vertex = Quadrangle.PointOnQuadrangle(
+                                        Vector2D vertex = GeometricMethods.PointOnQuadrangle(
                                             quadrangle,
                                             x_intervals[x_line], x_stretch[x_line], x_ind,
                                             y_intervals[y_line], y_stretch[y_line], y_ind
@@ -221,7 +221,7 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                                                                       new(lines[y_line + 1, x_line], z_lines![z_line + 1]),
                                                                       new(lines[y_line + 1, x_line + 1], z_lines![z_line + 1]),
                                                                       new(lines[y_line, x_line + 1], z_lines![z_line + 1])];
-                                                Vector3D vertex = Hexahedron.PointOnHexagon(hexagon, x_intervals[x_line], x_stretch[x_line], x_ind, y_intervals[y_line], y_stretch[y_line], y_ind, z_intervals[z_line], z_stretch![z_line], z_ind);
+                                                Vector3D vertex = GeometricMethods.PointOnHexagon(hexagon, x_intervals[x_line], x_stretch[x_line], x_ind, y_intervals[y_line], y_stretch[y_line], y_ind, z_intervals[z_line], z_stretch![z_line], z_ind);
                                                 if (vertices is List<Vector3D> vertices3d)
                                                     vertices3d.Add(vertex);
                                             }
@@ -293,7 +293,7 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                                                 quadrangle_vertex_numbers[i] = inner_index_start + (n_x - 2) * (local_index.y - 1) + local_index.x - 1;
                                         }
 
-                                        Quadrangle quadrangle = new(quadrangle_vertex_numbers);
+                                        Quadrangle<Vector2D> quadrangle = new(quadrangle_vertex_numbers);
                                         if (elementsGeometry is List<IFiniteElementGeometry<Vector2D>> elementsGeometry2d)
                                         {
                                             switch (meshType)
@@ -444,20 +444,20 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
 
                                 if (geometriesList is List<IFiniteElementGeometry<Vector2D>> edgesGeometry2d)
                                 {
-                                    if (n == 1) edgesGeometry2d.Add(new Line([global_index_y_line,
-                                                                              global_index_y_line_next]));
-                                    else edgesGeometry2d.Add(new Line([global_index_y_line,
-                                                                       first_vertex_on_edge]));
+                                    if (n == 1) edgesGeometry2d.Add(new Line<Vector2D>([global_index_y_line,
+                                                                                        global_index_y_line_next]));
+                                    else edgesGeometry2d.Add(new Line<Vector2D>([global_index_y_line,
+                                                                                 first_vertex_on_edge]));
                                     for (int i = 0; i < n - 2; ++i)
                                     {
                                         int vertex = first_vertex_on_edge + i;
 
-                                        edgesGeometry2d.Add(new Line([vertex,
+                                        edgesGeometry2d.Add(new Line<Vector2D>([vertex,
                                                                       vertex + 1]));
                                     }
 
-                                    if (n > 1) edgesGeometry2d.Add(new Line([first_vertex_on_edge + n - 2,
-                                                                             global_index_y_line_next]));
+                                    if (n > 1) edgesGeometry2d.Add(new Line<Vector2D>([first_vertex_on_edge + n - 2,
+                                                                                       global_index_y_line_next]));
                                 }
                             }
                         }
@@ -479,20 +479,20 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
 
                                 if (geometriesList is List<IFiniteElementGeometry<Vector2D>> edgesGeometry2d)
                                 {
-                                    if (n == 1) edgesGeometry2d.Add(new Line([global_index_x_line,
-                                                                              global_index_x_line_next]));
-                                    else edgesGeometry2d.Add(new Line([global_index_x_line,
-                                                                      first_vertex_on_edge]));
+                                    if (n == 1) edgesGeometry2d.Add(new Line<Vector2D>([global_index_x_line,
+                                                                                        global_index_x_line_next]));
+                                    else edgesGeometry2d.Add(new Line<Vector2D>([global_index_x_line,
+                                                                                 first_vertex_on_edge]));
                                     for (int i = 0; i < n - 2; ++i)
                                     {
                                         int vertex = first_vertex_on_edge + i;
 
-                                        edgesGeometry2d.Add(new Line([vertex,
-                                                                      vertex + 1]));
+                                        edgesGeometry2d.Add(new Line<Vector2D>([vertex,
+                                                                                vertex + 1]));
                                     }
 
-                                    if (n > 1) edgesGeometry2d.Add(new Line([first_vertex_on_edge + n - 2,
-                                                                             global_index_x_line_next]));
+                                    if (n > 1) edgesGeometry2d.Add(new Line<Vector2D>([first_vertex_on_edge + n - 2,
+                                                                                       global_index_x_line_next]));
                                 }
                             }
                         }
@@ -533,8 +533,8 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                                     borderDictionary[key] = (index, volume_material);
                                     for (int x_ind = 1; x_ind < n; ++x_ind)
                                     {
-                                        Vector2D vector = (Vector2D)Vector2D.PointOnLine(lines![y, x],
-                                                                        lines[y, x + 1], n, k, x_ind);
+                                        Vector2D vector = GeometricMethods.PointOnLine(lines![y, x],
+                                                                                       lines[y, x + 1], n, k, x_ind);
                                         if (vertices is List<Vector2D> vertices2d)
                                             vertices2d.Add(vector);
                                     }
@@ -550,7 +550,7 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                                     borderDictionary[key] = (index, volume_material);
                                     for (int y_ind = 1; y_ind < n; ++y_ind)
                                     {
-                                        Vector2D vector = (Vector2D)Vector2D.PointOnLine(lines![y, x], lines[y + 1, x], n, k, y_ind);
+                                        Vector2D vector = GeometricMethods.PointOnLine(lines![y, x], lines[y + 1, x], n, k, y_ind);
                                         if (vertices is List<Vector2D> vertices2d)
                                             vertices2d.Add(vector);
                                     }
@@ -577,7 +577,7 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                                                           lines[y, x].Y, z_lines![z]);
                                         Vector3D p2 = new(lines[y, x + 1].X,
                                                           lines[y, x + 1].Y, z_lines![z]);
-                                        Vector3D vector = (Vector3D)Vector3D.PointOnLine(p1, p2, n, k, x_ind);
+                                        Vector3D vector = GeometricMethods.PointOnLine(p1, p2, n, k, x_ind);
 
                                         if (vertices is List<Vector3D> vertices3d)
                                             vertices3d.Add(vector);
@@ -599,7 +599,7 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                                                           lines[y, x].Y, z_lines![z]);
                                         Vector3D p2 = new(lines[y + 1, x].X,
                                                           lines[y + 1, x].Y, z_lines![z]);
-                                        Vector3D vector = (Vector3D)Vector3D.PointOnLine(p1, p2, n, k, y_ind);
+                                        Vector3D vector = GeometricMethods.PointOnLine(p1, p2, n, k, y_ind);
 
                                         if (vertices is List<Vector3D> vertices3d)
                                             vertices3d.Add(vector);
@@ -620,7 +620,7 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                                                           lines[y, x].Y, z_lines![z]);
                                         Vector3D p2 = new(lines[y, x].X,
                                                           lines[y, x].Y, z_lines![z + 1]);
-                                        Vector3D vector = (Vector3D)Vector3D.PointOnLine(p1, p2, n, k, z_ind);
+                                        Vector3D vector = GeometricMethods.PointOnLine(p1, p2, n, k, z_ind);
 
                                         if (vertices is List<Vector3D> vertices3d)
                                             vertices3d.Add(vector);

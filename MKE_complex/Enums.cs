@@ -9,6 +9,6 @@ namespace MKE_complex;
 
 public enum Dimension {D1,D2,D3}
 
-public enum GeometryType {Line, Triangle, Quadrangle, Hexagon, Tetrahedron, Mix}
+public enum GeometryType {Line, Triangle, Quadrangle, Rectangle, Hexagon, Tetrahedron, Mix}
 
 public enum BasisType { Lagrangian, Hermitian}

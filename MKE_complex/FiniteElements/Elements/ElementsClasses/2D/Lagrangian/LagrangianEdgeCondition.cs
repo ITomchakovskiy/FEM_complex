@@ -1,4 +1,5 @@
 ﻿using MKE_complex.FiniteElements.Elements.BasisFunctions._1D.Lagrangian;
+using MKE_complex.FiniteElements.Elements.BasisFunctions.LocalCoordinates._1D;
 using MKE_complex.FiniteElements.Elements.LocalMatrices._1D.Lagrangian.Cartesian;
 using MKE_complex.FiniteElements.FiniteElementGeometry;
 using MKE_complex.FiniteElements.FiniteElementGeometry._2D;
@@ -12,9 +13,9 @@ using System.Threading.Tasks;
 namespace MKE_complex.FiniteElements.Elements.ElementsClasses._2D.Lagrangian.EdgeConditions;
 
 [FiniteElementAttribute(GeometryType.Line, BasisType.Lagrangian)]
-public class LagrangianEdgeCondition(string material, Line geometry, int order) : IBoundaryCondition<Vector2D>
+public class LagrangianEdgeCondition(string material, Line<Vector2D> geometry, int order) : IBoundaryCondition<Vector2D>
 {
-    private Line geometry { get; init; } = geometry;
+    private Line<Vector2D> geometry { get; init; } = geometry;
     public IFiniteElementGeometry<Vector2D> Geometry => geometry;
 
     public int Order { get; } = order;
@@ -146,12 +147,17 @@ public class LagrangianEdgeCondition(string material, Line geometry, int order) 
 
     public double[][] CalcLocalMatrixForRobinCondition(Vector2D[] vertices, Func<Vector2D, double> Beta)
     {
+        var VerticesAtDofs = GetLocalCoordinatesForDofs().
+                             Select(i => LineLocalCoordinates.LocalCoordinatesToGlobal(vertices,i));
+        double AvgBeta = VerticesAtDofs.Select(i => Beta(i)).Average();
+        double h = VectorBase<double, Vector2D>.Length(vertices[0], vertices[1]);
 
+        return LineLagrangianCartesianLocalMatrices.CalculateLocalMassMatrix(Order, h, AvgBeta);
     }
     public double[] CalcLocalRightPartForNeumannCondition(Vector2D[] vertices, Func<Vector2D, double> Theta)
     {
         var VerticesAtDofs = GetLocalCoordinatesForDofs().
-                             Select(i => LineLagrangianBases.LocarCoordinatesToGlobal(vertices,i));
+                             Select(i => LineLocalCoordinates.LocalCoordinatesToGlobal(vertices,i));
         var thetaValues = VerticesAtDofs.Select(i => Theta(i)).ToArray();
         double h = VectorBase<double, Vector2D>.Length(vertices[0], vertices[1]);
 
@@ -169,18 +175,38 @@ public class LagrangianEdgeCondition(string material, Line geometry, int order) 
 
         return localRightPart;
     }
-    double[] CalcLocalRightPartForRobinCondition(Vector2D[] vertices, Func<Vector2D, double> Beta, Func<Vector2D, double> UBeta)
+    public double[] CalcLocalRightPartForRobinCondition(Vector2D[] vertices, Func<Vector2D, double> Beta, Func<Vector2D, double> UBeta)
     {
-        
+        var VerticesAtDofs = GetLocalCoordinatesForDofs().
+                             Select(i => LineLocalCoordinates.LocalCoordinatesToGlobal(vertices,i));
+        var UBetaValues = VerticesAtDofs.Select(i => UBeta(i)).ToArray();
+        double AvgBetta = VerticesAtDofs.Select(i => Beta(i)).Average();
+        double h = VectorBase<double, Vector2D>.Length(vertices[0], vertices[1]);
+
+        var M = LineLagrangianCartesianLocalMatrices.CalculateLocalMassMatrix(Order, h, AvgBetta);
+
+        var localRightPart = new double[DOFs.Length];
+
+        for (int i = 0; i < localRightPart.Length; ++i)
+        {
+            for (int j = 0; j <= i; ++j)
+                localRightPart[i] += M[i][j] * UBetaValues[j];
+            for (int j = i + 1; j < localRightPart.Length; ++j)
+                localRightPart[i] += M[j][i] * UBetaValues[j];
+        }
+
+        return localRightPart;
     }
     public double[] CalcLocalRightPartForDirichletCondition(Vector2D[] vertices, Func<Vector2D, double> Ug)
     {
         var VerticesAtDofs = GetLocalCoordinatesForDofs().
-                             Select(i => LineLagrangianBases.LocarCoordinatesToGlobal(vertices,i));
+                             Select(i => LineLocalCoordinates.LocalCoordinatesToGlobal(vertices,i));
         return VerticesAtDofs.Select(i => Ug(i)).ToArray();
     }
-    IBoundaryCondition<VectorT>[] Refine(ReadOnlySpan<int> FaceVertices, ReadOnlySpan<int> EdgeVertices)
+
+    IBoundaryCondition<Vector2D>[] IBoundaryCondition<Vector2D>.Refine(ReadOnlySpan<int> FaceVertices, ReadOnlySpan<int> EdgeVertices)
     {
-        
+        var refinedGeometry = geometry.Refine(FaceVertices, EdgeVertices, -1, out _ );
+        return refinedGeometry.Select(g => new LagrangianEdgeCondition(Material, (Line<Vector2D>)g, Order)).ToArray();
     }
 }

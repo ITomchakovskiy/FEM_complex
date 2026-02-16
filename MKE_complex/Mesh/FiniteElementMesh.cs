@@ -68,7 +68,7 @@ public class FiniteElementMesh<VectorT>(IReadOnlyList<VectorT> vertices, IReadOn
             foreach (var element in elements)
             {
                 var geometry = element.Geometry;
-                if (geometry is Triangle)
+                if (geometry is Triangle<Vector2D>)
                 {
                     for (int i = 0; i < geometry.VertexNumber.Length; ++i)
                         swElements.Write($"{geometry.VertexNumber[i]} ");
@@ -86,7 +86,7 @@ public class FiniteElementMesh<VectorT>(IReadOnlyList<VectorT> vertices, IReadOn
             foreach (var edge in boundaries)
             {
                 var geometry = edge.Geometry;
-                if (geometry is Line)
+                if (geometry is Line<Vector2D>)
                 {
                     for (int i = 0; i < geometry.VertexNumber.Length; ++i)
                         swEdges.Write($"{geometry.VertexNumber[i]} ");

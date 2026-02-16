@@ -95,9 +95,14 @@ public abstract class VectorBase<T, Tself> where T : INumber<T>
         //return new VectorBase<T>(new_components);
     }
 
-    public static double Length(VectorBase<T, Tself> A, VectorBase<T, Tself> B)
+    public static double Length(Tself A, Tself B)
     {
         return (B - A).Norm();
+    }
+
+    public double Length(Tself other)
+    {
+        return (other - this).Norm();
     }
 
     public double Norm()
@@ -146,21 +151,6 @@ public abstract class VectorBase<T, Tself> where T : INumber<T>
 
         return this / norm;
     }
-    public static Tself PointOnLine(Tself A, Tself B, int n, double k, int ind) //for mesh initialization
-    {
-        if (A.components is null || B.components is null || A.components.Length != B.components.Length)
-            throw new ArgumentException();
-        if (ind == 0) return A;
-        if (ind == n) return B;
-        Tself r = B - A;
-        double l = r.Norm();
-        if (Math.Abs(k - 1d) < 1.0E-13)
-            return A + r / n * ind;
-
-        double l_ind = l * (1d - Math.Pow(Math.Abs(k), ind)) / (1d - Math.Pow(Math.Abs(k), n));
-
-        l_ind = k > 0 ? l_ind : l - l_ind;
-        return A + l_ind / l * r;
-    }
+    
    //public static IVector operator +(IVector v1, IVector v2);
 }

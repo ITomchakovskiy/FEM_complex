@@ -12,41 +12,6 @@ public class RectangleLagrangianBases
 
     public static int localYDofNum(int i, int order) => i / (order + 1);
 
-    public static (double xi, double eta) XiEta(ReadOnlySpan<Vector2D> vertices, Vector2D point)
-    {
-        Vector2D[] opposingVertices = [vertices[0], vertices[2]];
-        Array.Sort(opposingVertices, (a, b) => a.X.CompareTo(b.X));
-        double[] x = opposingVertices.Select(i => i.X).ToArray();
-        double[] y = opposingVertices.Select(i => i.Y).ToArray();
-        double xi = LineLagrangianBases.Xi(x, point.X);
-        double eta = LineLagrangianBases.Xi(y, point.Y);
-        return (xi, eta);
-    }
-    public static double Xi(ReadOnlySpan<Vector2D> vertices, Vector2D point)
-    {
-        Vector2D[] opposingVertices = [vertices[0], vertices[2]];
-        Array.Sort(opposingVertices, (a, b) => a.X.CompareTo(b.X));
-        double[] x = opposingVertices.Select(i => i.X).ToArray();
-        double xi = LineLagrangianBases.Xi(x, point.X);
-        return xi;
-    }
-
-    public static double Eta(ReadOnlySpan<Vector2D> vertices, Vector2D point)
-    {
-        Vector2D[] opposingVertices = [vertices[0], vertices[2]];
-        Array.Sort(opposingVertices, (a, b) => a.X.CompareTo(b.X));
-        double[] y = opposingVertices.Select(i => i.Y).ToArray();
-        double eta = LineLagrangianBases.Xi(y, point.Y);
-        return eta;
-    }
-
-    public static Vector2D LocalCoordinatesToGlobal(ReadOnlySpan<Vector2D> vertices, (double xi, double eta) localCoordinates)
-    {
-        double x = LineLagrangianBases.LocarCoordinatesToGlobal([vertices[0].X, vertices[2].X], localCoordinates.xi);
-        double y = LineLagrangianBases.LocarCoordinatesToGlobal([vertices[0].Y, vertices[2].Y], localCoordinates.eta);
-        return new(x,y);
-    }
-
     public Func<int, double, double, double> Psi(int order)
     {
         if(order < 1) throw new ArgumentException("wrong element order");

@@ -1,4 +1,5 @@
-﻿using MKE_complex.Vector;
+﻿using MKE_complex.FiniteElements.Elements.BasisFunctions.LocalCoordinates._2D;
+using MKE_complex.Vector;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,11 +8,25 @@ using System.Threading.Tasks;
 
 namespace MKE_complex.FiniteElements.FiniteElementGeometry._2D;
 
-public record Triangle(int[] VertexNumber) : IFiniteElementGeometry<Vector2D>
+public record Triangle<VectorT>(int[] VertexNumber) : IFiniteElementGeometry<VectorT> where VectorT : VectorBase<double, VectorT>
 {
     public GeometryType GeometryType => GeometryType.Triangle;
 
     public int EdgesCount => 3;
+
+    public bool IsPointInElement(VectorT point, VectorT[] vertices)
+    {
+        if(point is Vector2D point2D && vertices is Vector2D[] vertices2D)
+        {
+            var alphas = TriangleLocalCoordinates.Alpha.CalcAlphas(vertices2D);
+            var LocalCoordinates = TriangleLocalCoordinates.LocalCoordinates.Select(i => i(point2D, alphas));
+            return LocalCoordinates.All(i => i >= -1E-15);
+        }
+        else
+        {
+            throw new ArgumentException("Method is used only for volume elements");
+        }
+    }
 
     public (int, int) LocalEdge(int edgeNumber)
     {
@@ -22,5 +37,10 @@ public record Triangle(int[] VertexNumber) : IFiniteElementGeometry<Vector2D>
             case 2: return (2, 0);
             default: throw new Exception("wrong edge number");
         }
+    }
+
+    public IFiniteElementGeometry<VectorT>[] Refine(ReadOnlySpan<int> FaceVertices, ReadOnlySpan<int> EdgeVertices, int ElementVertex, out bool IsElementVertexNeeded)
+    {
+        throw new NotImplementedException();
     }
 }

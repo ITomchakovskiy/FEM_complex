@@ -1,4 +1,7 @@
-﻿using MKE_complex.FiniteElements.FiniteElementGeometry;
+﻿using MKE_complex.FiniteElements.Elements.BasisFunctions._2D.Lagrangian;
+using MKE_complex.FiniteElements.Elements.BasisFunctions.LocalCoordinates._2D;
+using MKE_complex.FiniteElements.Elements.LocalMatrices._2D.Lagrangian.Cartesian;
+using MKE_complex.FiniteElements.FiniteElementGeometry;
 using MKE_complex.FiniteElements.FiniteElementGeometry._2D;
 using MKE_complex.Vector;
 using System;
@@ -12,7 +15,7 @@ namespace MKE_complex.FiniteElements.Elements.ElementsClasses._2D.Lagrangian.Tri
 [FiniteElementAttribute(GeometryType.Triangle, BasisType.Lagrangian)]
 public class TriangleLagrangianFiniteElement : IFiniteElement<Vector2D>
 {
-    public TriangleLagrangianFiniteElement(string material, Triangle geometry, int order)
+    public TriangleLagrangianFiniteElement(string material, Triangle<Vector2D> geometry, int order)
     {
         if (order < 1) throw new ArgumentException("");
         Material = material;
@@ -24,7 +27,7 @@ public class TriangleLagrangianFiniteElement : IFiniteElement<Vector2D>
                        DofsOnElementCount];
     }
 
-    private Triangle geometry;
+    private Triangle<Vector2D> geometry;
 
     public IFiniteElementGeometry<Vector2D> Geometry => geometry;
 
@@ -148,5 +151,121 @@ public class TriangleLagrangianFiniteElement : IFiniteElement<Vector2D>
         
 
         return (x, y, DOFs.ToList());
+    }
+
+    private double[][] GetLocalCoordinatesForDofs()
+    {
+        double[][] LocalCoordinates = new double[DOFs.Length][];
+
+        int dofnumber = 0;
+
+        for(; dofnumber < Geometry.VertexNumber.Length; ++dofnumber) //vertices dofs
+        {
+            LocalCoordinates[dofnumber] = new double[Geometry.VertexNumber.Length];
+            LocalCoordinates[dofnumber][dofnumber] = 1d;
+        }
+
+        for(int i = 0; i < Geometry.EdgesCount; ++i) //edges dofs
+        {
+            var LocalEdge = Geometry.LocalEdge(i);
+            for(int j = 0; j < DofsOnEdgeCount; ++j, ++dofnumber)
+            {
+                var CoordinatesForDof = new double[Geometry.VertexNumber.Length];
+
+                CoordinatesForDof[LocalEdge.Item1] = (double)(DofsOnEdgeCount - j) / (double)(DofsOnEdgeCount + 1);
+                CoordinatesForDof[LocalEdge.Item2] = (double)(j + 1) / (double)(DofsOnEdgeCount + 1);
+
+                LocalCoordinates[dofnumber] = CoordinatesForDof;
+            }
+        }
+
+        for(int i = 0; i < Order - 2; ++i) //elements dofs
+        {
+            double coordinate3 = (double)(i + 1) / (double)Order;
+            for(int j = 0; j < Order - 2 - i; ++j, ++dofnumber)
+            {
+                double[] CoordinatesForDof = [
+                                                (double)(Order - 2 - i - j) / (double)Order,
+                                                (double)(j + 1) / (double)Order,
+                                                coordinate3
+                ];
+
+                LocalCoordinates[dofnumber] = CoordinatesForDof;
+            }
+        }
+
+        return LocalCoordinates;
+    }
+
+    public double[][] CalcLocalMatrix(Vector2D[] vertices, Func<Vector2D, double> Lambda, Func<Vector2D, double> Gamma)
+    {
+        var Alpha = TriangleLocalCoordinates.Alpha.CalcAlphas(vertices);
+
+        var AbsDetD = TriangleLocalCoordinates.Alpha.CalcAbsDetD(vertices);
+
+        var VerticesAtDofs = GetLocalCoordinatesForDofs().Select(i => TriangleLocalCoordinates.LocalCoordinatesToGlobal(vertices, i)).ToArray();
+
+        double LambdaAvg = VerticesAtDofs.Average(i => Lambda(i));
+        double GammaAvg = VerticesAtDofs.Average(i => Gamma(i));
+
+        var LocalStiffnessMatrix = TriangleLagrangianCartesianLocalMatrices.
+                                    CalculateLocalStiffnessMatrix(Order, Alpha, AbsDetD, LambdaAvg);
+
+        var LocalMassMatrix = TriangleLagrangianCartesianLocalMatrices.
+                              CalculateLocalMassMatrix(Order, Alpha, AbsDetD, GammaAvg);
+
+        var result = LocalStiffnessMatrix;
+
+        for(int i = 0; i < DOFs.Length; ++i)
+        {
+            for(int j = 0; j < DOFs.Length; ++j)
+                result[i][j] += LocalMassMatrix[i][j];
+        }
+                                  
+        return result;
+    }
+
+    public double[] CalcLocalRightPart(Vector2D[] vertices, Func<Vector2D, double> F)
+    {
+        var Alpha = TriangleLocalCoordinates.Alpha.CalcAlphas(vertices);
+
+        var AbsDetD = TriangleLocalCoordinates.Alpha.CalcAbsDetD(vertices);
+
+        var VerticesAtDofs = GetLocalCoordinatesForDofs().Select(i => TriangleLocalCoordinates.LocalCoordinatesToGlobal(vertices, i)).ToArray();
+
+        double[] FValuesAtDofs = VerticesAtDofs.Select(i => F(i)).ToArray();
+
+        var LocalMassMatrix = TriangleLagrangianCartesianLocalMatrices.
+                              CalculateLocalMassMatrix(Order, Alpha, AbsDetD, 1d);
+
+        var result = new double[DOFs.Length];
+
+        for(int i = 0; i < DOFs.Length; ++i)
+        {
+            for(int j = 0; j < DOFs.Length; ++j)
+                result[i] += LocalMassMatrix[i][j] * FValuesAtDofs[j];
+        }
+                                  
+        return result;
+    }
+
+    public double CalcResultAtPoint(Vector2D[] vertices, ReadOnlySpan<double> localSolution, Vector2D point)
+    {
+        var Alpha = TriangleLocalCoordinates.Alpha.CalcAlphas(vertices);
+
+        var LocalCoordinates = TriangleLocalCoordinates.LocalCoordinates.Select(i => i(point, Alpha)).ToArray();
+         
+        var basisFunctionValues = TriangleLagrangianBases.Psi(Order).Select(i => i(LocalCoordinates)).ToArray();
+
+        double result = 0d;
+
+        for(int i = 0; i < DOFs.Length; ++i)
+            result += localSolution[i] * basisFunctionValues[i];
+        return result;
+    }
+
+    public IFiniteElement<Vector2D>[] Refine(ReadOnlySpan<int> FaceVertices, ReadOnlySpan<int> EdgeVertices, int ElementVertex, out bool IsElementVertexNeeded)
+    {
+        throw new NotImplementedException();
     }
 }

@@ -3,6 +3,9 @@ using MKE_complex;
 using MKE_complex.DofsEnumerators;
 using MKE_complex.FiniteElements;
 using MKE_complex.FiniteElements.Elements;
+using MKE_complex.FiniteElements.Elements.ElementsClasses._2D.Lagrangian.EdgeConditions;
+using MKE_complex.FiniteElements.Elements.ElementsClasses._2D.Lagrangian.TriangleElements;
+using MKE_complex.FiniteElements.FiniteElementGeometry._2D;
 using MKE_complex.Matrix;
 using MKE_complex.Mesh;
 using MKE_complex.Mesh.MeshBuilder;
@@ -69,7 +72,6 @@ if (mesh is FiniteElementMesh<Vector2D> mesh2d)
     mesh2d.SaveMeshGeometry("input_points", "input_triangles", "input_dofs", "input_edges", "input_edgeDofs");
 
 Console.WriteLine("Done");
-
 //
 Console.WriteLine(new SpecificMaterials().Iron.Lambda(new Vector2D(0d,0d)));
 Console.WriteLine(new SpecificMaterials().Iron.Gamma(new Vector2D(0d, 0d)));
