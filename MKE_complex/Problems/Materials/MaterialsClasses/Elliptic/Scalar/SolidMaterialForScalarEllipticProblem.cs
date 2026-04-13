@@ -13,11 +13,8 @@ namespace MKE_complex.Problems.Materials.MaterialsClasses.Elliptic.Scalar;
 public class SolidMaterialForScalarEllipticProblem<VectorT> : IMaterial<VectorT> where VectorT : VectorBase<double, VectorT>
 {
     public string Name { get; init; }
-
     private IGenericExpression<double> lambdaExp;
-
     private IGenericExpression<double> gammaExp;
-
     private IGenericExpression<double> fExp;
 
     private string[] coordinates;
@@ -38,26 +35,13 @@ public class SolidMaterialForScalarEllipticProblem<VectorT> : IMaterial<VectorT>
 
     public double F(VectorT point) => EvaluateExpression(fExp, point);
 
-    public SolidMaterialForScalarEllipticProblem(string name, string lambda, string gamma, string f, CoordinateSystem system)
+    public SolidMaterialForScalarEllipticProblem(string name, string lambda, string gamma, string f, string[] coordinates)
     {
         Name = name;
 
         context = new ExpressionContext();
 
-        switch(system)
-        {
-            case CoordinateSystem.Cartesian:
-                coordinates = ["x", "y", "z" ];
-                break;
-            case CoordinateSystem.Cylindrical:
-                coordinates = ["r", "z", "phi" ];
-                break;
-            case CoordinateSystem.Spherical:
-                coordinates = ["r", "phi", "psi"];
-                break;
-            default:
-                throw new NotImplementedException();
-        }
+        this.coordinates = coordinates;
 
         context.Variables[coordinates[0]] = 0d;
         context.Variables[coordinates[1]] = 0d;
@@ -69,4 +53,9 @@ public class SolidMaterialForScalarEllipticProblem<VectorT> : IMaterial<VectorT>
 
         fExp = context.CompileGeneric<double>(f);
     }
+
+    public SolidMaterialForScalarEllipticProblem(MaterialFileInfo fileInfo, string[] coordinates) : 
+    this(fileInfo.Name, fileInfo.Functions["Lambda"], fileInfo.Functions["Gamma"], fileInfo.Functions["F"], coordinates) {}
+
+    
 }

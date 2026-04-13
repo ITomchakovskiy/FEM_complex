@@ -35,26 +35,13 @@ public class RobinConditionForScalarEllipticProblem<VectorT> : IMaterial<VectorT
     public double UBeta(VectorT point) => EvaluateExpression(uBetaExp, point);
 
 
-    public RobinConditionForScalarEllipticProblem(string name, string beta, string uBeta, CoordinateSystem system)
+    public RobinConditionForScalarEllipticProblem(string name, string beta, string uBeta, string[] coordinates)
     {
         Name = name;
 
         context = new ExpressionContext();
 
-        switch (system)
-        {
-            case CoordinateSystem.Cartesian:
-                coordinates = ["x", "y", "z"];
-                break;
-            case CoordinateSystem.Cylindrical:
-                coordinates = ["r", "z", "phi"];
-                break;
-            case CoordinateSystem.Spherical:
-                coordinates = ["r", "phi", "psi"];
-                break;
-            default:
-                throw new NotImplementedException();
-        }
+        this.coordinates = coordinates;
 
         context.Variables[coordinates[0]] = 0d;
         context.Variables[coordinates[1]] = 0d;
@@ -65,4 +52,7 @@ public class RobinConditionForScalarEllipticProblem<VectorT> : IMaterial<VectorT
         uBetaExp = context.CompileGeneric<double>(uBeta);
 
     }
+
+    public RobinConditionForScalarEllipticProblem(MaterialFileInfo fileInfo, string[] coordinates) : 
+    this(fileInfo.Name, fileInfo.Functions["Beta"], fileInfo.Functions["UBeta"], coordinates){}
 }

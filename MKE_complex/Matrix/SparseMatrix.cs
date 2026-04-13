@@ -21,25 +21,15 @@ public class SparseMatrix<T> where T : INumber<T>
     public int ElementsCount => Ja.Length;
     public bool IsSymmetric => Au.Length == 0;
 
-    public T? GetElement(int i, int j)
+    public int GetOffDiagonalElementIndex(int j, int start_index, int end_index)
     {
-        if(i >= N || j >= N) throw new ArgumentOutOfRangeException();
-        if(i == j)
+        int element_number = Array.BinarySearch(Ja, start_index, end_index - start_index, j);
+
+        if (element_number >= 0)
         {
-            return Di[i];
+            return element_number;
         }
-
-        int row_index = i > j ? i : j;
-
-        int element_number = Array.BinarySearch(Ja, Ia[row_index], Ia[row_index + 1] - Ia[row_index], j);
-
-        if(element_number >= 0)
-        {
-            if (!IsSymmetric) return i > j ? Al[element_number] : Au[element_number];
-            return Al[row_index];
-        }
-
-        return default;
+        else throw new ArgumentException();
     }
 
     public SparseMatrix(ReadOnlySpan<int> ia, ReadOnlySpan<int> ja, bool isSymmetric)

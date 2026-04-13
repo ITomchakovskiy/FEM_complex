@@ -180,7 +180,7 @@ public class LagrangianEdgeCondition(string material, Line<Vector2D> geometry, i
         var VerticesAtDofs = GetLocalCoordinatesForDofs().
                              Select(i => LineLocalCoordinates.LocalCoordinatesToGlobal(vertices,i));
         var UBetaValues = VerticesAtDofs.Select(i => UBeta(i)).ToArray();
-        double AvgBetta = VerticesAtDofs.Select(i => Beta(i)).Average();
+        double AvgBetta = VerticesAtDofs.Average(i => Beta(i));
         double h = VectorBase<double, Vector2D>.Length(vertices[0], vertices[1]);
 
         var M = LineLagrangianCartesianLocalMatrices.CalculateLocalMassMatrix(Order, h, AvgBetta);
