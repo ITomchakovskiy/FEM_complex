@@ -18,7 +18,7 @@ public static class FiniteElementsCreator
     public static void LoadFiniteElementTypes(Assembly assembly)
     {
         var elementsTypes = assembly.GetTypes().Where(t => t.GetInterfaces().Any(i => i.IsGenericType &&
-        i.GetGenericTypeDefinition() == typeof(IFiniteElement<>)));
+        i.GetGenericTypeDefinition() == typeof(IFiniteElement<>)) && !t.IsInterface);
 
         foreach (var type in elementsTypes)
         {

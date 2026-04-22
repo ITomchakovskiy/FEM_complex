@@ -11,7 +11,7 @@ namespace MKE_complex.FiniteElements.Elements.BasisFunctions._1D.Lagrangian;
 
 public static class LineLagrangianBases
 {
-    public static Func<double, double>[] Psi(int order)
+    public static Func<double, double>[] BasisFunctions(int order)
     {
         switch(order)
         {

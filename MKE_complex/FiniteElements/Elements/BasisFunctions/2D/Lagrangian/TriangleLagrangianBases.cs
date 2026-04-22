@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 using MKE_complex.Vector;
 
 namespace MKE_complex.FiniteElements.Elements.BasisFunctions._2D.Lagrangian;
-public class TriangleLagrangianBases
+public static class TriangleLagrangianBases
 {
 
-    public static Func<double[], double>[] Psi(int order)
+    public static Func<double[], double>[] BasisFunctions(int order)
     {
         switch(order)
         {

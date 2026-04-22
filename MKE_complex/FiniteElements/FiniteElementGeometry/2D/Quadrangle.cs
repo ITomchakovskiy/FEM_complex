@@ -44,4 +44,10 @@ public record Quadrangle<VectorT>(int[] VertexNumber) : IFiniteElementGeometry<V
     {
         throw new NotImplementedException();
     }
+
+    public (int, int) GlobalEdge(int edgeNumber)
+    {
+        var local = LocalEdge(edgeNumber);
+        return (VertexNumber[local.Item1], VertexNumber[local.Item2]);
+    }
 }

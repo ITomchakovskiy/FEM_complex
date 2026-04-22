@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 namespace MKE_complex.FiniteElements.Elements.ElementsClasses._2D.Lagrangian.EdgeConditions;
 
 [FiniteElementAttribute(GeometryType.Line, BasisType.Lagrangian)]
-public class LagrangianEdgeCondition(string material, Line<Vector2D> geometry, int order) : IBoundaryCondition<Vector2D>
+public class LagrangianEdgeCondition(string material, Line<Vector2D> geometry, int order) : IBoundaryCondition<Vector2D>, IBoundaryConditionScalarEllipticProblemCalculation<Vector2D>
 {
     private Line<Vector2D> geometry { get; init; } = geometry;
     public IFiniteElementGeometry<Vector2D> Geometry => geometry;

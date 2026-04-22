@@ -385,7 +385,7 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
                                                 if (elementsGeometry is List<IFiniteElementGeometry<Vector3D>> elementsGeometry3d)
                                                     switch (meshType)
                                                     {
-                                                        case GeometryType.Hexagon:
+                                                        case GeometryType.Hexahedron:
                                                             elementsGeometry3d.Add(hexagon);
                                                             break;
                                                         default:

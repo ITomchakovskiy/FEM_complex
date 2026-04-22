@@ -31,6 +31,17 @@ public abstract class VectorBase<T, Tself> where T : INumber<T>
         return A.CreateVector(new_components);
     }
 
+    public string AsString(string format, string separator)
+    {
+        string[] stringComponents = new string[components.Length];
+        for(int i = 0; i < components.Length; ++i)
+        {
+            var x = components[i];
+            stringComponents[i] = $"{x.ToString(format, null)}{separator}";
+        }
+        return string.Join(separator, stringComponents);
+    }
+
     public static Tself operator -(VectorBase<T, Tself> A, VectorBase<T, Tself> B)
     {
         if (A.components is null || B.components is null || A.components.Length != B.components.Length)

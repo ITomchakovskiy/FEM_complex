@@ -11,10 +11,14 @@
     <None Remove="input\Edges.txt" />
     <None Remove="input\Mesh.txt" />
     <None Remove="input\MeshFragmentation.txt" />
+    <None Remove="input\LOS.txt" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Include="input\Edges.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="input\LOS.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="input\Mesh.txt">
@@ -32,6 +36,8 @@
 
   <ItemGroup>
     <PackageReference Include="Flee" Version="2.0.0" />
+    <PackageReference Include="xunit.v3.common" Version="3.2.2" />
+    <PackageReference Include="xunit.v3.mtp-v2" Version="3.2.2" />
   </ItemGroup>
 
 </Project>

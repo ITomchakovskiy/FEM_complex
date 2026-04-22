@@ -7,7 +7,7 @@ using MKE_complex.FiniteElements.FiniteElementGeometry;
 using MKE_complex.Vector;
 
 namespace MKE_complex.FiniteElements.Elements.BasisFunctions.LocalCoordinates._2D;
-public class RectangleLocalCoordinates
+public static class RectangleLocalCoordinates
 {
     public static (double xi, double eta) XiEta(ReadOnlySpan<Vector2D> vertices, Vector2D point)
     {

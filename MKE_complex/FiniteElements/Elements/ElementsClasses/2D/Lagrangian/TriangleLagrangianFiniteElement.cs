@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 namespace MKE_complex.FiniteElements.Elements.ElementsClasses._2D.Lagrangian.TriangleElements;
 
 [FiniteElementAttribute(GeometryType.Triangle, BasisType.Lagrangian)]
-public class TriangleLagrangianFiniteElement : IFiniteElement<Vector2D>
+public class TriangleLagrangianFiniteElement : IFiniteElement<Vector2D>, IFiniteElementScalarEllipticProblemCalculation<Vector2D>
 {
     public TriangleLagrangianFiniteElement(string material, Triangle<Vector2D> geometry, int order)
     {
@@ -218,7 +218,7 @@ public class TriangleLagrangianFiniteElement : IFiniteElement<Vector2D>
 
         for(int i = 0; i < DOFs.Length; ++i)
         {
-            for(int j = 0; j < DOFs.Length; ++j)
+            for(int j = 0; j < LocalMassMatrix[i].Length; ++j)
                 result[i][j] += LocalMassMatrix[i][j];
         }
                                   
@@ -242,10 +242,12 @@ public class TriangleLagrangianFiniteElement : IFiniteElement<Vector2D>
 
         for(int i = 0; i < DOFs.Length; ++i)
         {
-            for(int j = 0; j < DOFs.Length; ++j)
+            for(int j = 0; j < LocalMassMatrix[i].Length; ++j)
                 result[i] += LocalMassMatrix[i][j] * FValuesAtDofs[j];
+            for(int j = LocalMassMatrix[i].Length; j < DOFs.Length; ++j)
+                result[i] += LocalMassMatrix[j][i] * FValuesAtDofs[j];
         }
-                                  
+                    
         return result;
     }
 
@@ -255,7 +257,7 @@ public class TriangleLagrangianFiniteElement : IFiniteElement<Vector2D>
 
         var LocalCoordinates = TriangleLocalCoordinates.LocalCoordinates.Select(i => i(point, Alpha)).ToArray();
          
-        var basisFunctionValues = TriangleLagrangianBases.Psi(Order).Select(i => i(LocalCoordinates)).ToArray();
+        var basisFunctionValues = TriangleLagrangianBases.BasisFunctions(Order).Select(i => i(LocalCoordinates)).ToArray();
 
         double result = 0d;
 

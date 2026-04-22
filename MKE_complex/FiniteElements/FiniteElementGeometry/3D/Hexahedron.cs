@@ -7,30 +7,32 @@ using System.Threading.Tasks;
 
 namespace MKE_complex.FiniteElements.FiniteElementGeometry._3D;
 
-public record Hexahedron(int[] VertexNumber) : IFiniteElementGeometry<Vector3D>
+public record Hexahedron(int[] VertexNumber) : IFiniteElementGeometry3D
 {
-    public GeometryType GeometryType => GeometryType.Hexagon;
+    public GeometryType GeometryType => GeometryType.Hexahedron;
 
     public int EdgesCount => 12;
 
-    public (int, int) LocalEdge(int edgeNumber)
+    public int FacesCount => 6;
+
+    public (int, int) LocalEdge(int edgeNumber) //
     {
-        switch(edgeNumber)
+        return edgeNumber switch
         {
-            case 0: return (0, 1);
-            case 1: return (1, 2);
-            case 2: return (2, 3);
-            case 3: return (3, 0);
-            case 4: return (4, 5);
-            case 5: return (5, 6);
-            case 6: return (6, 7);
-            case 7: return (7, 4);
-            case 8: return (0, 4);
-            case 9: return (1, 5);
-            case 10: return (2, 6);
-            case 11: return (3, 7);
-            default: throw new Exception("Wrong edge number");
-        }
+            0 => (0,1),
+            1 => (0,2),
+            2 => (1,3),
+            3 => (2,3),
+            4 => (0,4),
+            5 => (1,5),
+            6 => (2,6),
+            7 => (3,7),
+            8 => (4,5),
+            9 => (4,6),
+            10 => (5,7),
+            11 => (6,7),
+            _ => throw new ArgumentException("wrong edge number")
+        };
     }
 
     public bool IsPointInElement(Vector3D point, Vector3D[] vertices)
@@ -41,5 +43,33 @@ public record Hexahedron(int[] VertexNumber) : IFiniteElementGeometry<Vector3D>
     public IFiniteElementGeometry<Vector3D>[] Refine(ReadOnlySpan<int> FaceVertices, ReadOnlySpan<int> EdgeVertices, int ElementVertex, out bool IsElementVertexNeeded)
     {
         throw new NotImplementedException();
+    }
+
+    public int[] LocalFace(int faceNumber)
+    {
+        return faceNumber switch
+        {
+            0 => [0,2,3,1],
+            1 => [0,1,5,4],
+            2 => [0,4,6,2],
+            3 => [1,3,7,5],
+            4 => [2,6,7,3],
+            5 => [4,5,7,6],
+            _ => throw new ArgumentException("wrong face number")
+        };
+    }
+
+    public static (Vector3D A, Vector3D B) OpposingVertices(ReadOnlySpan<Vector3D> vertices) =>
+        (vertices[0], vertices[^1]);
+
+    public (int, int) GlobalEdge(int edgeNumber)
+    {
+        var local = LocalEdge(edgeNumber);
+        return (VertexNumber[local.Item1], VertexNumber[local.Item2]);
+    }
+
+    public int[] GlobalFace(int faceNumber)
+    {
+        return LocalFace(faceNumber).Select(i => VertexNumber[i]).ToArray();
     }
 }

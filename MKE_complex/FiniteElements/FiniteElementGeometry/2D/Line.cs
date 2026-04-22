@@ -46,4 +46,10 @@ public record Line<VectorT>(int[] VertexNumber) : IFiniteElementGeometry<VectorT
         return [new Line<VectorT>([VertexNumber[0], EdgeVertices[0]]),
                 new Line<VectorT>([EdgeVertices[0], VertexNumber[1]])];
     }
+
+    public (int, int) GlobalEdge(int edgeNumber)
+    {
+        var local = LocalEdge(edgeNumber);
+        return (VertexNumber[local.Item1], VertexNumber[local.Item2]);
+    }
 }

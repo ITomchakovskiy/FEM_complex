@@ -75,4 +75,29 @@ public static class GeometricMethods
 
         return PointOnLine(MAB, MCD, n_y, k_y, ind_y);
     }
+
+    public static int[] SimplifyFace(int[] face)
+    {
+        int[] res = new int[3];
+        int startVertex = face.Min();
+        var minIndex = face.IndexOf(startVertex);
+        (int leftVertex, int rightVertex) = (getLeftFaceNumber(face, minIndex),
+                                             getRightFaceNumber(face, minIndex));
+               
+        int midVertex = Math.Min(leftVertex, rightVertex);
+            
+        int lastVertex = leftVertex < rightVertex ? getLeftFaceNumber(face, minIndex - 1) :
+                                                    getRightFaceNumber(face, minIndex + 1);
+
+        return [startVertex, midVertex, lastVertex];
+
+        
+    }
+
+    private static int getLeftFaceNumber(ReadOnlySpan<int> face, int startIndex) =>
+        face[(startIndex - 1) >= 0 ? (startIndex - 1) : ^(-(startIndex - 1))];
+
+    private static int getRightFaceNumber(ReadOnlySpan<int> face, int startIndex) =>
+        face[(startIndex + 1) % face.Length];
+    
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MKE_complex.DofsEnumerators;
+using MKE_complex.FiniteElements;
 using MKE_complex.Matrix;
 using MKE_complex.Matrix.SLAESolvers;
 using MKE_complex.Mesh;
@@ -17,30 +18,28 @@ public class ScalarEllipticProblem<VectorT> where VectorT : VectorBase<double, V
     public IFiniteElementMesh<VectorT>? Mesh { get; private set; }
     private double[]? Solution { get; set; }
 
-    public double EvaluateDiscrepancy(VectorT[] vertices, Func<VectorT,double> u)
+    public double EvaluateDiscrepancy(ReadOnlySpan<VectorT> vertices, Func<VectorT,double> u)
     {
-        if(vertices is Vector2D[] v2)
+        double discrepancy = 0d;
+        int n = 0;
+        string format = "E3";
+        string separator = "\t";
+        foreach(var vertex in vertices)
         {
-            double discrepancy = 0d;
-            int n = 0;
-            for(int i = 0; i < v2.Length;++i)
+            double value = 0;
+            if (CalculateFunctionAtPoint(vertex, out value))
             {
-                double value = 0;
-                if (CalculateFunctionAtPoint(vertices[i], out value))
-                {
-                    Console.WriteLine($"{v2[i].X:F1}    {v2[i].Y:F2}     {value}      {u(vertices[i])}     {Math.Abs(value - u(vertices[i])):E3}");
-                    ++n;
-                    discrepancy += Math.Abs(value - u(vertices[i])) * Math.Abs(value - u(vertices[i]));
-                }
-                else
-                    Console.WriteLine($"{v2[i].X:F1}    {v2[i].Y:F1}     not found");
+                Console.WriteLine($" {vertex.AsString(format, separator)}{separator}{value.ToString(format)}{separator}{u(vertex).ToString(format)}{separator}{Math.Abs(value - u(vertex)):E3}");
+                ++n;
+                discrepancy += Math.Abs(value - u(vertex)) * Math.Abs(value - u(vertex));
             }
-            
-            discrepancy = Math.Sqrt(discrepancy/n);
-
-            return discrepancy;
+            else
+                Console.WriteLine($"{vertex.AsString(format, separator)}{separator}not found");
         }
-        return 0d;
+        
+        discrepancy = Math.Sqrt(discrepancy/n);
+        return discrepancy;
+
     }
 
     public bool CalculateFunctionAtPoint(VectorT point, out double value)
@@ -52,7 +51,8 @@ public class ScalarEllipticProblem<VectorT> where VectorT : VectorBase<double, V
             if (element.Geometry.IsPointInElement(point, vertices))
             {
                 var localSolution = element.DOFs.Select(dof => Solution![dof]).ToArray();
-                value = element.CalcResultAtPoint(vertices, localSolution, point);
+                if(element is IFiniteElementScalarEllipticProblemCalculation<VectorT> scalarElem)
+                    value = scalarElem.CalcResultAtPoint(vertices, localSolution, point);
                 return true;
             }
         }
@@ -78,7 +78,7 @@ public class ScalarEllipticProblem<VectorT> where VectorT : VectorBase<double, V
         var GeometryTypesForDimension = new Dictionary<Dimension, GeometryType[]>()
         {
             {Dimension.D2, new GeometryType[] {GeometryType.Triangle,GeometryType.Quadrangle, GeometryType.Rectangle} },
-            {Dimension.D3, new GeometryType[] {GeometryType.Hexagon,GeometryType.Tetrahedron} },
+            {Dimension.D3, new GeometryType[] {GeometryType.Hexahedron, GeometryType.Parallelepiped ,GeometryType.Tetrahedron} },
         };
 
         Console.WriteLine("Choose Mesh type");
@@ -91,78 +91,75 @@ public class ScalarEllipticProblem<VectorT> where VectorT : VectorBase<double, V
         foreach (BasisType b in Enum.GetValues(typeof(BasisType)))
            Console.WriteLine($"{b} : {(int)b}");
 
-        BasisType basis = (BasisType)int.Parse(Console.ReadLine()!);
+        basisType = (BasisType)int.Parse(Console.ReadLine()!);
 
         Console.WriteLine($"Choose basis order");
 
         basisOrder = int.Parse(Console.ReadLine()!);
-        //int order = 2;
 
         if (basisOrder < 1) throw new Exception();
     }
     public void Solve()
     {
-        var GeometryTypesForDimension = new Dictionary<Dimension, GeometryType[]>()
-        {
-            {Dimension.D2, new GeometryType[] {GeometryType.Triangle,GeometryType.Quadrangle, GeometryType.Rectangle} },
-            {Dimension.D3, new GeometryType[] {GeometryType.Hexagon,GeometryType.Tetrahedron} },
-        };
-
-        
-
-        //Console.WriteLine("Type file names for mesh building");
 
         string[] fileNames = ["Mesh.txt", "MeshFragmentation.txt", "Edges.txt"]; //Console.ReadLine()!.Split(' '); 
 
         PseudoRegularMeshBuilder builder = new PseudoRegularMeshBuilder();
 
-        Mesh = builder.BuildMesh<VectorT>(dimension, mesh_type, basis, order, fileNames);
+        Mesh = builder.BuildMesh<VectorT>(dimension, meshType, basisType, basisOrder, fileNames);
 
         var Materials = MaterialsReader.ReadMaterials<VectorT>("material1.json", PDE_Type.Elliptic, FieldType.Scalar, CoordinateSystem.Cartesian);
 
         DofsEnumerator.EnumerateMeshDofs(Mesh);
 
         var Matrix = MatrixProfileBuilder.BuildMatrixProfile<double, VectorT>(Mesh);
-        var Pr = new Vector.Vector<double>(new double[Matrix.N]);
+        var Pr = new Vector<double>(new double[Matrix.N]);
 
         foreach (var element in Mesh.Elements)
         {
-            var vertices = element.Geometry.VertexNumber.Select(i => Mesh.Vertices[i]).ToArray();
-
-            if(Materials[element.Material] is SolidMaterialForScalarEllipticProblem<VectorT> solidMaterial)
+            if(element is IFiniteElementScalarEllipticProblemCalculation<VectorT> scalarElem)
             {
-                var localMatrix = element.CalcLocalMatrix(vertices,
-                                                          solidMaterial.Lambda,
-                                                         solidMaterial.Gamma);
+                var vertices = element.Geometry.VertexNumber.Select(i => Mesh.Vertices[i]).ToArray();
 
-                SLAEAssemblyAlgorhitms.AddLocalMatrix(Matrix, localMatrix, element.DOFs, element.SortedDofIndices);
+                if(Materials[element.Material] is SolidMaterialForScalarEllipticProblem<VectorT> solidMaterial)
+                {
+                    var localMatrix = scalarElem.CalcLocalMatrix(vertices,
+                                                              solidMaterial.Lambda,
+                                                             solidMaterial.Gamma);
 
-                var localRightPart = element.CalcLocalRightPart(vertices,
-                                                                solidMaterial.F);
+                    SLAEAssemblyAlgorhitms.AddLocalMatrix(Matrix, localMatrix, element.DOFs, element.SortedDofIndices);
 
-                SLAEAssemblyAlgorhitms.AddLocalRightPart(Pr, localRightPart, element.DOFs);
+                    var localRightPart = scalarElem.CalcLocalRightPart(vertices,
+                                                                    solidMaterial.F);
+
+                    SLAEAssemblyAlgorhitms.AddLocalRightPart(Pr, localRightPart, element.DOFs);
+                }
             }
+            
         }
         foreach (var boundary in Mesh.Boundaries)
         {
-            var vertices = boundary.Geometry.VertexNumber.Select(i => Mesh.Vertices[i]).ToArray();
-            var material = Materials[boundary.Material];
-
-            if(material is NeumannConditionForScalarEllipticProblem<VectorT> neumannMetarial)
+            if(boundary is IBoundaryConditionScalarEllipticProblemCalculation<VectorT> scalarCondition)
             {
-                var localRightPart = boundary.CalcLocalRightPartForNeumannCondition(vertices, neumannMetarial.Theta);
+                var vertices = boundary.Geometry.VertexNumber.Select(i => Mesh.Vertices[i]).ToArray();
+                var material = Materials[boundary.Material];
 
-                SLAEAssemblyAlgorhitms.AddLocalRightPart(Pr, localRightPart, boundary.DOFs);
-            }
-            else if(material is RobinConditionForScalarEllipticProblem<VectorT> robinMaterial)
-            {
-                var localMatrix = boundary.CalcLocalMatrixForRobinCondition(vertices, robinMaterial.Beta);
+                if(material is NeumannConditionForScalarEllipticProblem<VectorT> neumannMetarial)
+                {
+                    var localRightPart = scalarCondition.CalcLocalRightPartForNeumannCondition(vertices, neumannMetarial.Theta);
 
-                SLAEAssemblyAlgorhitms.AddLocalMatrix(Matrix, localMatrix, boundary.DOFs, boundary.SortedDofIndices);
+                    SLAEAssemblyAlgorhitms.AddLocalRightPart(Pr, localRightPart, boundary.DOFs);
+                }
+                else if(material is RobinConditionForScalarEllipticProblem<VectorT> robinMaterial)
+                {
+                    var localMatrix = scalarCondition.CalcLocalMatrixForRobinCondition(vertices, robinMaterial.Beta);
 
-                var localRightPart = boundary.CalcLocalRightPartForRobinCondition(vertices, robinMaterial.Beta, robinMaterial.UBeta);
+                    SLAEAssemblyAlgorhitms.AddLocalMatrix(Matrix, localMatrix, boundary.DOFs, boundary.SortedDofIndices);
 
-                SLAEAssemblyAlgorhitms.AddLocalRightPart(Pr, localRightPart, boundary.DOFs);
+                    var localRightPart = scalarCondition.CalcLocalRightPartForRobinCondition(vertices, robinMaterial.Beta, robinMaterial.UBeta);
+
+                    SLAEAssemblyAlgorhitms.AddLocalRightPart(Pr, localRightPart, boundary.DOFs);
+                }
             }
         }
 
@@ -171,9 +168,12 @@ public class ScalarEllipticProblem<VectorT> where VectorT : VectorBase<double, V
             var material = Materials[boundary.Material];
             if (material is DirichletConditionForScalarEllipticProblem<VectorT> dirichletMaterial)
             {
-                 var vertices = boundary.Geometry.VertexNumber.Select(i => Mesh.Vertices[i]).ToArray();
-                 var localRightPart = boundary.CalcLocalRightPartForDirichletCondition(vertices, dirichletMaterial.Ug);
-                 SLAEAssemblyAlgorhitms.ApplyDirichletConditions(Matrix,Pr, localRightPart, boundary.DOFs);
+                var vertices = boundary.Geometry.VertexNumber.Select(i => Mesh.Vertices[i]).ToArray();
+                double[] localRightPart;
+                if(boundary is IBoundaryConditionScalarEllipticProblemCalculation<VectorT> scalarCondition)
+                    localRightPart = scalarCondition.CalcLocalRightPartForDirichletCondition(vertices, dirichletMaterial.Ug);
+                else throw new ArgumentException();
+                SLAEAssemblyAlgorhitms.ApplyDirichletConditions(Matrix,Pr, localRightPart, boundary.DOFs);
             }
         }
 
