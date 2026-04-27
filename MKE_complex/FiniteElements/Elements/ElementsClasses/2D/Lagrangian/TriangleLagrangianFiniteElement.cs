@@ -5,6 +5,7 @@ using MKE_complex.FiniteElements.FiniteElementGeometry;
 using MKE_complex.FiniteElements.FiniteElementGeometry._2D;
 using MKE_complex.Vector;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,6 +26,13 @@ public class TriangleLagrangianFiniteElement : IFiniteElement<Vector2D>, IFinite
         DOFs = new int[DofsOnVertexCount * geometry.VertexNumber.Length + 
                        DofsOnEdgeCount * geometry.EdgesCount + 
                        DofsOnElementCount];
+        sortedDofIndices = new Lazy<int[]>(()=>
+        {
+            var dofs = DOFs.ToArray();
+            var indices = Enumerable.Range(0,DOFs.Length).ToArray();
+            Array.Sort(dofs, indices);
+            return indices;
+        });
     }
 
     private Triangle<Vector2D> geometry;
@@ -43,23 +51,9 @@ public class TriangleLagrangianFiniteElement : IFiniteElement<Vector2D>, IFinite
 
     public int DofsOnElementCount => (Order - 2) * (Order - 1) / 2;
 
-    private int[]? sortedDofIndices;
-
-    public int[] SortedDofIndices
-    {
-        get
-        {
-            if (sortedDofIndices != null) return sortedDofIndices;
-            var dofs = new int[DOFs.Length];
-            Array.Copy(DOFs, dofs, DOFs.Length);
-            var indices = new int[DOFs.Length];
-            for (int i = 0; i < DOFs.Length; ++i)
-                indices[i] = i;
-            Array.Sort(dofs, indices);
-            sortedDofIndices = indices;
-            return indices;
-        }
-    }
+    private Lazy<int[]> sortedDofIndices;
+    
+    public int[] SortedDofIndices => sortedDofIndices.Value;
 
     public int[] SortedDofs => SortedDofIndices.Select(i => DOFs[i]).ToArray();
 

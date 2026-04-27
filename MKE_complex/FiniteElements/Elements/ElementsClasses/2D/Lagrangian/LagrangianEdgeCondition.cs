@@ -13,38 +13,38 @@ using System.Threading.Tasks;
 namespace MKE_complex.FiniteElements.Elements.ElementsClasses._2D.Lagrangian.EdgeConditions;
 
 [FiniteElementAttribute(GeometryType.Line, BasisType.Lagrangian)]
-public class LagrangianEdgeCondition(string material, Line<Vector2D> geometry, int order) : IBoundaryCondition<Vector2D>, IBoundaryConditionScalarEllipticProblemCalculation<Vector2D>
+public class LagrangianEdgeCondition : IBoundaryCondition<Vector2D>, IBoundaryConditionScalarEllipticProblemCalculation<Vector2D>
 {
-    private Line<Vector2D> geometry { get; init; } = geometry;
+    public LagrangianEdgeCondition(string material, Line<Vector2D> geometry, int order)
+    {
+        this.geometry = geometry;
+        Order = order;
+        Material = material;
+        DOFs = new int[order + 1];
+        sortedDofIndices = new Lazy<int[]>(()=>
+        {
+            var dofs = DOFs.ToArray();
+            var indices = Enumerable.Range(0,DOFs.Length).ToArray();
+            Array.Sort(dofs, indices);
+            return indices;
+        });
+    }
+    private Line<Vector2D> geometry { get; init; }
     public IFiniteElementGeometry<Vector2D> Geometry => geometry;
 
-    public int Order { get; } = order;
+    public int Order { get; }
 
-    public string Material { get; init; } = material;
+    public string Material { get; init; }
 
-    public int[] DOFs { get; private set; } = new int[order + 1];
+    public int[] DOFs { get; private set; }
 
     public int DofsOnEdgeCount => Order - 1;
 
     public int DofsOnVertexCount => 1;
 
-    private int[]? sortedDofIndices;
+    private Lazy<int[]> sortedDofIndices;
 
-    public int[] SortedDofIndices
-    {
-        get
-        {
-            if (sortedDofIndices != null) return sortedDofIndices;
-            var dofs = new int[DOFs.Length];
-            Array.Copy(DOFs, dofs, DOFs.Length);
-            var indices = new int[DOFs.Length];
-            for (int i = 0; i < DOFs.Length; ++i)
-                indices[i] = i;
-            Array.Sort(dofs, indices);
-            sortedDofIndices = indices;
-            return indices;
-        }
-    }
+    public int[] SortedDofIndices => sortedDofIndices.Value;
 
     public int[] SortedDofs => SortedDofIndices.Select(i => DOFs[i]).ToArray();
 

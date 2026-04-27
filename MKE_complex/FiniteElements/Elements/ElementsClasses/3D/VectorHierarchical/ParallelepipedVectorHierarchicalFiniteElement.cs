@@ -19,6 +19,14 @@ public class ParallelepipedVectorHierarchicalFiniteElement : IFiniteElement3D, I
         this.geometry = geometry;
         Order = order;
         DOFs = new int[CalcDofsCount(Order)];
+
+        sortedDofIndices = new Lazy<int[]>(()=>
+        {
+            var dofs = DOFs.ToArray();
+            var indices = Enumerable.Range(0,DOFs.Length).ToArray();
+            Array.Sort(dofs, indices);
+            return indices;
+        });
     }
 
     private Parallelepiped geometry;
@@ -46,23 +54,9 @@ public class ParallelepipedVectorHierarchicalFiniteElement : IFiniteElement3D, I
 
     public int DofsOnElementCount => 3 * Order * (Order * (Order - 2) + 1);
 
-    private int[]? sortedDofIndices;
+    private Lazy<int[]> sortedDofIndices;
 
-    public int[] SortedDofIndices
-    {
-        get
-        {
-            if (sortedDofIndices != null) return sortedDofIndices;
-            var dofs = new int[DOFs.Length];
-            Array.Copy(DOFs, dofs, DOFs.Length);
-            var indices = new int[DOFs.Length];
-            for (int i = 0; i < DOFs.Length; ++i)
-                indices[i] = i;
-            Array.Sort(dofs, indices);
-            sortedDofIndices = indices;
-            return indices;
-        }
-    }
+    public int[] SortedDofIndices => sortedDofIndices.Value;
 
     public int[] SortedDofs => SortedDofIndices.Select(i => DOFs[i]).ToArray();
 
