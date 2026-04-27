@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MKE_complex.FiniteElements.Elements.LocalMatrices._3D.VectorHierarchical.Cartesian;
 using MKE_complex.FiniteElements.FiniteElementGeometry;
 using MKE_complex.FiniteElements.FiniteElementGeometry._3D;
 using MKE_complex.Vector;
@@ -9,7 +10,7 @@ using MKE_complex.Vector;
 namespace MKE_complex.FiniteElements.Elements.ElementsClasses._3D.VectorHierarchical;
 
 [FiniteElementAttribute(GeometryType.Parallelepiped, BasisType.VectorHierarchical)]
-public class ParallelepipedVectorHierarchicalFiniteElement : IFiniteElement3D
+public class ParallelepipedVectorHierarchicalFiniteElement : IFiniteElement3D, IFiniteElementVectorProblemCalculation<Vector3D>
 {
     public ParallelepipedVectorHierarchicalFiniteElement(string material, Parallelepiped geometry, int order)
     {
@@ -149,6 +150,36 @@ public class ParallelepipedVectorHierarchicalFiniteElement : IFiniteElement3D
     }
 
     public IFiniteElement<Vector3D>[] Refine(ReadOnlySpan<int> FaceVertices, ReadOnlySpan<int> EdgeVertices, int ElementVertex, out bool IsElementVertexNeeded)
+    {
+        throw new NotImplementedException();
+    }
+
+    public double[][] CalcLocalMatrix(Vector3D[] vertices, Func<Vector3D, double> Mu, Func<Vector3D, double> Gamma)
+    {
+        var MuAvg = vertices.Average(i => Mu(i));
+        var GamAvg = vertices.Average(i => Gamma(i));
+
+        var H = Parallelepiped.CalcH(vertices);
+
+        var M = ParallelepipedVectorHierarchicalCartesianLocalMatrices.CalculateLocalMassMatrix(Order, GamAvg, H.X, H.Y, H.Z);
+        var G = ParallelepipedVectorHierarchicalCartesianLocalMatrices.CalculateLocalStiffnessMatrix(Order, MuAvg, H.X, H.Y, H.Z);
+
+        var res = M;
+
+        for(int i = 0; i < res.Length; ++i)
+        {
+            for(int j = 0; j <= i; ++j)
+                res[i][j] += G[i][j];
+        }
+        return res;
+    }
+
+    public double[] CalcLocalRightPart(Vector3D[] vertices, Func<Vector3D, Vector3D> F)
+    {
+        throw new NotImplementedException();
+    }
+
+    public double CalcResultAtPoint(Vector3D[] vertices, ReadOnlySpan<double> localSolution, Vector3D point)
     {
         throw new NotImplementedException();
     }

@@ -44,13 +44,13 @@ public static class ParallelepipedVectorHierarchicalBases
         Psi.AddRange(Psi1);
         
         for(int i = 0; i < 4; ++i)
-            Psi.Add((double xi, double eta, double zeta) => xi * Psi1[i](xi, eta, zeta));
+            Psi.Add((double xi, double eta, double zeta) => LocalCoordinateTransformation(xi) * Psi1[i](xi, eta, zeta));
         
         for(int i = 4; i < 8; ++i)
-            Psi.Add((double xi, double eta, double zeta) => eta * Psi1[i](xi, eta, zeta));
+            Psi.Add((double xi, double eta, double zeta) => LocalCoordinateTransformation(eta) * Psi1[i](xi, eta, zeta));
 
         for(int i = 8; i < 12; ++i)
-            Psi.Add((double xi, double eta, double zeta) => zeta * Psi1[i](xi, eta, zeta));
+            Psi.Add((double xi, double eta, double zeta) => LocalCoordinateTransformation(zeta) * Psi1[i](xi, eta, zeta));
 
         for(int i = 24; i < 54;++i)
             Psi.Add((double xi, double eta, double zeta) => new(0d,0d,0d));
@@ -102,20 +102,27 @@ public static class ParallelepipedVectorHierarchicalBases
                 (double xi, double eta, double zeta) => 
                     new(0,0,Psi2Z[i](xi, eta));
             Psi[numbers_for_faces_and_element[0][i+1]] = 
-                (double xi, double eta, double zeta) => xi*
+                (double xi, double eta, double zeta) => LocalCoordinateTransformation(xi)*
                 Psi[numbers_for_faces_and_element[0][i]](xi,eta,zeta);
             Psi[numbers_for_faces_and_element[1][i+1]] = 
-                (double xi, double eta, double zeta) => eta*
+                (double xi, double eta, double zeta) => LocalCoordinateTransformation(eta)*
                 Psi[numbers_for_faces_and_element[1][i]](xi,eta,zeta);
             Psi[numbers_for_faces_and_element[2][i+1]] = 
-                (double xi, double eta, double zeta) => zeta*
+                (double xi, double eta, double zeta) => LocalCoordinateTransformation(zeta)*
                 Psi[numbers_for_faces_and_element[2][i]](xi,eta,zeta);
         }
 
         return Psi.ToArray();
     }
     
-    private static double PhiL(double xi) => (1d - xi)/2d;
-    private static double PhiR(double xi) => (1d + xi)/2d;
-    private static double PhiP(double xi, double p) => Math.Pow(xi, p - 2) * (1d - xi * xi);
+    private static double PhiL(double xi) => (1d - LocalCoordinateTransformation(xi))/2d;
+    private static double PhiR(double xi) => (1d + LocalCoordinateTransformation(xi))/2d;
+    private static double PhiP(double xi, double p)
+    {
+        double local = LocalCoordinateTransformation(xi);
+
+        return Math.Pow(local, p - 2) * (1d - local * local);
+    }
+
+    private static double LocalCoordinateTransformation(double xi) => 2d * xi -1d;
 }

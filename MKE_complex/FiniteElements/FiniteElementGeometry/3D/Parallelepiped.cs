@@ -20,4 +20,9 @@ public record Parallelepiped(int[] VertexNumber) : Hexahedron(VertexNumber)
 
     public static int[] LocalEdgeNumToLocalEdgeNumForVectorHierarchicalBasis => [0, 4, 5, 1, 8, 9, 10, 11, 2, 6, 7, 3];
     public static int[] LocalFaceNumToLocalFaceNumForVectorHierarchicalBasis => [4, 2, 0, 1, 3, 5];
+
+    public static Vector3D CalcH(ReadOnlySpan<Vector3D> vertices)
+    {
+        return vertices[^1] - vertices[0];
+    }
 }
