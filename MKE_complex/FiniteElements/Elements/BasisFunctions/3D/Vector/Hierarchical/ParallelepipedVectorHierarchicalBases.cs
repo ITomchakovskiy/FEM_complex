@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using MKE_complex.Vector;
 
-namespace MKE_complex.FiniteElements.Elements.BasisFunctions._3D.VectorHierarchical;
+namespace MKE_complex.FiniteElements.Elements.BasisFunctions._3D.Vector.Hierarchical;
 public static class ParallelepipedVectorHierarchicalBases
 {
 
@@ -17,6 +17,18 @@ public static class ParallelepipedVectorHierarchicalBases
             _ => throw new ArgumentException("wrong element order")
         };
     }
+
+    public static int[] GetNonZeroBasisComponentsIndices(int order)
+    {
+        return order switch
+        {
+            1 => nonZeroBasisComponentsIndices.AsSpan(0,12).ToArray(),
+            2 => nonZeroBasisComponentsIndices,
+            _ => throw new ArgumentException("wrong element order")
+        };
+    }
+
+    private static int[] nonZeroBasisComponentsIndices = [0,0,0,0,1,1,1,1,2,2,2,2,0,0,0,0,1,1,1,1,2,2,2,2,1,1,2,2,1,1,2,2,0,0,2,2,0,0,2,2,0,0,1,1,0,0,1,1,0,0,1,1,2,2];
 
     private static Func<double, double, double, Vector3D>[] Psi = BuildPsi();
 
@@ -123,6 +135,5 @@ public static class ParallelepipedVectorHierarchicalBases
 
         return Math.Pow(local, p - 2) * (1d - local * local);
     }
-
     private static double LocalCoordinateTransformation(double xi) => 2d * xi -1d;
 }

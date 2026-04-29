@@ -71,5 +71,11 @@ namespace MKE_complex.Tests
             Console.WriteLine("M: " + EvaluateDiscrepancy(mnum,mteo));
             Console.WriteLine("G: " + EvaluateDiscrepancy(gnum,gteo));
         }
+
+        [Fact]
+        public void Test2()
+        {
+            var m = ParallelepipedVectorHierarchical_LagrangianCartesianLocalMatrices.GetLocalMassMatrix(1,1d,1d,1d);
+        }
     }
 }

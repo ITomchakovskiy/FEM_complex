@@ -39,14 +39,14 @@ public interface IFiniteElement3D : IFiniteElement<Vector3D>
 
 public interface IFiniteElementScalarEllipticProblemCalculation<VectorT> where VectorT : VectorBase<double, VectorT>
 {
-    double[][] CalcLocalMatrix(VectorT[] vertices, Func<VectorT, double> Lambda, Func<VectorT, double> Gamma);
-    double[] CalcLocalRightPart(VectorT[] vertices, Func<VectorT, double> F);
-    double CalcResultAtPoint(VectorT[] vertices, ReadOnlySpan<double> localSolution, VectorT point);
+    double[][] CalcLocalMatrix(ReadOnlySpan<VectorT> vertices, Func<VectorT, double> Lambda, Func<VectorT, double> Gamma);
+    double[] CalcLocalRightPart(ReadOnlySpan<VectorT> vertices, Func<VectorT, double> F);
+    double CalcResultAtPoint(ReadOnlySpan<VectorT> vertices, ReadOnlySpan<double> localSolution, VectorT point);
 }
 
 public interface IFiniteElementVectorProblemCalculation<VectorT> where VectorT : VectorBase<double, VectorT>
 {
-    double[][] CalcLocalMatrix(VectorT[] vertices, Func<VectorT, double> Mu, Func<VectorT, double> Gamma);
-    double[] CalcLocalRightPart(VectorT[] vertices, Func<VectorT, VectorT> F);
-    double CalcResultAtPoint(VectorT[] vertices, ReadOnlySpan<double> localSolution, VectorT point);
+    double[][] CalcLocalMatrix(ReadOnlySpan<VectorT> vertices, Func<VectorT, double> Mu, Func<VectorT, double> Gamma);
+    double[] CalcLocalRightPart(ReadOnlySpan<VectorT> vertices, Func<VectorT, VectorT> F);
+    double CalcResultAtPoint(ReadOnlySpan<VectorT> vertices, ReadOnlySpan<double> localSolution, VectorT point);
 }

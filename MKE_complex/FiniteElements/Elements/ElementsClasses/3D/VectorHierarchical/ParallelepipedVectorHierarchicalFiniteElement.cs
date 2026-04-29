@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MKE_complex.FiniteElements.Elements.BasisFunctions._3D.Scalar.Lagrangian;
+using MKE_complex.FiniteElements.Elements.BasisFunctions._3D.Vector.Hierarchical;
+using MKE_complex.FiniteElements.Elements.BasisFunctions.LocalCoordinates._3D;
 using MKE_complex.FiniteElements.Elements.LocalMatrices._3D.VectorHierarchical.Cartesian;
 using MKE_complex.FiniteElements.FiniteElementGeometry;
 using MKE_complex.FiniteElements.FiniteElementGeometry._3D;
@@ -148,10 +151,30 @@ public class ParallelepipedVectorHierarchicalFiniteElement : IFiniteElement3D, I
         throw new NotImplementedException();
     }
 
-    public double[][] CalcLocalMatrix(Vector3D[] vertices, Func<Vector3D, double> Mu, Func<Vector3D, double> Gamma)
+    private double[][] GetLocalCoordinatesForLagrangianDofs()
     {
-        var MuAvg = vertices.Average(i => Mu(i));
-        var GamAvg = vertices.Average(i => Gamma(i));
+        int N = (DOFs.Length + 1)*(DOFs.Length + 1)*(DOFs.Length + 1); //scalar lagrangian dofs count
+        var res = new double[N][];
+        for(int i = 0; i < res.Length; ++i)
+            res[i] = new double[3];
+        double[] values = new double[Order + 1];
+        for(int i = 1; i < values.Length - 1;++i)
+            values[i] = (double)i/(double)Order;
+        values[^1] = 1d;
+        for(int i = 0; i < N; i++)
+        {
+            res[i][0] = values[ParallelepipedScalarLagrangianBases.LocalXDofNum(i,Order)];
+            res[i][1] = values[ParallelepipedScalarLagrangianBases.LocalYDofNum(i,Order)];
+            res[i][2] = values[ParallelepipedScalarLagrangianBases.LocalZDofNum(i,Order)];
+        }
+        return res;
+    }
+
+    public double[][] CalcLocalMatrix(ReadOnlySpan<Vector3D> vertices, Func<Vector3D, double> Mu, Func<Vector3D, double> Gamma)
+    {
+        var verticesArray = vertices.ToArray();
+        double MuAvg = verticesArray.Average(i => Mu(i));
+        double GamAvg = verticesArray.Average(i => Gamma(i));
 
         var H = Parallelepiped.CalcH(vertices);
 
@@ -168,12 +191,39 @@ public class ParallelepipedVectorHierarchicalFiniteElement : IFiniteElement3D, I
         return res;
     }
 
-    public double[] CalcLocalRightPart(Vector3D[] vertices, Func<Vector3D, Vector3D> F)
+    public double[] CalcLocalRightPart(ReadOnlySpan<Vector3D> vertices, Func<Vector3D, Vector3D> F)
     {
-        throw new NotImplementedException();
+        var verticesArray = vertices.ToArray();
+        var LagrangianDofsVertices = GetLocalCoordinatesForLagrangianDofs().Select(i => 
+                                        ParallelepipedLocalCoordinates.LocalCoordinatesToGlobal(verticesArray,(i[0],i[1],i[2]))).ToArray();
+        double[][] weights = new double[3][];
+        for(int i = 0;i < weights.Length; ++i)
+            weights[i] = new double[LagrangianDofsVertices.Length];
+        for(int i = 0; i < LagrangianDofsVertices.Length; ++i)
+        {
+            var Fvalue = F(LagrangianDofsVertices[i]);
+            weights[0][i] = Fvalue.X;
+            weights[1][i] = Fvalue.Y;
+            weights[2][i] = Fvalue.Z;
+        }
+
+        var h = Parallelepiped.CalcH(vertices);
+
+        var M = ParallelepipedVectorHierarchical_LagrangianCartesianLocalMatrices.GetLocalMassMatrix(Order,h.X,h.Y,h.Z);
+
+        var Indices = ParallelepipedVectorHierarchicalBases.GetNonZeroBasisComponentsIndices(Order);
+
+        var res = new double[DOFs.Length];
+
+        for(int i = 0; i < res.Length; ++i)
+        {
+            for(int j = 0; j < M[i].Length; ++j)
+                res[i] += weights[Indices[i]][j] * M[i][j];
+        }
+        return res;
     }
 
-    public double CalcResultAtPoint(Vector3D[] vertices, ReadOnlySpan<double> localSolution, Vector3D point)
+    public double CalcResultAtPoint(ReadOnlySpan<Vector3D> vertices, ReadOnlySpan<double> localSolution, Vector3D point)
     {
         throw new NotImplementedException();
     }

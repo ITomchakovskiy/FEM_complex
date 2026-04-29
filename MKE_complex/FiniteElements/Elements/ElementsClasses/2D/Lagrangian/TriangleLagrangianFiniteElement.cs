@@ -7,6 +7,7 @@ using MKE_complex.Vector;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -191,13 +192,15 @@ public class TriangleLagrangianFiniteElement : IFiniteElement<Vector2D>, IFinite
         return LocalCoordinates;
     }
 
-    public double[][] CalcLocalMatrix(Vector2D[] vertices, Func<Vector2D, double> Lambda, Func<Vector2D, double> Gamma)
+    public double[][] CalcLocalMatrix(ReadOnlySpan<Vector2D> vertices, Func<Vector2D, double> Lambda, Func<Vector2D, double> Gamma)
     {
         var Alpha = TriangleLocalCoordinates.Alpha.CalcAlphas(vertices);
 
         var AbsDetD = TriangleLocalCoordinates.Alpha.CalcAbsDetD(vertices);
 
-        var VerticesAtDofs = GetLocalCoordinatesForDofs().Select(i => TriangleLocalCoordinates.LocalCoordinatesToGlobal(vertices, i)).ToArray();
+        var verticesArray = vertices.ToArray();
+
+        var VerticesAtDofs = GetLocalCoordinatesForDofs().Select(i => TriangleLocalCoordinates.LocalCoordinatesToGlobal(verticesArray, i)).ToArray();
 
         double LambdaAvg = VerticesAtDofs.Average(i => Lambda(i));
         double GammaAvg = VerticesAtDofs.Average(i => Gamma(i));
@@ -219,13 +222,15 @@ public class TriangleLagrangianFiniteElement : IFiniteElement<Vector2D>, IFinite
         return result;
     }
 
-    public double[] CalcLocalRightPart(Vector2D[] vertices, Func<Vector2D, double> F)
+    public double[] CalcLocalRightPart(ReadOnlySpan<Vector2D> vertices, Func<Vector2D, double> F)
     {
         var Alpha = TriangleLocalCoordinates.Alpha.CalcAlphas(vertices);
 
         var AbsDetD = TriangleLocalCoordinates.Alpha.CalcAbsDetD(vertices);
 
-        var VerticesAtDofs = GetLocalCoordinatesForDofs().Select(i => TriangleLocalCoordinates.LocalCoordinatesToGlobal(vertices, i)).ToArray();
+        var verticesArray = vertices.ToArray();
+
+        var VerticesAtDofs = GetLocalCoordinatesForDofs().Select(i => TriangleLocalCoordinates.LocalCoordinatesToGlobal(verticesArray, i)).ToArray();
 
         double[] FValuesAtDofs = VerticesAtDofs.Select(i => F(i)).ToArray();
 
@@ -245,7 +250,7 @@ public class TriangleLagrangianFiniteElement : IFiniteElement<Vector2D>, IFinite
         return result;
     }
 
-    public double CalcResultAtPoint(Vector2D[] vertices, ReadOnlySpan<double> localSolution, Vector2D point)
+    public double CalcResultAtPoint(ReadOnlySpan<Vector2D> vertices, ReadOnlySpan<double> localSolution, Vector2D point)
     {
         var Alpha = TriangleLocalCoordinates.Alpha.CalcAlphas(vertices);
 
