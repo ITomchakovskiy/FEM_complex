@@ -33,6 +33,23 @@ public static class GeometricMethods
         return A + l_ind / l * r;
     }
 
+    public static double PointOnLine(double A, double B, int n, double k, int ind)
+    {
+        if (ind == 0) return A;
+        if (ind == n) return B;
+        var r = B - A;
+        double l = Math.Abs(r);
+        if (Math.Abs(k - 1d) < 1.0E-13)
+            return A + r / n * ind;
+
+        ind = n - ind;
+
+        double l_ind = l * (1d - Math.Pow(Math.Abs(k), ind)) / (1d - Math.Pow(Math.Abs(k), n));
+
+        l_ind = k > 0 ? l_ind : l - l_ind;
+        return A + l_ind / l * r;
+    }
+
     public static Vector2D[] _2DProjection(ReadOnlySpan<Vector3D> vertices, out string projectionPlane) //projectionPlane - const coordinate
     {
         var cross = (vertices[1] - vertices[0]).CrossProduct(vertices[2] - vertices[0]);

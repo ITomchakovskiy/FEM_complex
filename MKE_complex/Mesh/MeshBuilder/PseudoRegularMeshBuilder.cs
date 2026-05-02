@@ -41,7 +41,7 @@ public class PseudoRegularMeshBuilder : IMeshBuilder
     private string[]? edgeMaterials;
 
     private Dimension dimension;
-    public IFiniteElementMesh<VectorT> BuildMesh<VectorT>(Dimension dimension, GeometryType meshType, BasisType basisType, int order, string[] fileNames) where VectorT : VectorBase<double, VectorT>
+    public IFiniteElementMesh<VectorT> BuildMesh<VectorT>(Dimension dimension, GeometryType meshType, BasisType basisType, int order, ReadOnlySpan<string> fileNames) where VectorT : VectorBase<double, VectorT>
     {
         this.dimension = dimension;
         ReadMeshFile(fileNames[0]);

@@ -22,4 +22,6 @@ public record Rectangle<VectorT>(int[] VertexNumber) : Quadrangle<VectorT>(Verte
             throw new ArgumentException();
         }
     }
+
+    public static int[] LocalEdgeNumToLocalEdgeNumForVectorHierarchicalBasis => [0, 3, 1, 2];
 }

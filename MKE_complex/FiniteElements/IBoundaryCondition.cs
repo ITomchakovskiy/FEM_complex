@@ -12,6 +12,7 @@ public interface IBoundaryCondition<VectorT> where VectorT : VectorBase<double, 
 {
     IFiniteElementGeometry<VectorT> Geometry { get; }
     string Material { get; }
+    int Order {get;}
     int[] DOFs { get; }
     int[] SortedDofs { get; }
     int[] SortedDofIndices { get; }
@@ -24,6 +25,13 @@ public interface IBoundaryCondition<VectorT> where VectorT : VectorBase<double, 
     void SetEdgesDofs(ReadOnlySpan<int> dofsNumbers);
     
     IBoundaryCondition<VectorT>[] Refine(ReadOnlySpan<int> FaceVertices, ReadOnlySpan<int> EdgeVertices);
+}
+
+public interface IBoundaryCondition3D : IBoundaryCondition<Vector3D>
+{
+    public new IFiniteElementGeometry3D Geometry { get; }
+    int DofsOnFaceCount { get; }
+    void SetFaceDofs(int[] baseVerices, int dofNumber);
 }
 
 public interface IBoundaryConditionScalarEllipticProblemCalculation<VectorT> where VectorT : VectorBase<double, VectorT>

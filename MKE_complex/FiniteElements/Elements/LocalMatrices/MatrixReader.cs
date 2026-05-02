@@ -26,4 +26,6 @@ public static class MatrixReader
         reader.Close();
         return matrix.ToArray();
     }
+
+    public static string Directory = "./LocalMatricesFiles";
 }

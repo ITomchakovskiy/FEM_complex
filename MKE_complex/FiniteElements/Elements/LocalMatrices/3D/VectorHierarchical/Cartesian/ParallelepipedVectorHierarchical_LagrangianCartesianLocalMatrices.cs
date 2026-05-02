@@ -20,20 +20,20 @@ public class ParallelepipedVectorHierarchical_LagrangianCartesianLocalMatrices
         return baseMatrix.Select(i => i.Select(j => j*hx*hy*hz).ToArray()).ToArray();
     }
 
-    private static string directory = "./LocalMatrices/VectorHierarchical";
+    private static string directory = "VectorHierarchical";
 
     private static double[][] M1 = buildLocalBaseMassMatrixLinear();
     private static double[][] M2 = buildLocalBaseMassMatrixQuadratic();
 
     private static double[][] buildLocalBaseMassMatrixLinear()
     {
-        string path = Path.Combine(directory, "LocalBaseHierarchical_LagrangeMassMatrixLinear");
+        string path = Path.Combine(MatrixReader.Directory, directory, "LocalBaseHierarchical_LagrangeMassMatrixLinear");
         return MatrixReader.ReadMatrixFromFile(path);
     }
 
     private static double[][] buildLocalBaseMassMatrixQuadratic()
     {
-        string path = Path.Combine(directory, "LocalBaseHierarchical_LagrangeMassMatrixQuadratic");
+        string path = Path.Combine(MatrixReader.Directory, directory, "LocalBaseHierarchical_LagrangeMassMatrixQuadratic");
         return MatrixReader.ReadMatrixFromFile(path);
     }
 }
