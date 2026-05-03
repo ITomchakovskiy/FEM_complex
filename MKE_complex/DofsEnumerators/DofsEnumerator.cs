@@ -92,7 +92,7 @@ public static class DofsEnumerator
                     element3D.SetFaceDofs(i,simplifiedFace,faceDofNumber);
                 }
             }
-        } //нужно сделать еще дофы для граней(3д)!!!
+        }
 
         foreach (var boundary in mesh.Boundaries) //setting dofs to boundary conditions
         {
@@ -104,6 +104,13 @@ public static class DofsEnumerator
                 edge = edge.Item1 < edge.Item2 ? edge : (edge.Item2, edge.Item1);
                 int edgeDofNumber = edgeList[edge.Item1][edge.Item2];
                 boundary.SetEdgeDofs(i, edgeDofNumber);
+            }
+            if(boundary is IBoundaryCondition3D boundary3D) //if need faces for 3D
+            {
+                var face = boundary3D.Geometry.GlobalFace(0);
+                var simplifiedFace = GeometricMethods.SimplifyFace(face);
+                int faceDofNumber = FacesList[simplifiedFace[0]][simplifiedFace[1]][simplifiedFace[2]];
+                boundary3D.SetFaceDofs(simplifiedFace,faceDofNumber);
             }
         }
     }

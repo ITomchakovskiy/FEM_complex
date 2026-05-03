@@ -33,7 +33,7 @@ public static class FiniteElementsCreator
         }
 
         var edgeTypes = assembly.GetTypes().Where(t => t.GetInterfaces().Any(i => i.IsGenericType &&
-        i.GetGenericTypeDefinition() == typeof(IBoundaryCondition<>)));
+        i.GetGenericTypeDefinition() == typeof(IBoundaryCondition<>)) && !t.IsInterface);
 
         foreach (var type in edgeTypes)
         {

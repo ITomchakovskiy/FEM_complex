@@ -220,7 +220,7 @@ public class RegularParallelepipedMeshBuilder : IMeshBuilder
                     if(indices.Select(i => IsVertexIndexInDomain[i]).All(i => i is true))
                     {
                         var VertexNumber = indices.Select(i => IndicesDictionary[i]);
-                        var geometry = new Rectangle<Vector3D>(VertexNumber.ToArray());
+                        var geometry = new RectangleBoundary(VertexNumber.ToArray());
                         var boundary = FiniteElementsCreator.CreateBoundaryCondition(GeometryType.Rectangle, basisType, order,boundaryDomain.Material,geometry);
 
                         boundaries.Add(boundary);
@@ -241,7 +241,7 @@ public class RegularParallelepipedMeshBuilder : IMeshBuilder
                     if(indices.Select(i => IsVertexIndexInDomain[i]).All(i => i is true))
                     {
                         var VertexNumber = indices.Select(i => IndicesDictionary[i]);
-                        var geometry = new Rectangle<Vector3D>(VertexNumber.ToArray());
+                        var geometry = new RectangleBoundary(VertexNumber.ToArray());
                         var boundary = FiniteElementsCreator.CreateBoundaryCondition(GeometryType.Rectangle, basisType, order,boundaryDomain.Material,geometry);
 
                         boundaries.Add(boundary);
@@ -262,7 +262,7 @@ public class RegularParallelepipedMeshBuilder : IMeshBuilder
                     if(indices.Select(i => IsVertexIndexInDomain[i]).All(i => i is true))
                     {
                         var VertexNumber = indices.Select(i => IndicesDictionary[i]);
-                        var geometry = new Rectangle<Vector3D>(VertexNumber.ToArray());
+                        var geometry = new RectangleBoundary(VertexNumber.ToArray());
                         var boundary = FiniteElementsCreator.CreateBoundaryCondition(GeometryType.Rectangle, basisType, order,boundaryDomain.Material,geometry);
 
                         boundaries.Add(boundary);

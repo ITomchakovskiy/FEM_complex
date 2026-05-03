@@ -10,6 +10,7 @@ using MKE_complex.Vector;
 
 namespace MKE_complex.FiniteElements.Elements.ElementsClasses._3D.VectorHierarchical;
 
+[FiniteElement(GeometryType.Rectangle, BasisType.VectorHierarchical)]
 public class RectangleVectorHierarchicalBoundary : IBoundaryCondition3D
 {
     public RectangleVectorHierarchicalBoundary(string material, RectangleBoundary geometry, int order)
@@ -80,7 +81,7 @@ public class RectangleVectorHierarchicalBoundary : IBoundaryCondition3D
         throw new NotSupportedException();
     }
 
-    private int NewDofsOnEdgesCountForOrder(int order) => 12;
+    private int NewDofsOnEdgesCountForOrder(int order) => 4;
 
     private int[] IndexShiftForFaceDOFS()
     {
@@ -106,13 +107,7 @@ public class RectangleVectorHierarchicalBoundary : IBoundaryCondition3D
         }
     }
 
-    public void SetVericesDofs(ReadOnlySpan<int> dofsNumbers)
-    {
-        ;
-    }
+    public void SetVericesDofs(ReadOnlySpan<int> dofsNumbers) {}
 
-    public void SetVertexDofs(int localVertexNumber, int dofNumber)
-    {
-        ;
-    }
+    public void SetVertexDofs(int localVertexNumber, int dofNumber) {}
 }
