@@ -15,7 +15,7 @@ public class Vector3D : VectorBase<double, Vector3D>
     public Vector3D(double X, double Y, double Z) => components = [X, Y, Z];
     public Vector3D(Vector2D xy, double z) => components = [xy.X, xy.Y, z];
 
-    protected override Vector3D CreateVector(params double[] components) => new Vector3D(components[0], components[1], components[2]);
+    public override Vector3D CreateVector(params double[] components) => new Vector3D(components[0], components[1], components[2]);
 
     public Vector3D CrossProduct(Vector3D other)
     {

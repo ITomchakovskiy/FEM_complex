@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MKE_complex.DofsEnumerators;
 using MKE_complex.FiniteElements.Elements;
 using MKE_complex.Mesh.MeshBuilder;
+using MKE_complex.Vector;
 using Xunit;
 
 namespace MKE_complex.Tests
@@ -26,7 +27,7 @@ namespace MKE_complex.Tests
 
             var builder = new RegularParallelepipedMeshBuilder();
 
-            var mesh = builder.BuildMesh(Dimension.D3,GeometryType.Parallelepiped,BasisType.VectorHierarchical,2,filenames);
+            var mesh = builder.BuildMesh<Vector3D>(Dimension.D3,GeometryType.Parallelepiped,BasisType.VectorHierarchical,2,filenames);
 
             DofsEnumerator.EnumerateMeshDofs(mesh);
 

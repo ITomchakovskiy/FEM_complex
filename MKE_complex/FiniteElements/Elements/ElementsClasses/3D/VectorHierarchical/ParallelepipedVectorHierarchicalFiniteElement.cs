@@ -153,7 +153,7 @@ public class ParallelepipedVectorHierarchicalFiniteElement : IFiniteElement3D, I
 
     private double[][] GetLocalCoordinatesForLagrangianDofs()
     {
-        int N = (DOFs.Length + 1)*(DOFs.Length + 1)*(DOFs.Length + 1); //scalar lagrangian dofs count
+        int N = (Order + 1)*(Order + 1)*(Order + 1); //scalar lagrangian dofs count
         var res = new double[N][];
         for(int i = 0; i < res.Length; ++i)
             res[i] = new double[3];
@@ -223,8 +223,11 @@ public class ParallelepipedVectorHierarchicalFiniteElement : IFiniteElement3D, I
         return res;
     }
 
-    public double CalcResultAtPoint(ReadOnlySpan<Vector3D> vertices, ReadOnlySpan<double> localSolution, Vector3D point)
+    public Vector3D CalcResultAtPoint(ReadOnlySpan<Vector3D> vertices, ReadOnlySpan<double> localSolution, Vector3D point)
     {
         throw new NotImplementedException();
     }
+
+    public void SetDofs(ReadOnlySpan<int> newDofs) =>
+        DOFs = newDofs.ToArray();
 }

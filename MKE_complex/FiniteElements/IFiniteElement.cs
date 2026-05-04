@@ -48,5 +48,6 @@ public interface IFiniteElementVectorProblemCalculation<VectorT> where VectorT :
 {
     double[][] CalcLocalMatrix(ReadOnlySpan<VectorT> vertices, Func<VectorT, double> Mu, Func<VectorT, double> Gamma);
     double[] CalcLocalRightPart(ReadOnlySpan<VectorT> vertices, Func<VectorT, VectorT> F);
-    double CalcResultAtPoint(ReadOnlySpan<VectorT> vertices, ReadOnlySpan<double> localSolution, VectorT point);
+    VectorT CalcResultAtPoint(ReadOnlySpan<VectorT> vertices, ReadOnlySpan<double> localSolution, VectorT point);
+    void SetDofs(ReadOnlySpan<int> newDofs);
 }

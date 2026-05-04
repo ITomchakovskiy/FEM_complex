@@ -35,6 +35,7 @@ public class NeumannConditionForScalarEllipticProblem<VectorT> : IMaterial<Vecto
         Name = name;
 
         context = new ExpressionContext();
+        context.Imports.AddType(typeof(Math));
 
         this.coordinates = coordinates;
 

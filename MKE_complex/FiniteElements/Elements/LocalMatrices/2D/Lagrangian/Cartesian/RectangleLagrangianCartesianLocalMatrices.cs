@@ -29,12 +29,12 @@ public class RectangleLagrangianCartesianLocalMatrices
             G[i] = new double[i + 1];
             for(int j = 0; j <= i; ++j)
             {
-                (int i, int j) Mu = (RectangleLagrangianBases.localXDofNum(i, order), 
-                                         RectangleLagrangianBases.localXDofNum(j, order));
+                (int i, int j) Mu = (RectangleScalarLagrangianBases.localXDofNum(i, order), 
+                                         RectangleScalarLagrangianBases.localXDofNum(j, order));
                 Mu = Mu.j < Mu.i ? Mu : (Mu.j, Mu.i);
 
-                (int i, int j) Nu = (RectangleLagrangianBases.localYDofNum(i, order),
-                                         RectangleLagrangianBases.localYDofNum(j, order));
+                (int i, int j) Nu = (RectangleScalarLagrangianBases.localYDofNum(i, order),
+                                         RectangleScalarLagrangianBases.localYDofNum(j, order));
                 Nu = Nu.j < Nu.i ? Nu : (Nu.j, Nu.i);
 
                 G[i][j] = Gx[Mu.i][Mu.j] * My[Nu.i][Nu.j] + Mx[Mu.i][Mu.j] * Gy[Nu.i][Nu.j];
@@ -60,12 +60,12 @@ public class RectangleLagrangianCartesianLocalMatrices
             M[i] = new double[i + 1];
             for (int j = 0; j <= i; ++j)
             {
-                (int i, int j) Mu = (RectangleLagrangianBases.localXDofNum(i, order),
-                                     RectangleLagrangianBases.localXDofNum(j, order));
+                (int i, int j) Mu = (RectangleScalarLagrangianBases.localXDofNum(i, order),
+                                     RectangleScalarLagrangianBases.localXDofNum(j, order));
                 Mu = Mu.j < Mu.i ? Mu : (Mu.j, Mu.i);
 
-                (int i, int j) Nu = (RectangleLagrangianBases.localYDofNum(i, order),
-                                         RectangleLagrangianBases.localYDofNum(j, order));
+                (int i, int j) Nu = (RectangleScalarLagrangianBases.localYDofNum(i, order),
+                                         RectangleScalarLagrangianBases.localYDofNum(j, order));
                 Nu = Nu.j < Nu.i ? Nu : (Nu.j, Nu.i);
 
                 M[i][j] = Mx[Mu.i][Mu.j] * My[Nu.i][Nu.j];

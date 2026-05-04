@@ -23,7 +23,7 @@ public class RegularParallelepipedMeshBuilder : IMeshBuilder
         public (int Y0, int Y1) YW = yw;
         public (int Z0, int Z1) ZW = zw;
     }
-    public IFiniteElementMesh<Vector3D> BuildMesh(Dimension dimension, GeometryType meshType, BasisType basisType, int order, ReadOnlySpan<string> fileNames)
+    public IFiniteElementMesh<VectorT> BuildMesh<VectorT>(Dimension dimension, GeometryType meshType, BasisType basisType, int order, ReadOnlySpan<string> fileNames) where VectorT : VectorBase<double,VectorT>
     {
         if(fileNames.Length != 3)
             throw new ArgumentException();
@@ -145,7 +145,9 @@ public class RegularParallelepipedMeshBuilder : IMeshBuilder
             }
         }
 
-        List<Vector3D> vertices = [];
+        //List<Vector3D> vertices = [];
+
+        List<VectorT> vertices = [];
 
         for(int i = 0, currentIndex = 0; i < N; ++i)
         {
@@ -153,11 +155,12 @@ public class RegularParallelepipedMeshBuilder : IMeshBuilder
             {
                 IndicesDictionary[i] = currentIndex;
                 ++currentIndex;
-                vertices.Add(VertexForIndex(i));
+                if(vertices is List<Vector3D> vertices3d)
+                    vertices3d.Add(VertexForIndex(i));
             }
         }
 
-        List<IFiniteElement<Vector3D>> elements = [];
+        List<IFiniteElement<VectorT>> elements = [];
 
         foreach(var domain in domains)
         {
@@ -177,7 +180,8 @@ public class RegularParallelepipedMeshBuilder : IMeshBuilder
                             var geometry = new Parallelepiped(VertexNumber.ToArray());
                             var element = FiniteElementsCreator.CreateFiniteElement(GeometryType.Parallelepiped,
                                                                                     basisType,order,domain.Material,geometry);
-                            elements.Add(element);
+                            if(elements is List<IFiniteElement<Vector3D>> elements3d)
+                                elements3d.Add(element);
                         }
                     }
                 }
@@ -205,7 +209,7 @@ public class RegularParallelepipedMeshBuilder : IMeshBuilder
             line = edgesReader.ReadLine()?.Split(' ');
         }
 
-        List<IBoundaryCondition<Vector3D>> boundaries = [];
+        List<IBoundaryCondition<VectorT>> boundaries = [];
 
         foreach(var boundaryDomain in edgeDomains[0])
         {
@@ -222,8 +226,8 @@ public class RegularParallelepipedMeshBuilder : IMeshBuilder
                         var VertexNumber = indices.Select(i => IndicesDictionary[i]);
                         var geometry = new RectangleBoundary(VertexNumber.ToArray());
                         var boundary = FiniteElementsCreator.CreateBoundaryCondition(GeometryType.Rectangle, basisType, order,boundaryDomain.Material,geometry);
-
-                        boundaries.Add(boundary);
+                        if(boundaries is List<IBoundaryCondition<Vector3D>> boundaries3d)
+                            boundaries3d.Add(boundary);
                     }
                 }
             }
@@ -244,7 +248,8 @@ public class RegularParallelepipedMeshBuilder : IMeshBuilder
                         var geometry = new RectangleBoundary(VertexNumber.ToArray());
                         var boundary = FiniteElementsCreator.CreateBoundaryCondition(GeometryType.Rectangle, basisType, order,boundaryDomain.Material,geometry);
 
-                        boundaries.Add(boundary);
+                        if(boundaries is List<IBoundaryCondition<Vector3D>> boundaries3d)
+                            boundaries3d.Add(boundary);
                     }
                 }
             }
@@ -265,12 +270,13 @@ public class RegularParallelepipedMeshBuilder : IMeshBuilder
                         var geometry = new RectangleBoundary(VertexNumber.ToArray());
                         var boundary = FiniteElementsCreator.CreateBoundaryCondition(GeometryType.Rectangle, basisType, order,boundaryDomain.Material,geometry);
 
-                        boundaries.Add(boundary);
+                        if(boundaries is List<IBoundaryCondition<Vector3D>> boundaries3d)
+                            boundaries3d.Add(boundary);
                     }
                 }
             }
         }
 
-        return new FiniteElementMesh<Vector3D>(vertices, elements, boundaries);
+        return new FiniteElementMesh<VectorT>(vertices, elements, boundaries);
     }
 }

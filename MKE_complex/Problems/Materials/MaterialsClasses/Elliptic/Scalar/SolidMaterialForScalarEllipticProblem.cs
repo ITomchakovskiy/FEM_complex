@@ -40,6 +40,7 @@ public class SolidMaterialForScalarEllipticProblem<VectorT> : IMaterial<VectorT>
         Name = name;
 
         context = new ExpressionContext();
+        context.Imports.AddType(typeof(Math));
 
         this.coordinates = coordinates;
 

@@ -8,16 +8,14 @@ using System.Threading.Tasks;
 
 namespace MKE_complex.Vector;
 
-public abstract class VectorBase<T, Tself> where T : INumber<T>
+public abstract class VectorBase<T, Tself>(params T[] components) where T : INumber<T>
                                            where Tself : VectorBase<T, Tself>
 {
-    public VectorBase(params T[] components) => this.components = components;
-
     public int N => components!.Length;
 
-    public T[] components { get; init; }
+    public T[] components { get; init; } = components;
 
-    protected abstract Tself CreateVector(params T[] components);
+    public abstract Tself CreateVector(params T[] components);
 
     public static Tself operator +(VectorBase<T,Tself> A, Tself B)
     {

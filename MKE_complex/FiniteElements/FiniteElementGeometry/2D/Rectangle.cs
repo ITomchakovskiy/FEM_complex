@@ -24,4 +24,9 @@ public record Rectangle<VectorT>(int[] VertexNumber) : Quadrangle<VectorT>(Verte
     }
 
     public static int[] LocalEdgeNumToLocalEdgeNumForVectorHierarchicalBasis => [0, 3, 1, 2];
+
+    public static VectorT CalcH(ReadOnlySpan<VectorT> vertices)
+    {
+        return vertices[2] - vertices[0];
+    }
 }

@@ -54,7 +54,7 @@ public class LOSSolver
         int k = 1;
         if (discrepancy < MaxDiscrepancy)
         {
-            Console.WriteLine("Метод LOS сошелся: %.3le", discrepancy);
+            Console.WriteLine($"Метод LOS сошелся: {discrepancy:E3}", discrepancy);
             return xV;
         }
         for (; k < Maxiter + 1; k++)
@@ -70,12 +70,12 @@ public class LOSSolver
             discrepancy = r.Norm(); discrepancy *= discrepancy; //квадрат нормы невязки
             if (discrepancy < MaxDiscrepancy)
             {
-                Console.WriteLine("Метод LOS сошелся: %.3le", discrepancy);
+                Console.WriteLine($"Метод LOS сошелся: {discrepancy:E3}");
                 return xV;
             }
         }
         if (k == Maxiter + 1)
-            Console.WriteLine("Достигнуто максимальное число итераций: %.3le", discrepancy);
+            Console.WriteLine($"Достигнуто максимальное число итераций: {discrepancy:E3}");
         return xV;
     }
 }

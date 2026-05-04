@@ -41,3 +41,10 @@ public interface IBoundaryConditionScalarEllipticProblemCalculation<VectorT> whe
     double[] CalcLocalRightPartForRobinCondition(VectorT[] vertices, Func<VectorT, double> Beta, Func<VectorT, double> UBeta);
     double[] CalcLocalRightPartForDirichletCondition(VectorT[] vertices, Func<VectorT, double> Ug);
 }
+
+public interface IBoundaryConditionVectorEllipticProblemCalculation<VectorT> where VectorT : VectorBase<double, VectorT>
+{
+    double[][] CalcLocalMatrixForDirichletCondition(ReadOnlySpan<VectorT> vertices);
+    double[] CalcLocalRightPart(ReadOnlySpan<VectorT> vertices, Func<VectorT, VectorT> Ag);
+    void SetDofs(ReadOnlySpan<int> newDofs);
+}

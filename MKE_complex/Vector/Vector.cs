@@ -10,5 +10,5 @@ namespace MKE_complex.Vector;
 public class Vector<T> : VectorBase<T, Vector<T>> where T : INumber<T>
 {
     public Vector(params T[] components) => this.components = components;
-    protected override Vector<T> CreateVector(params T[] components) => new Vector<T>(components);
+    public override Vector<T> CreateVector(params T[] components) => new Vector<T>(components);
 }

@@ -35,6 +35,7 @@ public class DirichletConditionForScalarEllipticProblem<VectorT> : IMaterial<Vec
         Name = name;
 
         context = new ExpressionContext();
+        context.Imports.AddType(typeof(Math));
 
         this.coordinates = coordinates;
 
