@@ -55,32 +55,30 @@ public class RegularParallelepipedMeshBuilder : IMeshBuilder
 
         var fragmentationReader = new StreamReader(fragmentationFile);
 
-        void ReadFragmentationFileLine(int length, out int[] n, out double[] k, StreamReader reader)
+        void ReadFragmentationFileLine(int length, out int[] n, out double[] k, out int[] fragmentation, StreamReader reader)
         {
             line = fragmentationReader.ReadLine()?.Split(' ');
 
-            if(line is null || line.Length != 2 * length) throw new FormatException("Wrong file format");
+            if(line is null || line.Length != 3 * length) throw new FormatException("Wrong file format");
 
             n = new int[length];
             k = new double[length];
+            fragmentation = new int[length];
 
             for(int i = 0; i < length; ++i)
             {
-                n[i] = int.Parse(line[2*i]);
-                k[i] = double.Parse(line[2*i + 1]);
+                n[i] = int.Parse(line[3*i]);
+                k[i] = double.Parse(line[3*i + 1]);
+                fragmentation[i] = int.Parse(line[3*i + 2]);
             }
         }
-        
-        int[] nx, ny, nz;
-
-        double[] kx, ky, kz;
         
         int[] FragmentationLength = [XWValues.Length - 1, 
                                      YWValues.Length - 1,
                                      ZWValues.Length - 1];
-        ReadFragmentationFileLine(FragmentationLength[0],out nx,out kx,fragmentationReader);
-        ReadFragmentationFileLine(FragmentationLength[1],out ny,out ky,fragmentationReader);
-        ReadFragmentationFileLine(FragmentationLength[2],out nz,out kz,fragmentationReader);
+        ReadFragmentationFileLine(FragmentationLength[0],out int[] nx,out double[] kx, out int[] ax, fragmentationReader);
+        ReadFragmentationFileLine(FragmentationLength[1],out int[] ny,out double[] ky, out int[] ay,fragmentationReader);
+        ReadFragmentationFileLine(FragmentationLength[2],out int[] nz,out double[] kz, out int[] az,fragmentationReader);
 
         fragmentationReader.Close();
 
@@ -88,7 +86,7 @@ public class RegularParallelepipedMeshBuilder : IMeshBuilder
 
         // int[] XW = new int[XWValues.Length], YW = new int[YWValues.Length], ZW = new int[ZWValues.Length];
 
-        void InitializeCoordinates(double[] WValues, int[] n, double[] k, out double[] Values,out int[] W)
+        void InitializeCoordinates(double[] WValues, int[] n, double[] k, int[] a, out double[] Values,out int[] W)
         {
             W = new int[WValues.Length];
 
@@ -101,9 +99,45 @@ public class RegularParallelepipedMeshBuilder : IMeshBuilder
                 //                                                         ((1d - Math.Pow(k[i],n[i]))/(1d - k[i])) : 
                 //                                                         len / n[i];
                 // double multiplier = 1d;
-                for(int j = 1; j <= n[i]; ++j)
+                if(a[i] == 0)
+                {
+                    for(int j = 1; j <= n[i]; ++j)
                     values.Add(GeometricMethods.PointOnLine(WValues[i],WValues[i+1],n[i],k[i],j));
-                W[i+1] = values.Count() - 1;
+                    W[i+1] = values.Count() - 1;
+                }
+                else
+                {
+                    int il = 1;
+                    for(int p = 0; p < a[i]; ++p) il *= 2;
+                    int N = n[i] * il; 
+                    double[] localValues = new double[N];
+                    double Klocal = k[i];
+                    for(int j = 1; j <= n[i]; ++j)
+                    {
+                        int ind = j * il - 1;
+                        localValues[ind] = GeometricMethods.PointOnLine(WValues[i],WValues[i+1],n[i],k[i],j);
+                    }
+                    int newValuesPerA = n[i];
+                    for(int ia = a[i]; ia > 0; --ia)
+                    {
+                        Klocal = Klocal > 0d ? Math.Sqrt(Klocal) : -Math.Sqrt(-Klocal);
+                        int new_il = il / 2;
+
+                        int ind = il - new_il - 1;
+                        localValues[ind] = GeometricMethods.PointOnLine(WValues[i],localValues[ind+new_il],2,Klocal,1);
+
+                        for(int j = 2; j <= newValuesPerA; ++j)
+                        {
+                            ind = j * il - new_il - 1;
+                            localValues[ind] = GeometricMethods.PointOnLine(localValues[ind-new_il],localValues[ind+new_il],2,Klocal,1);
+                        }
+                        newValuesPerA *= 2;
+                        il = new_il;
+                    }
+                    values.AddRange(localValues);
+                    W[i+1] = values.Count() - 1;
+                }
+                
             }
 
             Values = values.ToArray();
@@ -112,9 +146,9 @@ public class RegularParallelepipedMeshBuilder : IMeshBuilder
         double[] X, Y, Z;
         int[] XW, YW, ZW;
 
-        InitializeCoordinates(XWValues,nx,kx,out X, out XW);
-        InitializeCoordinates(YWValues,ny,ky,out Y, out YW);
-        InitializeCoordinates(ZWValues,nz,kz,out Z, out ZW);
+        InitializeCoordinates(XWValues,nx,kx,ax,out X, out XW);
+        InitializeCoordinates(YWValues,ny,ky,ay,out Y, out YW);
+        InitializeCoordinates(ZWValues,nz,kz,az,out Z, out ZW);
 
         Vector3D VertexForIndex(int number)
         {
