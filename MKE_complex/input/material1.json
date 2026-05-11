@@ -1,0 +1,12 @@
+[
+    {"Name":"volume1","Functions":{"Lambda":"2","Gamma":"1","F":"2*x^2 + 3*y^2 + 6*x*y - 20"},"MaterialType":"Solid"},
+    {"Name":"volume2","Functions":{"Lambda":"1","Gamma":"1","F":"5*x + 10*y + 10"},"MaterialType":"Solid"},
+    {"Name":"ed11","Functions":{"Ug":"2*x^2 + 3*y^2 + 6*x*y"},"MaterialType":"DirichletCondition"},
+    {"Name":"ed12","Functions":{"Ug":"30*y - 10"},"MaterialType":"DirichletCondition"},
+    {"Name":"ed21","Functions":{"Theta":"-(8*x + 12 * y)"},"MaterialType":"NeumannCondition"},
+    {"Name":"ed22","Functions":{"Theta":"12 * (x + y)"},"MaterialType":"NeumannCondition"},
+    {"Name":"ed23","Functions":{"Theta":"8*x + 12*y"},"MaterialType":"NeumannCondition"},
+    {"Name":"ed24","Functions":{"Theta":"-12 * (x + y)"},"MaterialType":"NeumannCondition"},
+    {"Name":"ed31","Functions":{"Beta":"1.0/5.0","UBeta":"5*x - 40"},"MaterialType":"RobinCondition"},
+    {"Name":"ed32","Functions":{"Beta":"2","UBeta":"5 * x + 35"},"MaterialType":"RobinCondition"}
+]

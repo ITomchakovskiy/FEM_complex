@@ -15,7 +15,7 @@ public static class ParallelepipedScalarLagrangianBases
     public static Func<int, double, double, double, double> BasisFunctions(int order)
     {
         if(order < 1) throw new ArgumentException("wrong element order");
-        return (int i, double xi, double eta, double zeta) => LineLagrangianBases.BasisFunctions(order)[LocalXDofNum(i, order)](xi) * 
+        return (i, xi, eta, zeta) => LineLagrangianBases.BasisFunctions(order)[LocalXDofNum(i, order)](xi) * 
                                                               LineLagrangianBases.BasisFunctions(order)[LocalYDofNum(i, order)](eta) *
                                                               LineLagrangianBases.BasisFunctions(order)[LocalZDofNum(i, order)](zeta);
     }

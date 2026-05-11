@@ -1,0 +1,8 @@
+[
+    {"Name":"m1","Functions":{"Mu":"1","Gamma":"1","Fx":"1.0 + y","Fy":"0","Fz":"0"},"MaterialType":"Solid"},
+    {"Name":"m2","Functions":{"Mu":"1","Gamma":"1","Fx":"1.0 + y","Fy":"0","Fz":"0"},"MaterialType":"Solid"},
+    {"Name":"m3","Functions":{"Mu":"1","Gamma":"1","Fx":"1.0 + y","Fy":"0","Fz":"0"},"MaterialType":"Solid"},
+    {"Name":"ed1","Functions":{"AgX":"1.0 + y","AgY":"0","AgZ":"0"},"MaterialType":"DirichletCondition"},
+    {"Name":"ed2","Functions":{"AgX":"1.0 + y","AgY":"0","AgZ":"0"},"MaterialType":"DirichletCondition"},
+    {"Name":"ed3","Functions":{"AgX":"1.0 + y","AgY":"0","AgZ":"0"},"MaterialType":"DirichletCondition"}
+]

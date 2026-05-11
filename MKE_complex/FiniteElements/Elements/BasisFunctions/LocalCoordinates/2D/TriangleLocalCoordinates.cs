@@ -62,30 +62,30 @@ public static class TriangleLocalCoordinates
 
     public static Func<Vector2D, double[,], double>[] LocalCoordinates =
     [
-        (Vector2D p,  double [,] alpha) => alpha[0,0] + alpha[0,1] * p.X + alpha[0,2] * p.Y,
-        (Vector2D p,  double [,] alpha) => alpha[1,0] + alpha[1,1] * p.X + alpha[1,2] * p.Y,
-        (Vector2D p,  double [,] alpha) => alpha[2,0] + alpha[2,1] * p.X + alpha[2,2] * p.Y,
+        (p,  alpha) => alpha[0,0] + alpha[0,1] * p.X + alpha[0,2] * p.Y,
+        (p,  alpha) => alpha[1,0] + alpha[1,1] * p.X + alpha[1,2] * p.Y,
+        (p,  alpha) => alpha[2,0] + alpha[2,1] * p.X + alpha[2,2] * p.Y,
     ];
 
     private static Func<Vector3D, double[,], double>[] LocalCoordinatesZConst =
     [
-        (Vector3D p,  double [,] alpha) => alpha[0,0] + alpha[0,1] * p.X + alpha[0,2] * p.Y,
-        (Vector3D p,  double [,] alpha) => alpha[1,0] + alpha[1,1] * p.X + alpha[1,2] * p.Y,
-        (Vector3D p,  double [,] alpha) => alpha[2,0] + alpha[2,1] * p.X + alpha[2,2] * p.Y,
+        (p,  alpha) => alpha[0,0] + alpha[0,1] * p.X + alpha[0,2] * p.Y,
+        (p,  alpha) => alpha[1,0] + alpha[1,1] * p.X + alpha[1,2] * p.Y,
+        (p,  alpha) => alpha[2,0] + alpha[2,1] * p.X + alpha[2,2] * p.Y,
     ];
 
     private static Func<Vector3D, double[,], double>[] LocalCoordinatesYConst =
     [
-        (Vector3D p,  double [,] alpha) => alpha[0,0] + alpha[0,1] * p.X + alpha[0,2] * p.Z,
-        (Vector3D p,  double [,] alpha) => alpha[1,0] + alpha[1,1] * p.X + alpha[1,2] * p.Z,
-        (Vector3D p,  double [,] alpha) => alpha[2,0] + alpha[2,1] * p.X + alpha[2,2] * p.Z,
+        (p,  alpha) => alpha[0,0] + alpha[0,1] * p.X + alpha[0,2] * p.Z,
+        (p,  alpha) => alpha[1,0] + alpha[1,1] * p.X + alpha[1,2] * p.Z,
+        (p,  alpha) => alpha[2,0] + alpha[2,1] * p.X + alpha[2,2] * p.Z,
     ];
 
     private static Func<Vector3D, double[,], double>[] LocalCoordinatesXConst =
     [
-        (Vector3D p,  double [,] alpha) => alpha[0,0] + alpha[0,1] * p.Y + alpha[0,2] * p.Z,
-        (Vector3D p,  double [,] alpha) => alpha[1,0] + alpha[1,1] * p.Y + alpha[1,2] * p.Z,
-        (Vector3D p,  double [,] alpha) => alpha[2,0] + alpha[2,1] * p.Y + alpha[2,2] * p.Z,
+        (p,  alpha) => alpha[0,0] + alpha[0,1] * p.Y + alpha[0,2] * p.Z,
+        (p,  alpha) => alpha[1,0] + alpha[1,1] * p.Y + alpha[1,2] * p.Z,
+        (p,  alpha) => alpha[2,0] + alpha[2,1] * p.Y + alpha[2,2] * p.Z,
     ];
 
     public static Func<Vector3D, double[,], double>[] GetLocalCoordinates(string projectionPlane)

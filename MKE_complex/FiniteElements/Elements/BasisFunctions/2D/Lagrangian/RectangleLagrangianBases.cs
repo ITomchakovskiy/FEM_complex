@@ -15,7 +15,7 @@ public static class RectangleScalarLagrangianBases
     public static Func<int, double, double, double> BasisFunctions(int order)
     {
         if(order < 1) throw new ArgumentException("wrong element order");
-        return (int i, double xi, double eta) => LineLagrangianBases.BasisFunctions(order)[LocalXDofNum(i, order)](xi) * 
+        return (i, xi, eta) => LineLagrangianBases.BasisFunctions(order)[LocalXDofNum(i, order)](xi) * 
                                                  LineLagrangianBases.BasisFunctions(order)[LocalYDofNum(i, order)](eta);
     }
 }

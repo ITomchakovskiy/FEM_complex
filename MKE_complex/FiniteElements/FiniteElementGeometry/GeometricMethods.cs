@@ -41,8 +41,8 @@ public static class GeometricMethods
         double l = Math.Abs(r);
         if (Math.Abs(k - 1d) < 1.0E-13)
             return A + r / n * ind;
-
-        ind = n - ind;
+        if(k < 0d)
+            ind = n - ind ;
 
         double l_ind = l * (1d - Math.Pow(Math.Abs(k), ind)) / (1d - Math.Pow(Math.Abs(k), n));
 

@@ -1,0 +1,4 @@
+[
+    {"Name":"m","Functions":{"Mu":"1","Gamma":"1","Fx":"y ^ 3 - 6*y","Fy":"5 * z ^ 3 - 30*z","Fz":"2 * x ^ 3 - 12 * x"},"MaterialType":"Solid"},
+    {"Name":"ed","Functions":{"AgX":"y ^ 3","AgY":"5 * z ^ 3","AgZ":"2 * x ^ 3"},"MaterialType":"DirichletCondition"}
+]

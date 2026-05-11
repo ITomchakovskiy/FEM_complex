@@ -24,22 +24,22 @@ public static class LineLagrangianBases
  
     private static Func<double, double>[] PsiLinear =
         [
-            (double xi) => 1d - xi,
-            (double xi) => xi,
+            xi => 1d - xi,
+            xi => xi,
         ];
 
     private static Func<double, double>[] PsiQuadratic =
         [
-            (double xi) => 2d * (xi - 1d/2d) * (xi - 1d),
-            (double xi) => - 4d * xi * (xi - 1),
-            (double xi) => 2d * xi * (xi - 1d/2d),
+            xi => 2d * (xi - 1d/2d) * (xi - 1d),
+            xi => - 4d * xi * (xi - 1),
+            xi => 2d * xi * (xi - 1d/2d),
         ];
     private static Func<double, double>[] PsiCubic =
         [
-            (double xi) => -2d / 9d *(xi - 1d/3d) * (xi - 2d/3d) * (xi - 1d),
-            (double xi) => 2d / 27d * xi * (xi - 2d/3d) * (xi - 1d),
-            (double xi) => -2d / 27d * xi * (xi - 1d/3d) * (xi - 1d),
-            (double xi) => 2d / 9d * xi * (xi - 1d/3d) * (xi - 2d/3d),
+            xi => -2d / 9d *(xi - 1d/3d) * (xi - 2d/3d) * (xi - 1d),
+            xi => 2d / 27d * xi * (xi - 2d/3d) * (xi - 1d),
+            xi => -2d / 27d * xi * (xi - 1d/3d) * (xi - 1d),
+            xi => 2d / 9d * xi * (xi - 1d/3d) * (xi - 2d/3d),
         ];
  
 }

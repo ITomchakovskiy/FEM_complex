@@ -21,35 +21,39 @@ public class VectorProblem<VectorT> where VectorT : VectorBase<double, VectorT>
 
     private double[]? Solution { get; set; }
 
-    // public double EvaluateDiscrepancy(ReadOnlySpan<VectorT> vertices, Func<VectorT,VectorT> u)
-    // {
-    //     double discrepancy = 0d;
-    //     int n = 0;
-    //     string format = "E3";
-    //     string separator = "\t";
-    //     foreach(var vertex in vertices)
-    //     {
-    //         double value = 0;
-    //         if (CalculateFunctionAtPoint(vertex, out value))
-    //         {
-    //             Console.WriteLine($" {vertex.AsString(format, separator)}{separator}{value.ToString(format)}{separator}{u(vertex).ToString(format)}{separator}{Math.Abs(value - u(vertex)):E3}");
-    //             ++n;
-    //             discrepancy += Math.Abs(value - u(vertex)) * Math.Abs(value - u(vertex));
-    //         }
-    //         else
-    //             Console.WriteLine($"{vertex.AsString(format, separator)}{separator}not found");
-    //     }
+    public double EvaluateDiscrepancy(ReadOnlySpan<VectorT> vertices, Func<VectorT,VectorT> A)
+    {
+        double discrepancy = 0d;
+        int n = 0;
+        string format = "E3";
+        string separator = "\t";
+        foreach(var vertex in vertices)
+        {
+            VectorT? value;
+            if (CalculateFunctionAtPoint(vertex, out value))
+            {
+                Console.WriteLine($"{vertex.AsString(format, separator)}{separator}{value!.AsString(format,separator)}{separator}{A(vertex).AsString(format, separator)}{separator}{Math.Pow((value - A(vertex)).Norm(),2d):E3}");
+                ++n;
+                discrepancy += Math.Pow((value - A(vertex)).Norm(),2d);
+            }
+            else
+                Console.WriteLine($"{vertex.AsString(format, separator)}{separator}not found");
+        }
         
-    //     discrepancy = Math.Sqrt(discrepancy/n);
-    //     return discrepancy;
-
-    // }
+        discrepancy = Math.Sqrt(discrepancy/n);
+        return discrepancy;
+    }
 
     public bool CalculateFunctionAtPoint(VectorT point, out VectorT? value)
     {
         value = null;
         foreach (var element in Mesh!.Elements)
         {
+            // if(element.Geometry.VertexNumber[0] == 64)
+            // {
+            //     int amogus = 0;
+            //     amogus += 1;
+            // }
             var vertices = element.Geometry.VertexNumber.Select(i => Mesh.Vertices[i]).ToArray();
             if (element.Geometry.IsPointInElement(point, vertices))
             {
@@ -104,15 +108,15 @@ public class VectorProblem<VectorT> where VectorT : VectorBase<double, VectorT>
     }
     public void Solve()
     {
-        string directory = "MeshTest1";
-        string[] fileNames = ["Mesh.txt", "MeshFragmentation.txt", "Edges.txt"]; //Console.ReadLine()!.Split(' ');
+        string directory = "./input/MeshTest2";
+        string[] fileNames = ["Mesh", "Fragmentation", "Boundary"]; //Console.ReadLine()!.Split(' ');
         fileNames = fileNames.Select(i => Path.Combine(directory,i)).ToArray();
 
-        RegularParallelepipedMeshBuilder builder = new RegularParallelepipedMeshBuilder();
+        RegularParallelepipedMeshBuilder builder = new();
 
         Mesh = builder.BuildMesh<VectorT>(dimension, meshType, basisType, basisOrder, fileNames);
 
-        var Materials = MaterialsReader.ReadMaterials<VectorT>("material2.json", PDE_Type.Elliptic, FieldType.Scalar, CoordinateSystem.Cartesian);
+        var Materials = MaterialsReader.ReadMaterials<VectorT>(Path.Join("MeshTest2","materials4.json"), PDE_Type.Elliptic, FieldType.Vector, CoordinateSystem.Cartesian);
 
         var DirichletConditions = Mesh.Boundaries.ToArray().Where(i=>Materials[i.Material] is DirichletConditionForVectorEllipticProblem<VectorT>);
 
@@ -120,7 +124,7 @@ public class VectorProblem<VectorT> where VectorT : VectorBase<double, VectorT>
         
         HashSet<int> DirichletDofs = [];
 
-        foreach(var condition in DirichletConditions) DirichletDofs.AddRange(condition.Geometry.VertexNumber);
+        foreach(var condition in DirichletConditions) DirichletDofs.AddRange(condition.DOFs);
 
         var SortedDirichletDofs = DirichletDofs.ToArray();
         Array.Sort(SortedDirichletDofs);
@@ -140,6 +144,8 @@ public class VectorProblem<VectorT> where VectorT : VectorBase<double, VectorT>
             for(int j = prevDof + 1; j < nextDof; ++j)
                 newDofNumbers[j] -= i;
         }
+        for(int i = SortedDirichletDofs[^1] + 1; i < N; ++i)
+            newDofNumbers[i] -= N - N0;
 
         
         foreach(var elem in Mesh.Elements)  //dofs renumeration For elements
@@ -175,7 +181,7 @@ public class VectorProblem<VectorT> where VectorT : VectorBase<double, VectorT>
 
         var solver = new LOSSolver("LOS.txt");
 
-        var BoundarySolution = solver.Solve(Preconditioning.None, BoundariesMatrix, BoundariesRS).components;
+        var BoundarySolution = solver.Solve(Preconditioning.Diagonal, BoundariesMatrix, BoundariesRS).components;
 
         //elements SLAE evaluation
         var ElementsMatrix = MatrixProfileBuilder.BuildMatrixProfile<double, VectorT>(Mesh, N0);
@@ -193,59 +199,24 @@ public class VectorProblem<VectorT> where VectorT : VectorBase<double, VectorT>
                                                               solidMaterial.Mu,
                                                              solidMaterial.Gamma);
 
-                    SLAEAssemblyAlgorhitms.AddLocalMatrix(ElementsMatrix, localMatrix, element.DOFs, element.SortedDofIndices);
+                    SLAEAssemblyAlgorhitms.AddLocalMatrixVectorFEM(ElementsMatrix, localMatrix, element.DOFs, element.SortedDofIndices,ElementsRs,BoundarySolution);
 
                     var localRightPart = scalarElem.CalcLocalRightPart(vertices,
                                                                     solidMaterial.F);
 
-                    SLAEAssemblyAlgorhitms.AddLocalRightPart(Pr, localRightPart, element.DOFs);
+                    SLAEAssemblyAlgorhitms.AddLocalRightPartVectorFEM(ElementsRs, localRightPart, element.DOFs);
                 }
             }
             
         }
-        foreach (var boundary in Mesh.Boundaries)
+        foreach (var boundary in Mesh.Boundaries) //for neumann conditions
         {
-            if(boundary is IBoundaryConditionScalarEllipticProblemCalculation<VectorT> scalarCondition)
-            {
-                var vertices = boundary.Geometry.VertexNumber.Select(i => Mesh.Vertices[i]).ToArray();
-                var material = Materials[boundary.Material];
-
-                if(material is NeumannConditionForScalarEllipticProblem<VectorT> neumannMetarial)
-                {
-                    var localRightPart = scalarCondition.CalcLocalRightPartForNeumannCondition(vertices, neumannMetarial.Theta);
-
-                    SLAEAssemblyAlgorhitms.AddLocalRightPart(Pr, localRightPart, boundary.DOFs);
-                }
-                else if(material is RobinConditionForScalarEllipticProblem<VectorT> robinMaterial)
-                {
-                    var localMatrix = scalarCondition.CalcLocalMatrixForRobinCondition(vertices, robinMaterial.Beta);
-
-                    SLAEAssemblyAlgorhitms.AddLocalMatrix(Matrix, localMatrix, boundary.DOFs, boundary.SortedDofIndices);
-
-                    var localRightPart = scalarCondition.CalcLocalRightPartForRobinCondition(vertices, robinMaterial.Beta, robinMaterial.UBeta);
-
-                    SLAEAssemblyAlgorhitms.AddLocalRightPart(Pr, localRightPart, boundary.DOFs);
-                }
-            }
+            
         }
 
-        foreach (var boundary in Mesh.Boundaries)
-        {
-            var material = Materials[boundary.Material];
-            if (material is DirichletConditionForScalarEllipticProblem<VectorT> dirichletMaterial)
-            {
-                var vertices = boundary.Geometry.VertexNumber.Select(i => Mesh.Vertices[i]).ToArray();
-                double[] localRightPart;
-                if(boundary is IBoundaryConditionScalarEllipticProblemCalculation<VectorT> scalarCondition)
-                    localRightPart = scalarCondition.CalcLocalRightPartForDirichletCondition(vertices, dirichletMaterial.Ug);
-                else throw new ArgumentException();
-                SLAEAssemblyAlgorhitms.ApplyDirichletConditions(Matrix,Pr, localRightPart, boundary.DOFs);
-            }
-        }
+        var ElementsSolution = solver.Solve(Preconditioning.Diagonal, ElementsMatrix, ElementsRs).components;
 
-        var solver = new LOSSolver("LOS.txt");
-
-        Solution = solver.Solve(Preconditioning.None, Matrix, Pr).components;
+        Solution = ElementsSolution.Concat(BoundarySolution).ToArray();
 
         Console.WriteLine("Done");
     }

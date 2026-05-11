@@ -65,7 +65,7 @@ public class ParallelepipedVectorHierarchicalFiniteElement : IFiniteElement3D, I
 
     public bool IsDofsConnected(int dof1, int dof2)
     {
-        throw new NotImplementedException();
+        return true;
     }
 
     private int[] IndexShiftForElementDOFS()
@@ -188,6 +188,7 @@ public class ParallelepipedVectorHierarchicalFiniteElement : IFiniteElement3D, I
             for(int j = 0; j <= i; ++j)
                 res[i][j] += G[i][j];
         }
+
         return res;
     }
 
@@ -211,7 +212,7 @@ public class ParallelepipedVectorHierarchicalFiniteElement : IFiniteElement3D, I
 
         var M = ParallelepipedVectorHierarchical_LagrangianCartesianLocalMatrices.GetLocalMassMatrix(Order,h.X,h.Y,h.Z);
 
-        var Indices = ParallelepipedVectorHierarchicalBases.GetNonZeroBasisComponentsIndices(Order);
+        int[] Indices = ParallelepipedVectorHierarchicalBases.GetNonZeroBasisComponentsIndices(Order);
 
         var res = new double[DOFs.Length];
 
@@ -225,7 +226,16 @@ public class ParallelepipedVectorHierarchicalFiniteElement : IFiniteElement3D, I
 
     public Vector3D CalcResultAtPoint(ReadOnlySpan<Vector3D> vertices, ReadOnlySpan<double> localSolution, Vector3D point)
     {
-        throw new NotImplementedException();
+        var localCoordinates = ParallelepipedLocalCoordinates.CalcLocalCoordinates(vertices,point);
+
+        var BasisFunctions = ParallelepipedVectorHierarchicalBases.BasisFunctions(Order);
+
+        Vector3D res = new(0d,0d,0d);
+
+        for(int i = 0; i < localSolution.Length; ++i)
+            res += localSolution[i] * BasisFunctions[i](localCoordinates.xi,localCoordinates.eta,localCoordinates.zeta);
+
+        return res;
     }
 
     public void SetDofs(ReadOnlySpan<int> newDofs) =>

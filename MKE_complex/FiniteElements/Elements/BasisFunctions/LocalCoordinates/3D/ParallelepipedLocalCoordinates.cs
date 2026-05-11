@@ -21,7 +21,7 @@ public static class ParallelepipedLocalCoordinates
         var z = opposingVertices.Select(i => i.Z).ToArray();
         double xi = LineLocalCoordinates.Xi(x, point.X);
         double eta = LineLocalCoordinates.Xi(y, point.Y);
-        double zeta = LineLocalCoordinates.Xi(y, point.Z);
+        double zeta = LineLocalCoordinates.Xi(z, point.Z);
         return (xi, eta, zeta);
     }
 

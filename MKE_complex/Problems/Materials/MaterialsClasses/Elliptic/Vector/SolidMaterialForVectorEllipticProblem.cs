@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using Flee.PublicTypes;
@@ -36,6 +37,16 @@ public class SolidMaterialForVectorEllipticProblem<VectorT> : IMaterial<VectorT>
     public double Fx(VectorT point) => EvaluateExpression(fxExp, point); //!could return Vector
     public double Fy(VectorT point) => EvaluateExpression(fyExp, point);
     public double Fz(VectorT point) => EvaluateExpression(fzExp, point);
+    public VectorT F(VectorT point)
+    {
+        double[] components = point switch
+        {
+            Vector2D => [Fx(point),Fy(point)],
+            Vector3D => [Fx(point),Fy(point),Fz(point)],
+            _ => throw new NotSupportedException()
+        };
+        return point.CreateVector(components);
+    }
 
     public SolidMaterialForVectorEllipticProblem(string name, string lambda, string gamma, string fx,string fy, string fz, string[] coordinates)
     {

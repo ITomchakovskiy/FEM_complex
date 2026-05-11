@@ -30,7 +30,6 @@ namespace MKE_complex.Tests
             var mesh = builder.BuildMesh<Vector3D>(Dimension.D3,GeometryType.Parallelepiped,BasisType.VectorHierarchical,2,filenames);
 
             DofsEnumerator.EnumerateMeshDofs(mesh);
-
         }
     }
 }

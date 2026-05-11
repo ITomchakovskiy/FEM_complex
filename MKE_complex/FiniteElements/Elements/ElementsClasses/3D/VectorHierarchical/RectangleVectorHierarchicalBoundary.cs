@@ -179,7 +179,7 @@ public class RectangleVectorHierarchicalBoundary : IBoundaryCondition3D, IBounda
             _ = zeroCoordNum switch
             {
                 2 => weights[1][i] = Agvalue.Y,
-                _ => weights[0][i] = Agvalue.Z,
+                _ => weights[1][i] = Agvalue.Z,
             };
         }
         

@@ -12,7 +12,7 @@ public static class ParallelepipedVectorLagrangianBases
     public static Func<int, double, double, double, Vector3D> BasisFunctions(int order)
     {
         if(order < 1) throw new ArgumentException("wrong element order");
-        return (int i, double xi, double eta, double zeta) => 
+        return (i, xi, eta, zeta) => 
         {
             var basisValue = ParallelepipedScalarLagrangianBases.BasisFunctions(order)(i/3,xi,eta,zeta);
             return (i % 3) switch

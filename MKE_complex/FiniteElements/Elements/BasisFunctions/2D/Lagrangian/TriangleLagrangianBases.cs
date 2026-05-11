@@ -22,32 +22,32 @@ public static class TriangleLagrangianBases
 
     private static Func<double[], double>[] PsiLinear =
     [
-        (double[] L) => L[0],
-        (double[] L) => L[1],
-        (double[] L) => L[2],
+        L => L[0],
+        L => L[1],
+        L => L[2],
     ];
 
     private static Func<double[], double>[] PsiQuadratic = 
     [
-        (double[] L) => L[0] * (2d * L[0] - 1d),
-        (double[] L) => L[1] * (2d * L[1] - 1d),
-        (double[] L) => L[2] * (2d * L[2] - 1d),
-        (double[] L) => 4d * L[0] * L[1],
-        (double[] L) => 4d * L[1] * L[2],
-        (double[] L) => 4d * L[0] * L[2],
+        L => L[0] * (2d * L[0] - 1d),
+        L => L[1] * (2d * L[1] - 1d),
+        L => L[2] * (2d * L[2] - 1d),
+        L => 4d * L[0] * L[1],
+        L => 4d * L[1] * L[2],
+        L => 4d * L[0] * L[2],
     ];
 
     private static Func<double[], double>[] PsiCubic = 
     [
-        (double[] L) => 1d / 2d * L[0] * (3d * L[0] - 1d) * (3d * L[0] - 2d),
-        (double[] L) => 1d / 2d * L[1] * (3d * L[1] - 1d) * (3d * L[1] - 2d),
-        (double[] L) => 1d / 2d * L[2] * (3d * L[2] - 1d) * (3d * L[2] - 2d),
-        (double[] L) => 9d / 2d * L[0] * L[1] * (3d * L[0] - 1d),
-        (double[] L) => 9d / 2d * L[0] * L[1] * (3d * L[1] - 1d),
-        (double[] L) => 9d / 2d * L[1] * L[2] * (3d * L[1] - 1d),
-        (double[] L) => 9d / 2d * L[1] * L[2] * (3d * L[2] - 1d),
-        (double[] L) => 9d / 2d * L[0] * L[2] * (3d * L[2] - 1d),
-        (double[] L) => 9d / 2d * L[0] * L[2] * (3d * L[0] - 1d),
-        (double[] L) => 27d * L[0] * L[1] * L[2],
+        L => 1d / 2d * L[0] * (3d * L[0] - 1d) * (3d * L[0] - 2d),
+        L => 1d / 2d * L[1] * (3d * L[1] - 1d) * (3d * L[1] - 2d),
+        L => 1d / 2d * L[2] * (3d * L[2] - 1d) * (3d * L[2] - 2d),
+        L => 9d / 2d * L[0] * L[1] * (3d * L[0] - 1d),
+        L => 9d / 2d * L[0] * L[1] * (3d * L[1] - 1d),
+        L => 9d / 2d * L[1] * L[2] * (3d * L[1] - 1d),
+        L => 9d / 2d * L[1] * L[2] * (3d * L[2] - 1d),
+        L => 9d / 2d * L[0] * L[2] * (3d * L[2] - 1d),
+        L => 9d / 2d * L[0] * L[2] * (3d * L[0] - 1d),
+        L => 27d * L[0] * L[1] * L[2],
     ];  
 }

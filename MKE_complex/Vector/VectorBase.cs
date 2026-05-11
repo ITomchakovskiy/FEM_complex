@@ -135,12 +135,11 @@ public abstract class VectorBase<T, Tself>(params T[] components) where T : INum
         }
     }
 
-    public static T Scalar(Tself A, Tself B)
+    public T Scalar(Tself Other)
     {
         T result = T.Zero;
-        if(A.N != B.N) throw new ArgumentException();
-        int N = A.N;
-        if(A.components is Complex[] ac && B.components is Complex[] bc && result is Complex cr)
+        if(N != Other.N) throw new ArgumentException();
+        if(components is Complex[] ac && Other.components is Complex[] bc && result is Complex cr)
         {
             for (int i = 0; i < N; ++i)
                 cr += ac[i] * new Complex(bc[i].Real, -bc[i].Imaginary);
@@ -148,10 +147,61 @@ public abstract class VectorBase<T, Tself>(params T[] components) where T : INum
         else
         {
             for (int i = 0; i < N; ++i)
-                result += A.components[i] * B.components[i];
+                result += components[i] * Other.components[i];
         }
         
         return result;
+    }
+
+    public static T Scalar(Tself A, Tself B) => A.Scalar(B);
+
+    public Tself Multiply(Tself Other)
+    {
+        if(N != Other.N) throw new ArgumentException();
+        T[] new_components = new T[N];
+        for(int i = 0; i < N; ++i)
+            new_components[i] = components[i] * Other.components[i];
+
+        var result = CreateVector(new_components);
+        
+        return result;
+    }
+
+    public static Tself Multiply(Tself A, Tself B) => A.Multiply(B);
+
+    public Tself Division(Tself other)
+    {
+        if(N != other.N) throw new ArgumentException();
+        T[] new_components = new T[N];
+        for(int i = 0; i < N; ++i)
+            new_components[i] = components[i] / other.components[i];
+
+        var result = CreateVector(new_components);
+        
+        return result;
+    }
+
+    public static Tself Division(Tself A, Tself B) => A.Division(B);
+
+    public Tself Sqrt()
+    {
+        T[] new_components = new T[N];
+        if(components is Complex[] complex && new_components is Complex[] new_complex)
+        {
+            for(int i = 0; i < N; ++i)
+                new_complex[i] = Complex.Sqrt(complex[i]);
+        }
+        else
+        {
+            for(int i = 0; i < N; ++i)
+                new_components[i] = T.CreateChecked(Math.Sqrt(double.CreateChecked(components[i])));
+        }
+        return CreateVector(new_components);
+    }
+
+    public static Tself Sqrt(Tself A)
+    {
+        return A.Sqrt();
     }
 
     public Tself Nornmalize()

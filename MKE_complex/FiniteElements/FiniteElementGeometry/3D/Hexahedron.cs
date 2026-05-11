@@ -35,7 +35,7 @@ public record Hexahedron(int[] VertexNumber) : IFiniteElementGeometry3D
         };
     }
 
-    public bool IsPointInElement(Vector3D point, Vector3D[] vertices)
+    public virtual bool IsPointInElement(Vector3D point, Vector3D[] vertices)
     {
         throw new NotImplementedException();
     }
