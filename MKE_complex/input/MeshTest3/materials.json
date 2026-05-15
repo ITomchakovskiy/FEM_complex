@@ -1,8 +1,8 @@
 [
-    {"Name":"m1","Functions":{"Mu":"1","Gamma":"1","Fx":"1.0 + y","Fy":"0","Fz":"0"},"MaterialType":"Solid"},
-    {"Name":"m2","Functions":{"Mu":"1","Gamma":"1","Fx":"1.0 + y","Fy":"0","Fz":"0"},"MaterialType":"Solid"},
-    {"Name":"m3","Functions":{"Mu":"1","Gamma":"1","Fx":"1.0 + y","Fy":"0","Fz":"0"},"MaterialType":"Solid"},
-    {"Name":"ed1","Functions":{"AgX":"1.0 + y","AgY":"0","AgZ":"0"},"MaterialType":"DirichletCondition"},
-    {"Name":"ed2","Functions":{"AgX":"1.0 + y","AgY":"0","AgZ":"0"},"MaterialType":"DirichletCondition"},
-    {"Name":"ed3","Functions":{"AgX":"1.0 + y","AgY":"0","AgZ":"0"},"MaterialType":"DirichletCondition"}
+    {"Name":"m1","Functions":{"Mu":"1","Gamma":"4","Fx":"4 * (y ^ 2 + x + 1)","Fy":"4 * (5 * z ^ 2 + 3 * z * y) - 10","Fz":"4 * (2 * x * z + 2) + 3"},"MaterialType":"Solid"},
+    {"Name":"m2","Functions":{"Mu":"1","Gamma":"0.5","Fx":"0.5 * (y ^ 2 + x + 1)","Fy":"0.5 * (5 * z ^ 2 + 3 * z * y) - 10","Fz":"0.5 * (2 * x * z + 2) + 3"},"MaterialType":"Solid"},
+    {"Name":"m3","Functions":{"Mu":"1","Gamma":"1","Fx":"1 * (y ^ 2 + x + 1)","Fy":"1 * (5 * z ^ 2 + 3 * z * y) - 10","Fz":"1 * (2 * x * z + 2) + 3"},"MaterialType":"Solid"},
+    {"Name":"ed1","Functions":{"AgX":"y ^ 2 + x + 1","AgY":"5 * z ^ 2 + 3 * z * y","AgZ":"2 * x * z + 2"},"MaterialType":"DirichletCondition"},
+    {"Name":"ed2","Functions":{"AgX":"y ^ 2 + x + 1","AgY":"5 * z ^ 2 + 3 * z * y","AgZ":"2 * x * z + 2"},"MaterialType":"DirichletCondition"},
+    {"Name":"ed3","Functions":{"AgX":"y ^ 2 + x + 1","AgY":"5 * z ^ 2 + 3 * z * y","AgZ":"2 * x * z + 2"},"MaterialType":"DirichletCondition"}
 ]

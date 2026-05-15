@@ -12,7 +12,7 @@ using MKE_complex.Vector;
 
 namespace MKE_complex.FiniteElements.Elements.ElementsClasses._3D.VectorHierarchical;
 
-[FiniteElementAttribute(GeometryType.Parallelepiped, BasisType.VectorHierarchical)]
+[FiniteElement(GeometryType.Parallelepiped, BasisType.VectorHierarchical)]
 public class ParallelepipedVectorHierarchicalFiniteElement : IFiniteElement3D, IFiniteElementVectorProblemCalculation<Vector3D>
 {
     public ParallelepipedVectorHierarchicalFiniteElement(string material, Parallelepiped geometry, int order)

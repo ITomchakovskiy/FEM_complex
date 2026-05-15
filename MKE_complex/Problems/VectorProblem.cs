@@ -108,7 +108,7 @@ public class VectorProblem<VectorT> where VectorT : VectorBase<double, VectorT>
     }
     public void Solve()
     {
-        string directory = "./input/MeshTest2";
+        string directory = "./input/MeshTest3";
         string[] fileNames = ["Mesh", "Fragmentation", "Boundary"]; //Console.ReadLine()!.Split(' ');
         fileNames = fileNames.Select(i => Path.Combine(directory,i)).ToArray();
 
@@ -116,7 +116,7 @@ public class VectorProblem<VectorT> where VectorT : VectorBase<double, VectorT>
 
         Mesh = builder.BuildMesh<VectorT>(dimension, meshType, basisType, basisOrder, fileNames);
 
-        var Materials = MaterialsReader.ReadMaterials<VectorT>(Path.Join("MeshTest2","materials4.json"), PDE_Type.Elliptic, FieldType.Vector, CoordinateSystem.Cartesian);
+        var Materials = MaterialsReader.ReadMaterials<VectorT>(Path.Join("MeshTest3","materials2.json"), PDE_Type.Elliptic, FieldType.Vector, CoordinateSystem.Cartesian);
 
         var DirichletConditions = Mesh.Boundaries.ToArray().Where(i=>Materials[i.Material] is DirichletConditionForVectorEllipticProblem<VectorT>);
 

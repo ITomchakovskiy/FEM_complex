@@ -105,7 +105,7 @@ namespace MKE_complex.Tests
 
             problem.Solve();
 
-            var points = PointsOnRectangle(new(0.5d, 0.25d, 0.7d), new(4.5d, 2.25d, 6.3d), new(4d/10d, 2d/10d, 5.6d/10d));
+            var points = PointsOnRectangle(new(0.5d, 0.25d, 0.7d), new(4.5d, 2.25d, 6.3d), new(4d/3d, 2d/3d, 5.6d/3d));
 
             Vector3D A(Vector3D point)
             {
@@ -116,10 +116,23 @@ namespace MKE_complex.Tests
                         // return new (point.Y*point.Y*point.Y,
                         //             5d*point.Z*point.Z*point.Z,
                         //             2d*point.X*point.X*point.X);
-                return new (Math.Sin(point.Y)*Math.Cos(point.Z),
-                                    Math.Sin(point.X)*Math.Cos(point.Z),
-                                    Math.Sin(point.X)*Math.Cos(point.Y));
+                // return new (Math.Sin(point.Y)*Math.Cos(point.Z),
+                //                     Math.Sin(point.X)*Math.Cos(point.Z),
+                //                     Math.Sin(point.X)*Math.Cos(point.Y));
 
+
+
+                if(point.X <= 1d && point.Z <= 2d)
+                    return new (point.Y * point.Y + point.X + 1d,
+                    5d* point.Z * point.Z + 3d * point.Y * point.Z,
+                        2d * point.X * point.Z + 2d);
+                else if(point.X >= 1d && point.Z <= 2d)
+                    return new (point.Y*point.Y/2d+point.Z*point.Z/2d+point.X+1,
+                    5d* point.Z * point.Z + 3d * point.Y * point.Z,
+                        2d * point.X * point.Z + 2d);
+                else return new (point.Y * point.Y + point.X + 1d,
+                    5d* point.Z * point.Z + 3d * point.Y * point.Z,
+                        3d*point.Z*point.X-10d*point.Y-0.75*point.Y*point.Y+2d);
             }
 
             var discr = problem.EvaluateDiscrepancy(points, A);

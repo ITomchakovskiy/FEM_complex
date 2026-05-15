@@ -1,0 +1,8 @@
+[
+    {"Name":"m1","Functions":{"Mu":"1","Gamma":"1","Fx":"y ^ 2 + x + 1","Fy":"5 * z ^ 2 + 3 * z * y - 10","Fz":"2 * x * z + 2 + 3"},"MaterialType":"Solid"},
+    {"Name":"m2","Functions":{"Mu":"0.5","Gamma":"1","Fx":"y^2/2.0 + z^2/2.0+x+1","Fy":"5 * z ^ 2 + 3 * z * y - 20","Fz":"2 * x * z + 2 + 6"},"MaterialType":"Solid"},
+    {"Name":"m3","Functions":{"Mu":"1.5","Gamma":"1","Fx":"y ^ 2 + x + 1 + 2.0/3.0","Fy":"5 * z ^ 2 + 3 * z * y -20.0/3.0","Fz":"3*z*x-10*y-0.75*y^2+2 + 3"},"MaterialType":"Solid"},
+    {"Name":"ed1","Functions":{"AgX":"y ^ 2 + x + 1","AgY":"5 * z ^ 2 + 3 * z * y","AgZ":"2 * x * z + 2"},"MaterialType":"DirichletCondition"},
+    {"Name":"ed2","Functions":{"AgX":"y^2/2.0 + z^2/2.0+x+1","AgY":"5 * z ^ 2 + 3 * z * y","AgZ":"2 * x * z + 2"},"MaterialType":"DirichletCondition"},
+    {"Name":"ed3","Functions":{"AgX":"y ^ 2 + x + 1","AgY":"5 * z ^ 2 + 3 * z * y","AgZ":"3*z*x-10*y-0.75*y^2+2"},"MaterialType":"DirichletCondition"}
+]
