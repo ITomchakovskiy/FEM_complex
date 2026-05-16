@@ -8,16 +8,14 @@ using System.Threading.Tasks;
 
 namespace MKE_complex.Vector;
 
-public abstract class VectorBase<T, Tself> where T : INumber<T>
+public abstract class VectorBase<T, Tself>(params T[] components) where T : INumber<T>
                                            where Tself : VectorBase<T, Tself>
 {
-    public VectorBase(params T[] components) => this.components = components;
-
     public int N => components!.Length;
 
-    public T[] components { get; init; }
+    public T[] components { get; init; } = components;
 
-    protected abstract Tself CreateVector(params T[] components);
+    public abstract Tself CreateVector(params T[] components);
 
     public static Tself operator +(VectorBase<T,Tself> A, Tself B)
     {
@@ -29,6 +27,17 @@ public abstract class VectorBase<T, Tself> where T : INumber<T>
             new_components[i] = A.components[i] + B.components[i];
 
         return A.CreateVector(new_components);
+    }
+
+    public string AsString(string format, string separator)
+    {
+        string[] stringComponents = new string[components.Length];
+        for(int i = 0; i < components.Length; ++i)
+        {
+            var x = components[i];
+            stringComponents[i] = $"{x.ToString(format, null)}{separator}";
+        }
+        return string.Join(separator, stringComponents);
     }
 
     public static Tself operator -(VectorBase<T, Tself> A, VectorBase<T, Tself> B)
@@ -95,6 +104,16 @@ public abstract class VectorBase<T, Tself> where T : INumber<T>
         //return new VectorBase<T>(new_components);
     }
 
+    public static double Length(Tself A, Tself B)
+    {
+        return (B - A).Norm();
+    }
+
+    public double Length(Tself other)
+    {
+        return (other - this).Norm();
+    }
+
     public double Norm()
     {
         if (components is null)
@@ -116,12 +135,11 @@ public abstract class VectorBase<T, Tself> where T : INumber<T>
         }
     }
 
-    public static T Scalar(Tself A, Tself B)
+    public T Scalar(Tself Other)
     {
         T result = T.Zero;
-        if(A.N != B.N) throw new ArgumentException();
-        int N = A.N;
-        if(A.components is Complex[] ac && B.components is Complex[] bc && result is Complex cr)
+        if(N != Other.N) throw new ArgumentException();
+        if(components is Complex[] ac && Other.components is Complex[] bc && result is Complex cr)
         {
             for (int i = 0; i < N; ++i)
                 cr += ac[i] * new Complex(bc[i].Real, -bc[i].Imaginary);
@@ -129,10 +147,61 @@ public abstract class VectorBase<T, Tself> where T : INumber<T>
         else
         {
             for (int i = 0; i < N; ++i)
-                result += A.components[i] * B.components[i];
+                result += components[i] * Other.components[i];
         }
         
         return result;
+    }
+
+    public static T Scalar(Tself A, Tself B) => A.Scalar(B);
+
+    public Tself Multiply(Tself Other)
+    {
+        if(N != Other.N) throw new ArgumentException();
+        T[] new_components = new T[N];
+        for(int i = 0; i < N; ++i)
+            new_components[i] = components[i] * Other.components[i];
+
+        var result = CreateVector(new_components);
+        
+        return result;
+    }
+
+    public static Tself Multiply(Tself A, Tself B) => A.Multiply(B);
+
+    public Tself Division(Tself other)
+    {
+        if(N != other.N) throw new ArgumentException();
+        T[] new_components = new T[N];
+        for(int i = 0; i < N; ++i)
+            new_components[i] = components[i] / other.components[i];
+
+        var result = CreateVector(new_components);
+        
+        return result;
+    }
+
+    public static Tself Division(Tself A, Tself B) => A.Division(B);
+
+    public Tself Sqrt()
+    {
+        T[] new_components = new T[N];
+        if(components is Complex[] complex && new_components is Complex[] new_complex)
+        {
+            for(int i = 0; i < N; ++i)
+                new_complex[i] = Complex.Sqrt(complex[i]);
+        }
+        else
+        {
+            for(int i = 0; i < N; ++i)
+                new_components[i] = T.CreateChecked(Math.Sqrt(double.CreateChecked(components[i])));
+        }
+        return CreateVector(new_components);
+    }
+
+    public static Tself Sqrt(Tself A)
+    {
+        return A.Sqrt();
     }
 
     public Tself Nornmalize()
@@ -141,21 +210,6 @@ public abstract class VectorBase<T, Tself> where T : INumber<T>
 
         return this / norm;
     }
-    public static Tself PointOnLine(Tself A, Tself B, int n, double k, int ind) //for mesh initialization
-    {
-        if (A.components is null || B.components is null || A.components.Length != B.components.Length)
-            throw new ArgumentException();
-        if (ind == 0) return A;
-        if (ind == n) return B;
-        Tself r = B - A;
-        double l = r.Norm();
-        if (Math.Abs(k - 1d) < 1.0E-13)
-            return A + r / n * ind;
-
-        double l_ind = l * (1d - Math.Pow(Math.Abs(k), ind)) / (1d - Math.Pow(Math.Abs(k), n));
-
-        l_ind = k > 0 ? l_ind : l - l_ind;
-        return A + l_ind / l * r;
-    }
+    
    //public static IVector operator +(IVector v1, IVector v2);
 }

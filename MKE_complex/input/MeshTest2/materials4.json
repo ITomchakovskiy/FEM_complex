@@ -1,0 +1,4 @@
+[
+    {"Name":"m","Functions":{"Mu":"1","Gamma":"1","Fx":"3 * sin(y)*cos(z)","Fy":"3 * sin(x)*cos(z)","Fz":"3 * sin(x)*cos(y)"},"MaterialType":"Solid"},
+    {"Name":"ed","Functions":{"AgX":"sin(y)*cos(z)","AgY":"sin(x)*cos(z)","AgZ":"sin(x)*cos(y)"},"MaterialType":"DirichletCondition"}
+]

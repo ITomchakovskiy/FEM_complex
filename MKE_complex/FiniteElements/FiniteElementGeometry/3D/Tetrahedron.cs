@@ -13,6 +13,11 @@ public record Tetrahedron(int[] VertexNumber) : IFiniteElementGeometry<Vector3D>
 
     public int EdgesCount => throw new NotImplementedException();
 
+    public bool IsPointInElement(Vector3D point, Vector3D[] vertices)
+    {
+        throw new NotImplementedException();
+    }
+
     public (int, int) LocalEdge(int edgeNumber)
     {
         switch(edgeNumber)
@@ -25,5 +30,16 @@ public record Tetrahedron(int[] VertexNumber) : IFiniteElementGeometry<Vector3D>
                 case 5 : return (2, 3);
             default: throw new Exception("Wrong edge number");
         }
+    }
+
+    public IFiniteElementGeometry<Vector3D>[] Refine(ReadOnlySpan<int> FaceVertices, ReadOnlySpan<int> EdgeVertices, int ElementVertex, out bool IsElementVertexNeeded)
+    {
+        throw new NotImplementedException();
+    }
+
+    public (int, int) GlobalEdge(int edgeNumber)
+    {
+        var local = LocalEdge(edgeNumber);
+        return (VertexNumber[local.Item1], VertexNumber[local.Item2]);
     }
 }

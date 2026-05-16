@@ -30,26 +30,14 @@ public class NeumannConditionForScalarEllipticProblem<VectorT> : IMaterial<Vecto
 
     public double Theta(VectorT point) => EvaluateExpression(thetaExp, point);
 
-    public NeumannConditionForScalarEllipticProblem(string name, string theta, CoordinateSystem system)
+    public NeumannConditionForScalarEllipticProblem(string name, string theta, string[] coordinates)
     {
         Name = name;
 
         context = new ExpressionContext();
+        context.Imports.AddType(typeof(Math));
 
-        switch (system)
-        {
-            case CoordinateSystem.Cartesian:
-                coordinates = ["x", "y", "z"];
-                break;
-            case CoordinateSystem.Cylindrical:
-                coordinates = ["r", "z", "phi"];
-                break;
-            case CoordinateSystem.Spherical:
-                coordinates = ["r", "phi", "psi"];
-                break;
-            default:
-                throw new NotImplementedException();
-        }
+        this.coordinates = coordinates;
 
         context.Variables[coordinates[0]] = 0d;
         context.Variables[coordinates[1]] = 0d;
@@ -57,4 +45,7 @@ public class NeumannConditionForScalarEllipticProblem<VectorT> : IMaterial<Vecto
 
         thetaExp = context.CompileGeneric<double>(theta);
     }
+
+    public NeumannConditionForScalarEllipticProblem(MaterialFileInfo fileInfo, string[] coordinates) : 
+    this(fileInfo.Name, fileInfo.Functions["Theta"], coordinates){}
 }

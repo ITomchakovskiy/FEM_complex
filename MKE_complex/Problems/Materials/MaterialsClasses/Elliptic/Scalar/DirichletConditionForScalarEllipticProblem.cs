@@ -30,26 +30,14 @@ public class DirichletConditionForScalarEllipticProblem<VectorT> : IMaterial<Vec
 
     public double Ug(VectorT point) => EvaluateExpression(ugExp, point);
 
-    public DirichletConditionForScalarEllipticProblem(string name, string ug, CoordinateSystem system)
+    public DirichletConditionForScalarEllipticProblem(string name, string ug, string[] coordinates)
     {
         Name = name;
 
         context = new ExpressionContext();
+        context.Imports.AddType(typeof(Math));
 
-        switch (system)
-        {
-            case CoordinateSystem.Cartesian:
-                coordinates = ["x", "y", "z"];
-                break;
-            case CoordinateSystem.Cylindrical:
-                coordinates = ["r", "z", "phi"];
-                break;
-            case CoordinateSystem.Spherical:
-                coordinates = ["r", "phi", "psi"];
-                break;
-            default:
-                throw new NotImplementedException();
-        }
+        this.coordinates = coordinates;
 
         context.Variables[coordinates[0]] = 0d;
         context.Variables[coordinates[1]] = 0d;
@@ -57,4 +45,7 @@ public class DirichletConditionForScalarEllipticProblem<VectorT> : IMaterial<Vec
 
         ugExp = context.CompileGeneric<double>(ug);
     }
+
+    public DirichletConditionForScalarEllipticProblem(MaterialFileInfo fileInfo, string[] coordinates) : 
+    this(fileInfo.Name, fileInfo.Functions["Ug"], coordinates){}
 }

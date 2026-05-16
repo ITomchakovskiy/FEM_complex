@@ -1,79 +1,83 @@
-﻿// See https://aka.ms/new-console-template for more information
-using MKE_complex;
-using MKE_complex.DofsEnumerators;
-using MKE_complex.FiniteElements;
-using MKE_complex.FiniteElements.Elements;
-using MKE_complex.Matrix;
-using MKE_complex.Mesh;
-using MKE_complex.Mesh.MeshBuilder;
-using MKE_complex.Problems.Materials;
-using MKE_complex.Vector;
-using System.Globalization;
-using System.Reflection;
+﻿// // See https://aka.ms/new-console-template for more information
+// using MKE_complex;
+// using MKE_complex.DofsEnumerators;
+// using MKE_complex.FiniteElements;
+// using MKE_complex.FiniteElements.Elements;
+// using MKE_complex.FiniteElements.Elements.ElementsClasses._2D.Lagrangian.EdgeConditions;
+// using MKE_complex.FiniteElements.Elements.ElementsClasses._2D.Lagrangian.TriangleElements;
+// using MKE_complex.FiniteElements.FiniteElementGeometry._2D;
+// using MKE_complex.Matrix;
+// using MKE_complex.Mesh;
+// using MKE_complex.Mesh.MeshBuilder;
+// using MKE_complex.Problems;
+// using MKE_complex.Problems.Materials;
+// using MKE_complex.Problems.Materials.MaterialsClasses.Elliptic.Scalar;
+// using MKE_complex.Vector;
+// using System.Globalization;
+// using System.Reflection;
+// using System.Text.Json;
+// using System.Text.Json.Serialization;
 
-Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+// Vector2D[] PointsOnRectangle(Vector2D A, Vector2D B, Vector2D h)
+// {
+//     var dif = B - A;
+//     int k_x = (int)(dif.X / h.X);
+//     int k_y = (int)(dif.Y / h.Y);
 
-Assembly assembly = Assembly.GetExecutingAssembly();
+//     Vector2D[] res = new Vector2D[(k_x + 1)*(k_y + 1)];
+    
+//     for(int i = 0; i < k_y; ++i)
+//     {
+//         double y = A.Y + i * h.Y;
+//         for(int j = 0; j < k_x; ++j)
+//         {
+//             double x = A.X + j * h.X;
+//             res[i * (k_x + 1) + j] = new(x,y);
+//         }
+//         {
+//             double x = B.X;
+//             res[(i + 1) * (k_x + 1) - 1] = new(x,y);
+//         }
+//     }
+//     {
+//         double y = B.Y;
+//         for(int j = 0; j < k_x; ++j)
+//         {
+//             double x = A.X + j * h.X;
+//             res[^(k_x - j + 1)] = new(x,y);
+//         }
+//     }
+//     res[^1] = B;
+//     return res;
+// }
 
-FiniteElementsCreator.LoadFiniteElementTypes(assembly);
 
-var GeometryTypesForDimension = new Dictionary<Dimension, GeometryType[]>()
-{
-    {Dimension.D2, new GeometryType[] {GeometryType.Triangle,GeometryType.Quadrangle} },
-    {Dimension.D3, new GeometryType[] {GeometryType.Hexagon,GeometryType.Tetrahedron} },
-};
 
-Console.WriteLine("Choose dimension");
+// Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 
-//foreach(Dimension d in Enum.GetValues(typeof(Dimension)))
-//{
-//    Console.WriteLine($"{d} : {(int)d}");
-//}
-Dimension dimension = Dimension.D2; //(Dimension)int.Parse(Console.ReadLine()!);
+// Assembly assembly = Assembly.GetExecutingAssembly();
 
-Console.WriteLine("Choose mesh type");
+// FiniteElementsCreator.LoadFiniteElementTypes(assembly);
 
-//foreach (GeometryType g in GeometryTypesForDimension[dimension])
-//{
-//    Console.WriteLine($"{g} : {(int)g}");
-//}
+// MaterialCreator.LoadMaterialsAssemblyInfo(assembly);
 
-GeometryType mesh_type = GeometryType.Triangle;      //(GeometryType)int.Parse(Console.ReadLine()!);
+// Console.WriteLine("Choose dimension");
 
-//foreach (BasisType b in Enum.GetValues(typeof(BasisType)))
-//{
-//    Console.WriteLine($"{b} : {(int)b}");
-//}
+// foreach(Dimension d in Enum.GetValues(typeof(Dimension)))
+//            Console.WriteLine($"{d} : {(int)d}");
+        
+// Dimension dimension = (Dimension)int.Parse(Console.ReadLine()!);
 
-BasisType basis = BasisType.Lagrangian; //(BasisType)int.Parse(Console.ReadLine()!);
+// var problem = new ScalarEllipticProblem<Vector2D>();
 
-//Console.WriteLine($"Choose basis order");
+// problem.InputUserDefinedData();
 
-int order = 3; //int.Parse(Console.ReadLine()!);
+// problem.Solve();
 
-if (order < 1) throw new Exception();
+// var points = PointsOnRectangle(new(0d,0d), new(10d,4d), new(0.3,0.3));
 
-//Console.WriteLine("Type file names for mesh building");
+// var discr = problem.EvaluateDiscrepancy(points, (vec)=>2d*vec.X*vec.X + 3d*vec.Y*vec.Y + 6d*vec.X*vec.Y);
 
-string[] fileNames = ["Mesh.txt", "MeshFragmentation.txt", "Edges.txt"]; //Console.ReadLine()!.Split(' '); 
+// //problem.Mesh.
 
-PseudoRegularMeshBuilder builder = new PseudoRegularMeshBuilder();
-
-IFiniteElementMesh<Vector2D> mesh = builder.BuildMesh<Vector2D>(dimension,mesh_type,basis,order,fileNames); //костыль
-
-DofsEnumerator.EnumerateMeshDofs(mesh);
-
-var matrix = MatrixProfileBuilder.BuildMatrixProfile<double, Vector2D>(mesh);
-
-if (mesh is FiniteElementMesh<Vector2D> mesh2d)
-    mesh2d.SaveMeshGeometry("input_points", "input_triangles", "input_dofs", "input_edges", "input_edgeDofs");
-
-Console.WriteLine("Done");
-
-//
-Console.WriteLine(new SpecificMaterials().Iron.Lambda(new Vector2D(0d,0d)));
-Console.WriteLine(new SpecificMaterials().Iron.Gamma(new Vector2D(0d, 0d)));
-Console.WriteLine(new SpecificMaterials().Iron.F(new Vector2D(0d, 0d)));
-Console.WriteLine(new SpecificMaterials().Iron.F(new Vector2D(1d, 0d)));
-Console.WriteLine(new SpecificMaterials().Iron.F(new Vector2D(0d, 2d)));
-
+// Console.WriteLine(discr);

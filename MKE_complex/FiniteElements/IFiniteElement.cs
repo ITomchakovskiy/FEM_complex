@@ -10,7 +10,8 @@ namespace MKE_complex.FiniteElements;
 
 public interface IFiniteElement<VectorT> where VectorT : VectorBase<double, VectorT>
 {
-    IFiniteElementGeometry<VectorT> Geometry { get;}
+    IFiniteElementGeometry<VectorT> Geometry { get; }
+    int Order { get; }
     string Material { get; }
     int[] DOFs { get; }
     int[] SortedDofs { get; }
@@ -24,8 +25,29 @@ public interface IFiniteElement<VectorT> where VectorT : VectorBase<double, Vect
     void SetVericesDofs(ReadOnlySpan<int> dofsNumbers);
     void SetEdgeDofs(int localEdgeNumber, int dofNumber);
     void SetEdgesDofs(ReadOnlySpan<int> dofsNumbers);
+    IFiniteElement<VectorT>[] Refine(ReadOnlySpan<int> FaceVertices, ReadOnlySpan<int> EdgeVertices, int ElementVertex, out bool IsElementVertexNeeded);
+}
 
-    //void SetDOFsOnVertices(int );
-    //void SetDOFsOnEdges(int );
-    //void SetDOFsOnElement();
+public interface IFiniteElement3D : IFiniteElement<Vector3D>
+{
+    new IFiniteElementGeometry3D Geometry {get;}
+
+    int DofsOnFaceCount { get; }
+
+    void SetFaceDofs(int localFaceNumber, int[] baseVerices, int dofNumber);
+}
+
+public interface IFiniteElementScalarEllipticProblemCalculation<VectorT> where VectorT : VectorBase<double, VectorT>
+{
+    double[][] CalcLocalMatrix(ReadOnlySpan<VectorT> vertices, Func<VectorT, double> Lambda, Func<VectorT, double> Gamma);
+    double[] CalcLocalRightPart(ReadOnlySpan<VectorT> vertices, Func<VectorT, double> F);
+    double CalcResultAtPoint(ReadOnlySpan<VectorT> vertices, ReadOnlySpan<double> localSolution, VectorT point);
+}
+
+public interface IFiniteElementVectorProblemCalculation<VectorT> where VectorT : VectorBase<double, VectorT>
+{
+    double[][] CalcLocalMatrix(ReadOnlySpan<VectorT> vertices, Func<VectorT, double> Mu, Func<VectorT, double> Gamma);
+    double[] CalcLocalRightPart(ReadOnlySpan<VectorT> vertices, Func<VectorT, VectorT> F);
+    VectorT CalcResultAtPoint(ReadOnlySpan<VectorT> vertices, ReadOnlySpan<double> localSolution, VectorT point);
+    void SetDofs(ReadOnlySpan<int> newDofs);
 }

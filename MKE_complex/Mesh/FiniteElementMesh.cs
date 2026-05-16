@@ -68,7 +68,7 @@ public class FiniteElementMesh<VectorT>(IReadOnlyList<VectorT> vertices, IReadOn
             foreach (var element in elements)
             {
                 var geometry = element.Geometry;
-                if (geometry is Triangle)
+                if (geometry is Triangle<Vector2D>)
                 {
                     for (int i = 0; i < geometry.VertexNumber.Length; ++i)
                         swElements.Write($"{geometry.VertexNumber[i]} ");
@@ -86,7 +86,7 @@ public class FiniteElementMesh<VectorT>(IReadOnlyList<VectorT> vertices, IReadOn
             foreach (var edge in boundaries)
             {
                 var geometry = edge.Geometry;
-                if (geometry is Line)
+                if (geometry is Line<Vector2D>)
                 {
                     for (int i = 0; i < geometry.VertexNumber.Length; ++i)
                         swEdges.Write($"{geometry.VertexNumber[i]} ");
@@ -108,7 +108,7 @@ public class FiniteElementMesh<VectorT>(IReadOnlyList<VectorT> vertices, IReadOn
 
             foreach (var element in elements)
             {
-                if(element is TriangleLagrangianCubicFiniteElement cube && vertices is List<Vector2D> ver2)
+                if(element is TriangleLagrangianFiniteElement cube && vertices is List<Vector2D> ver2)
                 {
                     var info = cube.ReturnDofs(CollectionsMarshal.AsSpan(ver2));
                     x.AddRange(info.x);
@@ -137,7 +137,7 @@ public class FiniteElementMesh<VectorT>(IReadOnlyList<VectorT> vertices, IReadOn
 
             foreach (var edge in edges)
             {
-                if (edge is LagrangianCubicEdgeCondition cube && vertices is List<Vector2D> ver2)
+                if (edge is LagrangianEdgeCondition cube && vertices is List<Vector2D> ver2)
                 {
                     var info = cube.ReturnDofs(CollectionsMarshal.AsSpan(ver2));
                     x.AddRange(info.x);

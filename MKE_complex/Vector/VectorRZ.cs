@@ -12,5 +12,5 @@ public class VectorRZ : VectorBase<double, VectorRZ>
     public double Z => components![1];
     public VectorRZ(double R, double Z) => components = [R, Z];
     public VectorRZ(Vector2D V) => components = [V.X, V.Y];
-    protected override VectorRZ CreateVector(params double[] components) => new VectorRZ(components[0], components[1]);
+    public override VectorRZ CreateVector(params double[] components) => new VectorRZ(components[0], components[1]);
 }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MKE_complex.FiniteElements.FiniteElementGeometry._2D;
 
-public record Quadrangle(int[] VertexNumber) : IFiniteElementGeometry<Vector2D>
+public record Quadrangle<VectorT>(int[] VertexNumber) : IFiniteElementGeometry<VectorT> where VectorT : VectorBase<double, VectorT>
 {
     public GeometryType GeometryType => GeometryType.Quadrangle;
 
@@ -15,7 +15,7 @@ public record Quadrangle(int[] VertexNumber) : IFiniteElementGeometry<Vector2D>
 
     public (int, int) LocalEdge(int edgeNumber)
     {
-        switch(edgeNumber)
+        switch(edgeNumber) //x0y0 -> x0y1 -> x1y1 -> x1y0
         {
             case 0: return (0, 1);
             case 1: return (1, 2);
@@ -25,22 +25,29 @@ public record Quadrangle(int[] VertexNumber) : IFiniteElementGeometry<Vector2D>
         }
     }
 
-    public Triangle[] ToTriangles()
+    public Triangle<VectorT>[] ToTriangles()
     {
         int[][] triangleVertices_local = [[0, 1, 3], [1, 2, 3]];
         // int[][] triangleVertices = 
-        Triangle[] triangles = new Triangle[2];
+        Triangle<VectorT>[] triangles = new Triangle<VectorT>[2];
         for(int i = 0; i < triangles.Length; ++i)
-            triangles[i] = new Triangle(triangleVertices_local[i].Select(j => VertexNumber[j]).ToArray());
+            triangles[i] = new Triangle<VectorT>(triangleVertices_local[i].Select(j => VertexNumber[j]).ToArray());
         return triangles;
     }
 
-    public static Vector2D PointOnQuadrangle(Vector2D[] vertices, int n_x, double k_x, int ind_x, int n_y, double k_y, int ind_y) //for mesh initialization
+    public bool IsPointInElement(VectorT point, VectorT[] vertices)
     {
-        Vector2D A = (Vector2D)Vector2D.PointOnLine(vertices[0], vertices[3], n_x, k_x, ind_x);
+        throw new NotImplementedException();
+    }
 
-        Vector2D B = (Vector2D)Vector2D.PointOnLine(vertices[1], vertices[2], n_x, k_x, ind_x);
+    IFiniteElementGeometry<VectorT>[] IFiniteElementGeometry<VectorT>.Refine(ReadOnlySpan<int> FaceVertices, ReadOnlySpan<int> EdgeVertices, int ElementVertex, out bool IsElementVertexNeeded)
+    {
+        throw new NotImplementedException();
+    }
 
-        return (Vector2D)Vector2D.PointOnLine(A, B, n_y, k_y, ind_y);
+    public (int, int) GlobalEdge(int edgeNumber)
+    {
+        var local = LocalEdge(edgeNumber);
+        return (VertexNumber[local.Item1], VertexNumber[local.Item2]);
     }
 }

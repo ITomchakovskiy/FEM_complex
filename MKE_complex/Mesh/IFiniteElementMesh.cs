@@ -16,3 +16,8 @@ public interface IFiniteElementMesh<VectorT> where VectorT : VectorBase<double, 
     int? DofsCount { get; set; }
     public void SortElementsByMinimumVertexNumber();
 }
+
+// public interface IFiniteElementMesh3D : IFiniteElementMesh<Vector3D>
+// {
+//     new ReadOnlySpan<IFiniteElement3D> Elements { get; }
+// }
