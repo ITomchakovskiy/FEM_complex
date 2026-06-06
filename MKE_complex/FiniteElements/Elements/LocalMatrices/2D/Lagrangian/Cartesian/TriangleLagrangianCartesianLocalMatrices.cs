@@ -7,7 +7,7 @@ namespace MKE_complex.FiniteElements.Elements.LocalMatrices._2D.Lagrangian.Carte
 public class TriangleLagrangianCartesianLocalMatrices
 {
 
-    public static double[][] CalculateLocalStiffnessMatrix(int order, double[,] alphas, double detD, double Coefficient)
+    public static double[][] CalculateLocalStiffnessMatrix(int order, double[][] alphas, double detD, double Coefficient)
     {
         switch(order)
         {
@@ -17,17 +17,17 @@ public class TriangleLagrangianCartesianLocalMatrices
             default: throw new ArgumentException("wrong element order");
         }
     }
-    public static double[][] CalculateLocalMassMatrix(int order, double[,] alphas, double detD, double Coefficient)
+    public static double[][] CalculateLocalMassMatrix(int order, double[][] alphas, double detD, double Coefficient)
     {
         switch(order)
         {
-            case 1: return M1(alphas, detD, Coefficient);
-            case 2: return M2(alphas, detD, Coefficient);
-            case 3: return M3(alphas, detD, Coefficient);
+            case 1: return M1(detD, Coefficient);
+            case 2: return M2(detD, Coefficient);
+            case 3: return M3(detD, Coefficient);
             default: throw new ArgumentException("wrong element order");
         }
     }
-    private static double[][] G1(double[,] alphas, double detD, double Coefficient)
+    private static double[][] G1(double[][] alphas, double detD, double Coefficient)
     {
         double[][] G = [new double[1],
                         new double[2],
@@ -35,12 +35,12 @@ public class TriangleLagrangianCartesianLocalMatrices
         for(int i = 0; i < G.GetLength(0); ++i)
         {
             for(int j = 0; j <= i; ++j)
-                G[i][j] = (alphas[i,1] * alphas[j,1] + alphas[i,2] * alphas[j,2]) * detD * Coefficient/2d;
+                G[i][j] = (alphas[i][1] * alphas[j][1] + alphas[i][2] * alphas[j][2]) * detD * Coefficient/2d;
         }
         return G;
     }
 
-    private static double[][] M1(double[,] alphas, double detD, double Coefficient)
+    private static double[][] M1(double detD, double Coefficient)
     {
         double[][] M = [[2d],
                         [1d, 2d],
@@ -54,32 +54,32 @@ public class TriangleLagrangianCartesianLocalMatrices
         return M;
     }
 
-    private static double connection21(int[] nums, double[,] alphas)
+    private static double connection21(int[] nums, double[][] alphas)
     {
         double expr1 = 1d;
         double expr2 = 1d;
         foreach (var num in nums)
         {
-            expr1 *= alphas[num, 1];
-            expr2 *= alphas[num, 2];
+            expr1 *= alphas[num][1];
+            expr2 *= alphas[num][2];
         }
         return expr1 + expr2;
     }
-    private static double connection22(int[] nums, double[,] alphas)
+    private static double connection22(int[] nums, double[][] alphas)
     {
-        double expr1 = alphas[nums[0],1] * alphas[nums[0], 1] + alphas[nums[0], 1] * alphas[nums[1], 1] + alphas[nums[1], 1] * alphas[nums[1], 1];
-        double expr2 = alphas[nums[0], 2] * alphas[nums[0], 2] + alphas[nums[0], 2] * alphas[nums[1], 2] + alphas[nums[1], 2] * alphas[nums[1], 2];
+        double expr1 = alphas[nums[0]][1] * alphas[nums[0]][1] + alphas[nums[0]][1] * alphas[nums[1]][1] + alphas[nums[1]][1] * alphas[nums[1]][1];
+        double expr2 = alphas[nums[0]][2] * alphas[nums[0]][2] + alphas[nums[0]][2] * alphas[nums[1]][2] + alphas[nums[1]][2] * alphas[nums[1]][2];
 
         return expr1 + expr2;
      }
-    private static double connection23(int[] nums, double[,] alphas)
+    private static double connection23(int[] nums, double[][] alphas)
     {
-        double expr1 = (alphas[nums[0],1] + alphas[nums[2], 1]) * (alphas[nums[2], 1] + alphas[nums[1], 1]) + alphas[nums[0],1] * alphas[nums[1], 1];
-        double expr2 = (alphas[nums[0], 2] + alphas[nums[2], 2]) * (alphas[nums[2], 2] + alphas[nums[1], 2]) + alphas[nums[0], 2] * alphas[nums[1], 2];
+        double expr1 = (alphas[nums[0]][1] + alphas[nums[2]][1]) * (alphas[nums[2]][1] + alphas[nums[1]][1]) + alphas[nums[0]][1] * alphas[nums[1]][1];
+        double expr2 = (alphas[nums[0]][2] + alphas[nums[2]][2]) * (alphas[nums[2]][2] + alphas[nums[1]][2]) + alphas[nums[0]][2] * alphas[nums[1]][2];
         return expr1 + expr2;
     }
 
-    private static double[][] G2(double[,] alphas, double detD, double Coefficient)
+    private static double[][] G2(double[][] alphas, double detD, double Coefficient)
     {
         double[][] G =
         [
@@ -113,7 +113,7 @@ public class TriangleLagrangianCartesianLocalMatrices
         return G;
     }
 
-    private static double[][] M2(double[,] alphas, double detD, double Coefficient)
+    private static double[][] M2(double detD, double Coefficient)
     {
         double[] el = [0d, 1d / 60d, -1d / 360d, 4d / 45d, -1d / 90d, 2d / 45d];
         double[][] M = [[el[1]],
@@ -131,7 +131,7 @@ public class TriangleLagrangianCartesianLocalMatrices
         return M;
     }
 
-    private static double[][] M3(double[,] alphas, double detD, double Coefficient)
+    private static double[][] M3(double detD, double Coefficient)
     {
         double[] el = [19d/3360d, 11d/13440d, 3d/2240d, 0d, 9d/4480d, 9d/224d, -9d/640d,-9d/896d,9d/448d,-9d/2240d, 3d/1120d, 27d/2240d, 81d/560d];
         int[][] indices = [[0],
@@ -152,28 +152,28 @@ public class TriangleLagrangianCartesianLocalMatrices
         return M;
     }
 
-    private static double connection31(int[] nums, double[,] alphas)
+    private static double connection31(int[] nums, double[][] alphas)
     {
         if(nums.Count() != 1) throw new ArgumentException();
         int num = nums[0];
 
-        double expr1 = alphas[num,1] * alphas[num,1];
-        double expr2 = alphas[num,2] * alphas[num,2];
+        double expr1 = alphas[num][1] * alphas[num][1];
+        double expr2 = alphas[num][2] * alphas[num][2];
 
         return expr1 + expr2;
     }
 
-    private static double connection32(int[] nums, double[,] alphas)
+    private static double connection32(int[] nums, double[][] alphas)
     {
         if(nums.Count() != 2) throw new ArgumentException();
         
-        double expr1 = alphas[nums[0],1] * alphas[nums[1],1];
-        double expr2 = alphas[nums[0],2] * alphas[nums[1],2];
+        double expr1 = alphas[nums[0]][1] * alphas[nums[1]][1];
+        double expr2 = alphas[nums[0]][2] * alphas[nums[1]][2];
 
         return expr1 + expr2;
     }
 
-    private static double connection33(int[] nums, double[,] alphas)
+    private static double connection33(int[] nums, double[][] alphas)
     {
         if(nums.Count() != 2) throw new ArgumentException();
         
@@ -183,7 +183,7 @@ public class TriangleLagrangianCartesianLocalMatrices
         return expr1 + expr2;
     }
 
-    private static double connection34(int[] nums, double[,] alphas)
+    private static double connection34(int[] nums, double[][] alphas)
     {
         if(nums.Count() != 2) throw new ArgumentException();
         
@@ -193,7 +193,7 @@ public class TriangleLagrangianCartesianLocalMatrices
         return expr1 + expr2;
     }
 
-    private static double connection35(int[] nums, double[,] alphas)
+    private static double connection35(int[] nums, double[][] alphas)
     {
         if(nums.Count() != 3) throw new ArgumentException();
         
@@ -203,7 +203,7 @@ public class TriangleLagrangianCartesianLocalMatrices
         return expr1 + expr2;
     }
 
-    private static double connection36(int[] nums, double[,] alphas)
+    private static double connection36(int[] nums, double[][] alphas)
     {
         if(nums.Count() != 2) throw new ArgumentException();
         
@@ -214,19 +214,19 @@ public class TriangleLagrangianCartesianLocalMatrices
         return expr1 + expr2 + expr3;
     }
 
-    private static double connection37(int[] nums, double[,] alphas)
+    private static double connection37(int[] nums, double[][] alphas)
     {
         if(nums.Count() != 2) throw new ArgumentException();
         
-        double expr1 = alphas[nums[0], 1] - alphas[nums[1], 1];
+        double expr1 = alphas[nums[0]][1] - alphas[nums[1]][1];
         double expr2 = expr1 * expr1;
-        double expr3 = alphas[nums[0], 2] - alphas[nums[1], 2];
+        double expr3 = alphas[nums[0]][2] - alphas[nums[1]][2];
         double expr4 = expr3 * expr3;
 
         return expr2 + expr4;
     }
 
-    private static double connection38(int[] nums, double[,] alphas)
+    private static double connection38(int[] nums, double[][] alphas)
     {
         if(nums.Count() != 3) throw new ArgumentException();
         
@@ -238,16 +238,16 @@ public class TriangleLagrangianCartesianLocalMatrices
         return expr1 + expr2 + expr3 + expr4;
     }
 
-    private static double connection39(int[] nums, double[,] alphas)
+    private static double connection39(int[] nums, double[][] alphas)
     {
         if(nums.Count() != 1) throw new ArgumentException();
         
-        double expr1 = alphas[nums[0],1] * (alphas[0,1] + alphas[1,1] + alphas[2,1]);
-        double expr2 = alphas[nums[0],2] * (alphas[0,2] + alphas[1,2] + alphas[2,2]);
+        double expr1 = alphas[nums[0]][1] * (alphas[0][1] + alphas[1][1] + alphas[2][1]);
+        double expr2 = alphas[nums[0]][2] * (alphas[0][2] + alphas[1][2] + alphas[2][2]);
         return expr1 + expr2;
     }
 
-    private static double connection310(double[,] alphas)
+    private static double connection310(double[][] alphas)
     {
         double expr1 = connection31([0],alphas) +
                        connection31([1],alphas) +
@@ -258,7 +258,7 @@ public class TriangleLagrangianCartesianLocalMatrices
         return expr1 + expr2;
     }
 
-    private static double[][] G3(double[,] alphas, double detD, double Coefficient)
+    private static double[][] G3(double[][] alphas, double detD, double Coefficient)
     {
         double[][] G =
         [

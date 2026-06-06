@@ -25,13 +25,13 @@ public static class RectangleVectorHierarchical_LagrangianCartesianLocalMatrices
 
     private static double[][] buildLocalBaseMassMatrixLinear()
     {
-        string path = Path.Combine(MatrixReader.Directory, directory, "RectangleHierarchical_LagrangianMassMatrixLinear");
+        string path = Path.Combine(directory, "RectangleHierarchical_LagrangianMassMatrixLinear");
         return MatrixReader.ReadMatrixFromFile(path);
     }
 
     private static double[][] buildLocalBaseMassMatrixQuadratic()
     {
-        string path = Path.Combine(MatrixReader.Directory, directory, "RectangleHierarchical_LagrangianMassMatrixQuadratic");
+        string path = Path.Combine(directory, "RectangleHierarchical_LagrangianMassMatrixQuadratic");
         return MatrixReader.ReadMatrixFromFile(path);
     }
 }

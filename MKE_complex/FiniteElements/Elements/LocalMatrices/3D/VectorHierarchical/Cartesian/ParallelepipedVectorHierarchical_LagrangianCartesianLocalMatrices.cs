@@ -27,13 +27,13 @@ public class ParallelepipedVectorHierarchical_LagrangianCartesianLocalMatrices
 
     private static double[][] buildLocalBaseMassMatrixLinear()
     {
-        string path = Path.Combine(MatrixReader.Directory, directory, "LocalBaseHierarchical_LagrangeMassMatrixLinear");
+        string path = Path.Combine(directory, "LocalBaseHierarchical_LagrangeMassMatrixLinear");
         return MatrixReader.ReadMatrixFromFile(path);
     }
 
     private static double[][] buildLocalBaseMassMatrixQuadratic()
     {
-        string path = Path.Combine(MatrixReader.Directory, directory, "LocalBaseHierarchical_LagrangeMassMatrixQuadratic");
+        string path = Path.Combine(directory, "LocalBaseHierarchical_LagrangeMassMatrixQuadratic");
         return MatrixReader.ReadMatrixFromFile(path);
     }
 }

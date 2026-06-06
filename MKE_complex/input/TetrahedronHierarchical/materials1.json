@@ -1,0 +1,11 @@
+[
+    {"Name":"m1","Functions":{"Lambda":"1","Gamma":"1","F":"x^2 + 2*y^2 + 3*y*z - 6"},"MaterialType":"Solid"},
+    {"Name":"m2","Functions":{"Lambda":"1","Gamma":"3","F":"3 * (x^2 + 2*y^2 + 3*y*z) - 6"},"MaterialType":"Solid"},
+    {"Name":"ed1","Functions":{"Beta":"2","UBeta":"-3.0/2.0*y + x^2 + 2*y^2"},"MaterialType":"RobinCondition"},
+    {"Name":"ed2","Functions":{"Theta":"-2*x"},"MaterialType":"NeumannCondition"},
+    {"Name":"ed3","Functions":{"Theta":"2*x"},"MaterialType":"NeumannCondition"},
+    {"Name":"ed4","Functions":{"Theta":"-4*y - 3*z"},"MaterialType":"NeumannCondition"},
+    {"Name":"ed5","Functions":{"Theta":"-4*y - 3*z"},"MaterialType":"NeumannCondition"},
+    {"Name":"ed6","Functions":{"Ug":"x^2 + 2*y^2 + 3*y*z"},"MaterialType":"DirichletCondition"},
+    {"Name":"ed7","Functions":{"Ug":"x^2 + 2*y^2 + 3*y*z"},"MaterialType":"DirichletCondition"}
+]

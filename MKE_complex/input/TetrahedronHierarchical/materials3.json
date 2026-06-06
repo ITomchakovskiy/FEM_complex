@@ -1,0 +1,11 @@
+[
+    {"Name":"m1","Functions":{"Lambda":"1","Gamma":"1","F":"y^4 - 12*y^2"},"MaterialType":"Solid"},
+    {"Name":"m2","Functions":{"Lambda":"1","Gamma":"1","F":"y^4 - 12*y^2"},"MaterialType":"Solid"},
+    {"Name":"ed1","Functions":{"Ug":"y^4"},"MaterialType":"DirichletCondition"},
+    {"Name":"ed2","Functions":{"Ug":"y^4"},"MaterialType":"DirichletCondition"},
+    {"Name":"ed3","Functions":{"Ug":"y^4"},"MaterialType":"DirichletCondition"},
+    {"Name":"ed4","Functions":{"Ug":"y^4"},"MaterialType":"DirichletCondition"},
+    {"Name":"ed5","Functions":{"Ug":"y^4"},"MaterialType":"DirichletCondition"},
+    {"Name":"ed6","Functions":{"Ug":"y^4"},"MaterialType":"DirichletCondition"},
+    {"Name":"ed7","Functions":{"Ug":"y^4"},"MaterialType":"DirichletCondition"}
+]

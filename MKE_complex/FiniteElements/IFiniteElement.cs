@@ -24,7 +24,6 @@ public interface IFiniteElement<VectorT> where VectorT : VectorBase<double, Vect
     void SetVertexDofs(int localVertexNumber, int dofNumber);
     void SetVericesDofs(ReadOnlySpan<int> dofsNumbers);
     void SetEdgeDofs(int localEdgeNumber, int dofNumber);
-    void SetEdgesDofs(ReadOnlySpan<int> dofsNumbers);
     IFiniteElement<VectorT>[] Refine(ReadOnlySpan<int> FaceVertices, ReadOnlySpan<int> EdgeVertices, int ElementVertex, out bool IsElementVertexNeeded);
 }
 

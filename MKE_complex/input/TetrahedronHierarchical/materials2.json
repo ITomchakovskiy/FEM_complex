@@ -1,0 +1,11 @@
+[
+    {"Name":"m1","Functions":{"Lambda":"1","Gamma":"1","F":"x^3 + 2*y^3 + 3*(z^2)*y - 6*x - 18*y"},"MaterialType":"Solid"},
+    {"Name":"m2","Functions":{"Lambda":"2","Gamma":"1","F":"x^3 + 2*y^3 + 3*(z^2)*y - (3.0/4.0 * x^2 + 3.0/2.0 * z*y)*(x+z-10) - 3*x + 3*z - 30*y - 30"},"MaterialType":"Solid"},
+    {"Name":"ed1","Functions":{"Beta":"2","UBeta":"x^3 + 2*y^3"},"MaterialType":"RobinCondition"},
+    {"Name":"ed2","Functions":{"Theta":"0"},"MaterialType":"NeumannCondition"},
+    {"Name":"ed3","Functions":{"Theta":"-30*(z - 15) -3*z*y"},"MaterialType":"NeumannCondition"},
+    {"Name":"ed4","Functions":{"Ug":"x^3 + 2*y^3 + 3*(z^2)*y"},"MaterialType":"DirichletCondition"},
+    {"Name":"ed5","Functions":{"Ug":"x^3 + 2*y^3 + 3*(z^2)*y - (3.0/4.0 * x^2 + 3.0/2.0 * z*y)*(x+z-10)"},"MaterialType":"DirichletCondition"},
+    {"Name":"ed6","Functions":{"Ug":"x^3 + 2*y^3 + 3*(z^2)*y"},"MaterialType":"DirichletCondition"},
+    {"Name":"ed7","Functions":{"Ug":"x^3 + 2*y^3 + 3*(z^2)*y - (3.0/4.0 * x^2 + 3.0/2.0 * z*y)*(x+z-10)"},"MaterialType":"DirichletCondition"}
+]

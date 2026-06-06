@@ -64,6 +64,22 @@ public static class FiniteElementsCreator
         else throw new NotSupportedException();
     }
 
+    public static IFiniteElement<VectorT> CreateFiniteElement<VectorT>(GeometryType geometryType, BasisType basis, int order, string material, IFiniteElementGeometry<VectorT> geometry, int[] DOFs) where VectorT : VectorBase<double, VectorT>
+    {
+        Type elementType;
+        if (finiteElementType.TryGetValue((geometryType, basis), out elementType!))
+        {
+            Type[] types = [typeof(string), geometry.GetType(), typeof(int), typeof(int[])];
+            var constructor = elementType.GetConstructor(types);
+            if (constructor is null)
+                throw new NotSupportedException();
+            
+            object[] arguments = [material, geometry, order, DOFs];
+            return (IFiniteElement<VectorT>)constructor!.Invoke(arguments);
+        }
+        else throw new NotSupportedException();
+    }
+
     public static IBoundaryCondition<VectorT> CreateBoundaryCondition<VectorT>(GeometryType geometryType, BasisType basis, int order, string material, IFiniteElementGeometry<VectorT> geometry) where VectorT : VectorBase<double, VectorT>
     {
         Type edgeType;
@@ -75,6 +91,22 @@ public static class FiniteElementsCreator
                 throw new NotSupportedException();
 
             object[] arguments = [material, geometry, order];
+            return (IBoundaryCondition<VectorT>)constructor!.Invoke(arguments);
+        }
+        else throw new NotSupportedException();
+    }
+
+    public static IBoundaryCondition<VectorT> CreateBoundaryCondition<VectorT>(GeometryType geometryType, BasisType basis, int order, string material, IFiniteElementGeometry<VectorT> geometry, int[] DOFs) where VectorT : VectorBase<double, VectorT>
+    {
+        Type edgeType;
+        if (finiteElementEdgeType.TryGetValue((geometryType, basis), out edgeType!))
+        {
+            Type[] types = [typeof(string), geometry.GetType(), typeof(int), typeof(int[])];
+            var constructor = edgeType.GetConstructor(types);
+            if (constructor is null)
+                throw new NotSupportedException();
+
+            object[] arguments = [material, geometry, order, DOFs];
             return (IBoundaryCondition<VectorT>)constructor!.Invoke(arguments);
         }
         else throw new NotSupportedException();

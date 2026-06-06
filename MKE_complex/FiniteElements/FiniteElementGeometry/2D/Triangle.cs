@@ -39,9 +39,14 @@ public record Triangle<VectorT>(int[] VertexNumber) : IFiniteElementGeometry<Vec
         }
     }
 
-    public IFiniteElementGeometry<VectorT>[] Refine(ReadOnlySpan<int> FaceVertices, ReadOnlySpan<int> EdgeVertices, int ElementVertex, out bool IsElementVertexNeeded)
+    public virtual IFiniteElementGeometry<VectorT>[] Refine(ReadOnlySpan<int> FaceVertices, ReadOnlySpan<int> EdgeVertices, int ElementVertex, out bool IsElementVertexNeeded)
     {
-        throw new NotImplementedException();
+        IsElementVertexNeeded = false;
+        int[][] VertexNumbers = [[VertexNumber[0], EdgeVertices[0], EdgeVertices[2]],
+                                 [VertexNumber[1], EdgeVertices[0], EdgeVertices[1]],
+                                 [VertexNumber[2], EdgeVertices[1], EdgeVertices[2]],
+                                 [EdgeVertices[0],EdgeVertices[1], EdgeVertices[2]]];
+        return [.. VertexNumbers.Select(i => new Triangle<VectorT>(i))];
     }
 
     public (int, int) GlobalEdge(int edgeNumber)

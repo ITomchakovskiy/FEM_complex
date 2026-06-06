@@ -22,7 +22,6 @@ public interface IBoundaryCondition<VectorT> where VectorT : VectorBase<double, 
     void SetVertexDofs(int localVertexNumber, int dofNumber);
     void SetVericesDofs(ReadOnlySpan<int> dofsNumbers);
     void SetEdgeDofs(int localEdgeNumber, int dofNumber);
-    void SetEdgesDofs(ReadOnlySpan<int> dofsNumbers);
     
     IBoundaryCondition<VectorT>[] Refine(ReadOnlySpan<int> FaceVertices, ReadOnlySpan<int> EdgeVertices);
 }
@@ -40,6 +39,11 @@ public interface IBoundaryConditionScalarEllipticProblemCalculation<VectorT> whe
     double[] CalcLocalRightPartForNeumannCondition(VectorT[] vertices, Func<VectorT, double> Theta);
     double[] CalcLocalRightPartForRobinCondition(VectorT[] vertices, Func<VectorT, double> Beta, Func<VectorT, double> UBeta);
     double[] CalcLocalRightPartForDirichletCondition(VectorT[] vertices, Func<VectorT, double> Ug);
+}
+
+public interface IBoundaryConditionScalarHierarchicalEllipticProblemCalculation<VectorT>  : IBoundaryConditionScalarEllipticProblemCalculation<VectorT> where VectorT : VectorBase<double, VectorT>
+{
+    double[][] CalcLocalMatrixForDirichletCondition(VectorT[] vertices);
 }
 
 public interface IBoundaryConditionVectorEllipticProblemCalculation<VectorT> where VectorT : VectorBase<double, VectorT>

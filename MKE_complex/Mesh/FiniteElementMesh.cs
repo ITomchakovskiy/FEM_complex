@@ -1,6 +1,8 @@
-﻿using MKE_complex.FiniteElements;
+﻿using MKE_complex.DofsEnumerators;
+using MKE_complex.FiniteElements;
 using MKE_complex.FiniteElements.Elements.ElementsClasses._2D.Lagrangian.EdgeConditions;
 using MKE_complex.FiniteElements.Elements.ElementsClasses._2D.Lagrangian.TriangleElements;
+using MKE_complex.FiniteElements.FiniteElementGeometry;
 using MKE_complex.FiniteElements.FiniteElementGeometry._2D;
 using MKE_complex.Vector;
 using System;
@@ -178,5 +180,119 @@ public class FiniteElementMesh<VectorT>(IReadOnlyList<VectorT> vertices, IReadOn
     {
         var comparer = new ElementComparer();
         elements.Sort(comparer);
+    }
+
+    public IFiniteElementMesh<VectorT> Refine() //Subject to changes!!!
+    {
+        //ДОБАВИТЬ СПИСОК ГРАНЕЙ ДЛЯ 3Д
+
+        var EdgesList = DofsEnumerator.EdgesListBuilding(CollectionsMarshal.AsSpan(elements), vertices.Count);
+
+        List<VectorT> NewVertexList = vertices.ToList();
+
+        List<IFiniteElement<VectorT>> NewElementList = new();
+
+        List<IBoundaryCondition<VectorT>> NewBoundaryList = new();
+
+        for (int i = 0; i < EdgesList.Length; ++i) //adding points on edges
+        {
+            VectorT A = vertices[i];
+            var dict = EdgesList[i];
+            foreach(var val in dict)
+            {
+                VectorT B = vertices[val.Key];
+                VectorT C = (A + B) / 2d;
+                NewVertexList.Add(C);
+                dict[val.Key] = NewVertexList.Count - 1;
+            }
+        }
+
+        foreach(var element in elements) //elements refinement and adding element center if needed
+        {
+            bool isElementVertexNeeded = false;
+            List<int> edgeVertices = new();
+            for(int i = 0; i < element.Geometry.EdgesCount;++i)
+            {
+                var edge = element.Geometry.LocalEdge(i);
+                (int i, int j) globalEdge = (element.Geometry.VertexNumber[edge.Item1],
+                                             element.Geometry.VertexNumber[edge.Item2]);
+                globalEdge = globalEdge.i < globalEdge.j ? globalEdge : (globalEdge.j, globalEdge.i);
+                edgeVertices.Add(EdgesList[globalEdge.i][globalEdge.j]);
+            }
+            NewElementList.AddRange(element.Refine([], edgeVertices.ToArray(), NewVertexList.Count,out isElementVertexNeeded));
+
+            if(isElementVertexNeeded)
+            {
+                var local_vertices = element.Geometry.VertexNumber.Select(i => vertices[i]).ToArray();
+                //VectorT elementCenter = element.Geometry.CalculateCenterVertex(local_vertices);
+                //NewVertexList.Add(elementCenter);
+            }
+        }
+
+        foreach(var boundary in boundaries) //refining boundary conditions
+        {
+            List<int> edgeVertices = new();
+            for (int i = 0; i < boundary.Geometry.EdgesCount; ++i)
+            {
+                var edge = boundary.Geometry.LocalEdge(i);
+                (int i, int j) globalEdge = (boundary.Geometry.VertexNumber[edge.Item1],
+                                             boundary.Geometry.VertexNumber[edge.Item2]);
+                globalEdge = globalEdge.i < globalEdge.j ? globalEdge : (globalEdge.j, globalEdge.i);
+                edgeVertices.Add(EdgesList[globalEdge.i][globalEdge.j]);
+            }
+            NewBoundaryList.AddRange(boundary.Refine([], edgeVertices.ToArray()));
+        }
+
+        return new FiniteElementMesh<VectorT>(NewVertexList, NewElementList, NewBoundaryList);
+    }
+
+    public bool IsMeshConforming() //subject to changes!!! now only for 3d
+    {
+        Dictionary<int, Dictionary<int, int>>[] FaceList;
+        var elements3D = elements.OfType<IFiniteElement3D>();
+        FaceList = DofsEnumerator.FacesListBuilding(elements3D.ToArray(), vertices!.Count());
+
+        foreach(var dict1 in FaceList) //nullify element count for faces
+        {
+            foreach(var dict2 in dict1.Values)
+            {
+                foreach(var elem in dict2.Keys)
+                {
+                    dict2[elem] = 0;
+                }
+            }
+        }
+
+        foreach(var elem in elements.OfType<IFiniteElement3D>())
+        {
+            for(int i = 0; i < elem.Geometry.FacesCount; ++i)
+            {
+                var faceGlobal = elem.Geometry.GlobalFace(i);
+                var invariantFace = GeometricMethods.SimplifyFace(faceGlobal);
+                FaceList[invariantFace[0]][invariantFace[1]][invariantFace[2]] += 1;
+            }
+        }
+
+        foreach(var boundary in boundaries.OfType<IBoundaryCondition3D>())
+        {
+            var faceGlobal = boundary.Geometry.GlobalFace(0);
+            var invariantFace = GeometricMethods.SimplifyFace(faceGlobal);
+            FaceList[invariantFace[0]][invariantFace[1]][invariantFace[2]] += 1;
+        }
+
+
+        foreach(var dict1 in FaceList) //nullify element count for faces
+        {
+            foreach(var dict2 in dict1.Values)
+            {
+                foreach(var neighboursCount in dict2.Values)
+                {
+                    if(neighboursCount != 2)
+                        return false;
+                }
+            }
+        }
+
+        return true;
     }
 }

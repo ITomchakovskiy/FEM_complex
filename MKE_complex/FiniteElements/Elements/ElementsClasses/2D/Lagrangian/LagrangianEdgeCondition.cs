@@ -63,13 +63,6 @@ public class LagrangianEdgeCondition : IBoundaryCondition<Vector2D>, IBoundaryCo
             DOFs[1 + i] = dofNumber + increment * i;
     }
 
-    public void SetEdgesDofs(ReadOnlySpan<int> dofsNumbers)
-    {
-        if (dofsNumbers.Length != Geometry.EdgesCount * DofsOnEdgeCount) throw new ArgumentOutOfRangeException();
-        for (int i = 0; i < dofsNumbers.Length; ++i)
-            SetEdgeDofs(i, dofsNumbers[i]);
-    }
-
     public void SetVericesDofs(ReadOnlySpan<int> dofsNumbers)
     {
         if (dofsNumbers.Length != Geometry.VertexNumber.Length) throw new ArgumentOutOfRangeException();

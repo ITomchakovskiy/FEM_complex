@@ -114,7 +114,7 @@ public static class DofsEnumerator
             }
         }
     }
-    private static Dictionary<int, int>[] EdgesListBuilding<VectorT>(ReadOnlySpan<IFiniteElement<VectorT>> elements, int vertexCount) where VectorT : VectorBase<double, VectorT>
+    public static Dictionary<int, int>[] EdgesListBuilding<VectorT>(ReadOnlySpan<IFiniteElement<VectorT>> elements, int vertexCount) where VectorT : VectorBase<double, VectorT>
     {
         Dictionary<int,int>[] edgesList = new Dictionary<int, int>[vertexCount]; //key - second vertex number; value - dofs count on edge
 
@@ -151,7 +151,7 @@ public static class DofsEnumerator
         return vertexList;
     }
 
-    private static Dictionary<int, Dictionary<int, int>>[] FacesListBuilding(ReadOnlySpan<IFiniteElement3D> elements, int vertexCount)
+    public static Dictionary<int, Dictionary<int, int>>[] FacesListBuilding(ReadOnlySpan<IFiniteElement3D> elements, int vertexCount)
     {
         var FacesList = new Dictionary<int, Dictionary<int, int>>[vertexCount];
 

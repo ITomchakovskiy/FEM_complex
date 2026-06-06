@@ -69,7 +69,7 @@ namespace MKE_complex.Tests
 
             var problem = new ScalarEllipticProblem<Vector2D>();
 
-            problem.InputUserDefinedData();
+            //problem.InputUserDefinedData();
 
             problem.Solve();
 

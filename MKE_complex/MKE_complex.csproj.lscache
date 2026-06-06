@@ -65,13 +65,16 @@ FiniteElements/Elements/BasisFunctions/
   2D/
    RectangleLocalCoordinates.cs
    TriangleLocalCoordinates.cs
-  3D/ParallelepipedLocalCoordinates.cs
+  3D/
+   ParallelepipedLocalCoordinates.cs
+   TetrahedronLocalCoordinates.cs
 FiniteElements/Elements/ElementsClasses/2D/Lagrangian/
  LagrangianEdgeCondition.cs
  TriangleLagrangianFiniteElement.cs
 FiniteElements/Elements/ElementsClasses/3D/VectorHierarchical/
  ParallelepipedVectorHierarchicalFiniteElement.cs
  RectangleVectorHierarchicalBoundary.cs
+ TetrahedronScalarHierarchicalFiniteElement.cs
 FiniteElements/Elements/
  FiniteElementAttribute.cs
  FiniteElementsCreator.cs

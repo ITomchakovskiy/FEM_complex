@@ -78,11 +78,6 @@ public class RectangleVectorHierarchicalBoundary : IBoundaryCondition3D, IBounda
             DOFs[dofIndex + shifts[i]] = dofNumber + i;
     }
 
-    public void SetEdgesDofs(ReadOnlySpan<int> dofsNumbers)
-    {
-        throw new NotSupportedException();
-    }
-
     private int NewDofsOnEdgesCountForOrder(int order) => 4;
 
     private int[] IndexShiftForFaceDOFS()

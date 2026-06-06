@@ -31,7 +31,7 @@ public static class RectangleVectorHierarchicalCartesianLocalMatrices
 
     private static double[][] buildLocalBaseMassMatrixQuadratic()
     {
-        string path = Path.Combine(MatrixReader.Directory, directory, "LocalBaseRectangleVectorHierarchicalMassMatrixQuadratic");
+        string path = Path.Combine(directory, "LocalBaseRectangleVectorHierarchicalMassMatrixQuadratic");
         return MatrixReader.ReadMatrixFromFile(path);
     }
 }

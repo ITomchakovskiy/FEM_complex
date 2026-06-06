@@ -56,12 +56,12 @@ public static class GeometricMethods
 
         Vector2D[] vertices2D;
 
-        if(cross.Z == cross.components.Max())
+        if(Math.Abs(cross.Z) == cross.components.Max(Math.Abs))
         {
             vertices2D = vertices.ToArray().Select(v => new Vector2D(v.X, v.Y)).ToArray();
             projectionPlane = "Z";
         }
-        else if(cross.Y == cross.components.Max())
+        else if(Math.Abs(cross.Y) == cross.components.Max(Math.Abs))
         {
             vertices2D = vertices.ToArray().Select(v => new Vector2D(v.X, v.Z)).ToArray();
             projectionPlane = "Y";

@@ -80,13 +80,6 @@ public class TriangleLagrangianFiniteElement : IFiniteElement<Vector2D>, IFinite
             DOFs[Geometry.VertexNumber.Length + localEdgeNumber * DofsOnEdgeCount + i] = dofNumber + increment * i;
     }
 
-    public void SetEdgesDofs(ReadOnlySpan<int> dofsNumbers)
-    {
-        if(dofsNumbers.Length != Geometry.EdgesCount * DofsOnEdgeCount) throw new ArgumentOutOfRangeException();
-        for(int i = 0; i < dofsNumbers.Length; ++i)
-            SetEdgeDofs(i, dofsNumbers[i]);
-    }
-
     public void SetElementDofs(int startDofNumber)
     {
         for(int i = 0; i < DofsOnElementCount; ++i)

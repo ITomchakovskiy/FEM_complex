@@ -44,7 +44,7 @@ public class ParallelepipedVectorHierarchicalFiniteElement : IFiniteElement3D, I
 
     public int[] DOFs { get; private set; }
 
-    private static int NewDofsOnEdgesCountForOrder(int order) => 12;
+    private static int NewDofsOnEdgesCountForOrder() => 12;
     private static int NewDofsOnFacesCountForOrder(int order) => 24 * (order - 1);
     private static int NewDofsOnElementCountForOrder(int order) => order * (9 * order - 21) + 12;
     private static int CalcDofsCount(int order) => 3 * (order + 1) * (order + 1) * order;
@@ -61,7 +61,7 @@ public class ParallelepipedVectorHierarchicalFiniteElement : IFiniteElement3D, I
 
     public int[] SortedDofIndices => sortedDofIndices.Value;
 
-    public int[] SortedDofs => SortedDofIndices.Select(i => DOFs[i]).ToArray();
+    public int[] SortedDofs => [.. SortedDofIndices.Select(i => DOFs[i])];
 
     public bool IsDofsConnected(int dof1, int dof2)
     {
@@ -72,7 +72,7 @@ public class ParallelepipedVectorHierarchicalFiniteElement : IFiniteElement3D, I
     {
         var res = new int[Order - 1];
         for( int i = 1; i < Order; ++i)
-            res[i-1] = CalcDofsCount(i) + NewDofsOnEdgesCountForOrder(i + 1) + NewDofsOnFacesCountForOrder(i + 1);
+            res[i-1] = CalcDofsCount(i) + NewDofsOnEdgesCountForOrder() + NewDofsOnFacesCountForOrder(i + 1);
         return res;
     }
 
@@ -116,19 +116,11 @@ public class ParallelepipedVectorHierarchicalFiniteElement : IFiniteElement3D, I
             DOFs[dofIndex + shifts[i]] = dofNumber + i;
     }
 
-    public void SetEdgesDofs(ReadOnlySpan<int> dofsNumbers)
-    {
-        throw new NotSupportedException();
-        // if(dofsNumbers.Length != Geometry.EdgesCount * DofsOnEdgeCount) throw new ArgumentOutOfRangeException();
-        // for(int i = 0; i < dofsNumbers.Length; ++i)
-        //     SetEdgeDofs(i, dofsNumbers[i]);
-    }
-
     private int[] IndexShiftForFaceDOFS()
     {
         var res = new int[Order - 1];
         for( int i = 1; i < Order; ++i)
-            res[i-1] = CalcDofsCount(i) + NewDofsOnEdgesCountForOrder(i + 1);
+            res[i-1] = CalcDofsCount(i) + NewDofsOnEdgesCountForOrder();
         return res;
     }
 

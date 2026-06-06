@@ -8,7 +8,8 @@ public static class MatrixReader
 {
     public static double[][] ReadMatrixFromFile(string filename)
     {
-        var reader = new StreamReader(filename);
+        var path = Path.Join(Directory, filename);
+        var reader = new StreamReader(path);
 
         List<double[]> matrix = [];
 
@@ -27,5 +28,5 @@ public static class MatrixReader
         return matrix.ToArray();
     }
 
-    public static string Directory = "./LocalMatricesFiles";
+    private static string Directory = "./LocalMatricesFiles";
 }
