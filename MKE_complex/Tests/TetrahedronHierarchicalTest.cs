@@ -330,219 +330,6 @@ namespace MKE_complex.Tests
             return discrepancy;
         }
 
-        private void InitQuadratures(int num)
-        {
-            switch(num)
-            {
-                case 1:
-                    {
-                        p1 = [ 1.0 / 4.0, 1.0 / 2.0, 1.0 / 6.0, 1.0 / 6.0, 1.0 / 6.0 ];
-                        p2 = [ 1.0 / 4.0, 1.0 / 6.0, 1.0 / 2.0, 1.0 / 6.0, 1.0 / 6.0 ];
-                        p3 = [ 1.0 / 4.0, 1.0 / 6.0, 1.0 / 6.0, 1.0 / 2.0, 1.0 / 6.0 ];
-                        w = [ -4.0 / 5.0, 9.0 / 20.0, 9.0 / 20.0, 9.0 / 20.0, 9.0 / 20.0 ];
-                        w = w.Select(i => i/6d).ToArray();
-                        break;
-                    }
-                case 2:
-                    {
-                        p1 = [1d/4d, 0, 1d/3d, 1d/3d, 1d/3d, 8d/11d, 1d/11d, 1d/11d, 1d/11d, 0.066550153573664, 0.066550153573664, 0.433449846426336, 0.433449846426336, 0.066550153573664, 0.433449846426336];
-                        p2 = [1d/4d, 1d/3d, 0, 1d/3d, 1d/3d, 1d/11d, 8d/11d, 1d/11d, 1d/11d, 0.066550153573664, 0.433449846426336, 0.433449846426336, 0.066550153573664, 0.433449846426336, 0.066550153573664];
-                        p3 = [1d/4d, 1d/3d, 1d/3d, 0, 1d/3d, 1d/11d, 1d/11d, 8d/11d, 1d/11d, 0.433449846426336, 0.433449846426336, 0.066550153573664, 0.066550153573664, 0.066550153573664, 0.433449846426336];
-                        w = [ 0.030283678097089,
-                         0.006026785714286, 0.006026785714286, 0.006026785714286, 0.006026785714286,
-                         0.011645249086029, 0.011645249086029, 0.011645249086029, 0.011645249086029,
-                         0.010949141561386, 0.010949141561386, 0.010949141561386, 0.010949141561386, 0.010949141561386, 0.010949141561386 ];
-                        break;
-                    }
-                case 3:
-                    {
-                        const double w1 = 0.665379170969464506e-2;
-        const double w2 = 0.167953517588677620e-2;
-        const double w3 = 0.922619692394239843e-2;
-        const double w4 = 0.803571428571428248e-2;
-
-        const double x1a = 0.214602871259151684;
-        const double x1b = 0.356191386222544953;
-
-        const double x2a = 0.406739585346113397e-1;
-        const double x2b = 0.877978124396165982;
-
-        const double x3a = 0.322337890142275646;
-        const double x3b = 0.329863295731730594e-1;
-
-        const double x4a = 0.636610018750175299e-1;
-        const double x4b = 0.269672331458315867;
-        const double x4c = 0.603005664791649076;
-
-        p1 = [ x1a, x1a, x1a, x1b, x2a, x2a, x2a, x2b, x3a, x3a, x3a, x3b, x4a, x4a, x4a, x4a, x4b, x4c, x4a, x4a, x4b, x4b, x4c, x4c ];
-        p2 = [ x1a, x1a, x1b, x1a, x2a, x2a, x2b, x2a, x3a, x3a, x3b, x3a, x4a, x4a, x4b, x4c, x4a, x4a, x4b, x4c, x4a, x4c, x4a, x4b ];
-        p3 = [ x1a, x1b, x1a, x1a, x2a, x2b, x2a, x2a, x3a, x3b, x3a, x3a, x4b, x4c, x4a, x4a, x4a, x4a, x4c, x4b, x4c, x4a, x4b, x4a ];
-        w = [ w1, w1, w1, w1, w2, w2, w2, w2, w3, w3, w3, w3, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4 ];
-        break;
-                    }
-            }
-
-            p4 = new double[w.Length];
-            for(int i = 0; i < w.Length; ++i)
-            {
-                p4[i] = 1d - p1[i] - p2[i] - p3[i];
-            }
-        }
-        private double[] p1;
-        private double[] p2;
-        private double[] p3;
-
-        private double[] p4;
-
- //double[] w = { -4.0 / 5.0, 9.0 / 20.0, 9.0 / 20.0, 9.0 / 20.0, 9.0 / 20.0 };
-        private double[] w;
-        private double integrateTetrahedron(ScalarHierarchicalEllipticProblem<Vector3D> problem, IFiniteElement3D tetrElem, Func<Vector3D,double> u)
-        {
-            double[][] localPoints = new double[p1.Length][];
-
-            for(int i = 0; i < localPoints.Length; ++i)
-                localPoints[i] = [p1[i], p2[i], p3[i], p4[i]];
-
-            var tetrVertices = tetrElem.Geometry.VertexNumber.Select(j => problem.Mesh.Vertices[j]).ToArray();
-
-            var GlobalPoints = localPoints.Select(i => TetrahedronLocalCoordinates.LocalCoordinatesToGlobal(tetrVertices, i)).ToArray();
-
-            var AbsDetD = TetrahedronLocalCoordinates.Alpha.CalcAbsDetD(tetrVertices);
-
-            double discrepancy = 0d;
-
-            var localSolution = tetrElem.DOFs.Select(i => problem.Solution[i]).ToArray();
-
-            if(tetrElem is IFiniteElementScalarEllipticProblemCalculation<Vector3D> elem)
-            {
-                for(int i = 0; i < w.Length; ++i)
-                {
-                    double value = elem.CalcResultAtPoint(tetrVertices, localSolution, GlobalPoints[i]);
-                    discrepancy += w[i] * (value - u(GlobalPoints[i])) * (value - u(GlobalPoints[i]));
-                }
-                    
-            }
-
-            return discrepancy * AbsDetD;
-        }
-
-        private double integrateTetrahedron(ScalarEllipticProblem<Vector3D> problem, IFiniteElement3D tetrElem, Func<Vector3D,double> u)
-        {
-            double[][] localPoints = new double[p1.Length][];
-
-            for(int i = 0; i < localPoints.Length; ++i)
-                localPoints[i] = [p1[i], p2[i], p3[i], p4[i]];
-
-            var tetrVertices = tetrElem.Geometry.VertexNumber.Select(j => problem.Mesh.Vertices[j]).ToArray();
-
-            var GlobalPoints = localPoints.Select(i => TetrahedronLocalCoordinates.LocalCoordinatesToGlobal(tetrVertices, i)).ToArray();
-
-            var AbsDetD = TetrahedronLocalCoordinates.Alpha.CalcAbsDetD(tetrVertices);
-
-            double discrepancy = 0d;
-
-            var localSolution = tetrElem.DOFs.Select(i => problem.Solution[i]).ToArray();
-
-            if(tetrElem is TetrahedronScalarLagrangianFiniteElement eleml)
-            {
-                for(int i = 0; i < w.Length; ++i)
-                {
-                    double value = eleml.CalcResultAtPointLocal(localSolution, [p1[i], p2[i], p3[i], p4[i]]);
-                    discrepancy += w[i] * (value - u(GlobalPoints[i])) * (value - u(GlobalPoints[i]));
-                }
-            }
-            else if(tetrElem is TetrahedronScalarHierarchicalFiniteElement elemh)
-            {
-                for(int i = 0; i < w.Length; ++i)
-                {
-                    double value = elemh.CalcResultAtPointLocal(localSolution, [p1[i], p2[i], p3[i], p4[i]]);
-                    discrepancy += w[i] * (value - u(GlobalPoints[i])) * (value - u(GlobalPoints[i]));
-                }
-            }
-            // else if(tetrElem is IFiniteElementScalarEllipticProblemCalculation<Vector3D> elem)
-            // {
-            //     for(int i = 0; i < w.Length; ++i)
-            //     {
-            //         double value = elem.CalcResultAtPoint(tetrVertices, localSolution, GlobalPoints[i]);
-            //         discrepancy += w[i] * (value - u(GlobalPoints[i])) * (value - u(GlobalPoints[i]));
-            //     }
-                    
-            // }
-
-            return discrepancy * AbsDetD;
-        }
-
-        private double TetrIntegrationTest(ScalarEllipticProblem<Vector3D> problem, IFiniteElement3D tetrElem, Func<Vector3D,double> u)
-        {   
-            double[][] localPoints = new double[p1.Length][];
-
-            for(int i = 0; i < localPoints.Length; ++i)
-                localPoints[i] = [p1[i], p2[i], p3[i], p4[i]];
-
-            var tetrVertices = tetrElem.Geometry.VertexNumber.Select(j => problem.Mesh.Vertices[j]).ToArray();
-
-            var GlobalPoints = localPoints.Select(i => TetrahedronLocalCoordinates.LocalCoordinatesToGlobal(tetrVertices, i)).ToArray();
-
-            var AbsDetD = TetrahedronLocalCoordinates.Alpha.CalcAbsDetD(tetrVertices);
-
-            double discrepancy = 0d;
-
-            var localSolution = tetrElem.DOFs.Select(i => problem.Solution[i]).ToArray();
-
-            if(tetrElem is TetrahedronScalarLagrangianFiniteElement eleml)
-            {
-                for(int i = 0; i < w.Length; ++i)
-                {
-                    double value = eleml.CalcResultAtPointLocal(localSolution, [p1[i], p2[i], p3[i], p4[i]]);
-                    discrepancy += w[i] * u(GlobalPoints[i]);
-                }
-            }
-            else if(tetrElem is TetrahedronScalarHierarchicalFiniteElement elemh)
-            {
-                for(int i = 0; i < w.Length; ++i)
-                {
-                    double value = elemh.CalcResultAtPointLocal(localSolution, [p1[i], p2[i], p3[i], p4[i]]);
-                   discrepancy += w[i] * u(GlobalPoints[i]);
-                }
-            }
-            // else if(tetrElem is IFiniteElementScalarEllipticProblemCalculation<Vector3D> elem)
-            // {
-            //     for(int i = 0; i < w.Length; ++i)
-            //     {
-            //         double value = elem.CalcResultAtPoint(tetrVertices, localSolution, GlobalPoints[i]);
-            //         discrepancy += w[i] * (value - u(GlobalPoints[i])) * (value - u(GlobalPoints[i]));
-            //     }
-                    
-            // }
-
-            return discrepancy * AbsDetD;
-        }
-
-        private double CalcDiscrepancy(ScalarHierarchicalEllipticProblem<Vector3D> problem, Func<Vector3D,double> u)
-        {
-            double discrepancy = 0d;
-
-            foreach(var elem in problem.Mesh.Elements.ToArray().OfType<IFiniteElement3D>())
-            {
-                discrepancy += integrateTetrahedron(problem, elem, u);
-            }
-
-            return Math.Sqrt(discrepancy);
-        }
-
-        private double IntegrationTest(ScalarEllipticProblem<Vector3D> problem, Func<Vector3D,double> u)
-        {
-            double discrepancy = 0d;
-
-            foreach(var elem in problem.Mesh.Elements.ToArray().OfType<IFiniteElement3D>())
-            {
-                discrepancy += TetrIntegrationTest(problem, elem, u);
-            }
-
-            return discrepancy;
-        }
-
-
         private void BuildTrueLagrangianSolution(ScalarEllipticProblem<Vector3D> problem, Func<Vector3D,double> u)
         {
             var elements = problem.Mesh.Elements;
@@ -578,27 +365,16 @@ namespace MKE_complex.Tests
             }
         }
 
-        private double CalcDiscrepancy(ScalarEllipticProblem<Vector3D> problem, Func<Vector3D,double> u)
-        {
-            double discrepancy = 0d;
-
-            for(int i = 0; i < problem.Mesh.Elements.Length; ++i)
-            {
-                discrepancy += integrateTetrahedron(problem, (IFiniteElement3D)problem.Mesh.Elements[i], u);
-            }
-
-            return Math.Sqrt(discrepancy);
-        }
 
         private void TestFunc(int refinement)
         {
-            BasisType basis = BasisType.Hierarchical; int order = 1; double h = 0.4d;
+            BasisType basis = BasisType.Hierarchical; int order = 3; double h = 0.4d;
             double Length = 5d;
+            int scheme = 3;
             //var materialsfile = "materials5.json";
             var materialsfile = "Cubic.json";
             var materialsFolder = "TetrahedronHierarchical";
 
-            InitQuadratures(3);
             Assembly assembly = Assembly.GetExecutingAssembly();
 
             FiniteElementsCreator.LoadFiniteElementTypes(assembly);
@@ -648,16 +424,16 @@ namespace MKE_complex.Tests
             //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             //BuildTrueLagrangianSolution(problem,A);
 
-            (bool isCalculated, double value) CalculateFunctionAtPoint(Vector3D point)
-            {
-                var isCalculated = problem.CalculateFunctionAtPoint(point, out double value);
-                return (isCalculated, value);
-            }
+            // (bool isCalculated, double value) CalculateFunctionAtPoint(Vector3D point)
+            // {
+            //     var isCalculated = problem.CalculateFunctionAtPoint(point, out double value);
+            //     return (isCalculated, value);
+            // }
 
             // var discr = EvaluateDiscrepancyGaussParallelepiped(new(0d,0d,0d),new(Length,Length,Length),
             //                                                   new(h,h,h), A, CalculateFunctionAtPoint);
-
-            var discr = CalcDiscrepancy(problem, A);
+            double discr = Mesh.IntegrateDiscrepancy(A, problem.Solution, scheme);
+        
             //var discr = IntegrationTest(problem, A);
 
 

@@ -50,3 +50,9 @@ public interface IFiniteElementVectorProblemCalculation<VectorT> where VectorT :
     VectorT CalcResultAtPoint(ReadOnlySpan<VectorT> vertices, ReadOnlySpan<double> localSolution, VectorT point);
     void SetDofs(ReadOnlySpan<int> newDofs);
 }
+
+public interface IIntegrationElement<VectorT> where VectorT : VectorBase<double, VectorT>
+{
+    double IntegrateElement(ReadOnlySpan<VectorT> vertices, Func<VectorT,double> F, int scheme);
+    double IntegrateDiscrepancy(ReadOnlySpan<VectorT> vertices, Func<VectorT,double> F, ReadOnlySpan<double> localSolution, int scheme);
+}

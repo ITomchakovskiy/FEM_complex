@@ -1,4 +1,4 @@
 [
-    {"Name":"m1","Functions":{"Lambda":"1","Gamma":"1","F":"x^3 - 6.0*(x)"},"MaterialType":"Solid"},
+    {"Name":"m1","Functions":{"Lambda":"1","Gamma":"1","F":"x^3 - 6.0*x"},"MaterialType":"Solid"},
     {"Name":"ed1","Functions":{"Ug":"x^3"},"MaterialType":"DirichletCondition"}
 ]

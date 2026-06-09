@@ -12,7 +12,7 @@ using MKE_complex.Vector;
 
 namespace MKE_complex.FiniteElements.Elements.ElementsClasses._3D.Hierarchical;
 [FiniteElement(GeometryType.Tetrahedron, BasisType.Hierarchical)]
-public class TetrahedronScalarHierarchicalFiniteElement : IFiniteElement3D, IFiniteElementScalarEllipticProblemCalculation<Vector3D>
+public class TetrahedronScalarHierarchicalFiniteElement : IFiniteElement3D, IFiniteElementScalarEllipticProblemCalculation<Vector3D>, IIntegrationElement<Vector3D>
 {
     public TetrahedronScalarHierarchicalFiniteElement(string material, Tetrahedron geometry, int order)
     {
@@ -280,5 +280,40 @@ public class TetrahedronScalarHierarchicalFiniteElement : IFiniteElement3D, IFin
             Result += BasisValues[i] * localSolution[i];
         
         return Result;
+    }
+
+    public double IntegrateElement(ReadOnlySpan<Vector3D> vertices, Func<Vector3D, double> F, int scheme)
+    {
+        var Quadrature = TetrahedronQuadratures.GetQuadrature(scheme);
+        double res = 0d;
+        for(int i = 0; i < Quadrature.Weights.Length; ++i)
+        {
+            var pointL = Quadrature.LocalPoints[i];
+            var w = Quadrature.Weights[i];
+            var pointG = TetrahedronLocalCoordinates.LocalCoordinatesToGlobal(vertices, pointL);
+
+            res += w * F(pointG);
+        }
+        var AbsDetD = TetrahedronLocalCoordinates.Alpha.CalcAbsDetD(vertices);
+
+        return res * AbsDetD;
+    }
+
+    public double IntegrateDiscrepancy(ReadOnlySpan<Vector3D> vertices, Func<Vector3D, double> F, ReadOnlySpan<double> localSolution, int scheme)
+    {
+        var Quadrature = TetrahedronQuadratures.GetQuadrature(scheme);
+        double res = 0d;
+        for(int i = 0; i < Quadrature.Weights.Length; ++i)
+        {
+            var pointL = Quadrature.LocalPoints[i];
+            var w = Quadrature.Weights[i];
+            var pointG = TetrahedronLocalCoordinates.LocalCoordinatesToGlobal(vertices, pointL);
+
+            var value = CalcResultAtPointLocal(localSolution, pointL);
+            res += w * (F(pointG) - value) * (F(pointG) - value);
+        }
+        var AbsDetD = TetrahedronLocalCoordinates.Alpha.CalcAbsDetD(vertices);
+
+        return res * AbsDetD;
     }
 }

@@ -19,6 +19,13 @@ public interface IFiniteElementMesh<VectorT> where VectorT : VectorBase<double, 
     public IFiniteElementMesh<VectorT> Refine();
 }
 
+public interface IIntgrateMesh<VectorT> where VectorT : VectorBase<double, VectorT>
+{
+    public double Integrate(Func<VectorT,double> F, int scheme);
+
+    public double IntegrateDiscrepancy(Func<VectorT,double> F, ReadOnlySpan<double> Solution, int scheme);
+}
+
 // public interface IFiniteElementMesh3D : IFiniteElementMesh<Vector3D>
 // {
 //     new ReadOnlySpan<IFiniteElement3D> Elements { get; }

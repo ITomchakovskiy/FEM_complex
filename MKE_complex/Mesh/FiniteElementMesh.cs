@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace MKE_complex.Mesh;
 
-public class FiniteElementMesh<VectorT>(IReadOnlyList<VectorT> vertices, IReadOnlyList<IFiniteElement<VectorT>> elements, IReadOnlyList<IBoundaryCondition<VectorT>> edges) : IFiniteElementMesh<VectorT> where VectorT : VectorBase<double, VectorT>
+public class FiniteElementMesh<VectorT>(IReadOnlyList<VectorT> vertices, IReadOnlyList<IFiniteElement<VectorT>> elements, IReadOnlyList<IBoundaryCondition<VectorT>> edges) : IFiniteElementMesh<VectorT>, IIntgrateMesh<VectorT> where VectorT : VectorBase<double, VectorT>
 {
     private List<VectorT> vertices { get; init; } = (List<VectorT>)vertices;
     ReadOnlySpan<VectorT> IFiniteElementMesh<VectorT>.Vertices => CollectionsMarshal.AsSpan(vertices);
@@ -294,5 +294,42 @@ public class FiniteElementMesh<VectorT>(IReadOnlyList<VectorT> vertices, IReadOn
         }
 
         return true;
+    }
+
+    public double Integrate(Func<VectorT, double> F, int scheme)
+    {
+        double res = 0d;
+        foreach(var elem in elements.OfType<IIntegrationElement<VectorT>>())
+        {
+            if(elem is IFiniteElement<VectorT> felem)
+            {
+                var vertices = felem.Geometry.VertexNumber.Select(i => this.vertices[i]);
+                res += elem.IntegrateElement(vertices.ToArray(), F, scheme);
+            }
+        }
+        return res;
+    }
+
+    public double IntegrateDiscrepancy(Func<VectorT, double> F, ReadOnlySpan<double> Solution, int scheme)
+    {
+        double res = 0d;
+        var SolutionCopy = Solution.ToArray();
+        foreach(var elem in elements.OfType<IIntegrationElement<VectorT>>())
+        {
+            if(elem is IFiniteElement<VectorT> felem)
+            {
+                var vertices = felem.Geometry.VertexNumber.Select(i => this.vertices[i]);
+
+                var localSolution = felem.DOFs.Select(i => SolutionCopy[i]).ToArray();
+                double diff = elem.IntegrateDiscrepancy(vertices.ToArray(), F, localSolution, scheme);
+                if(diff > 1d)
+                {
+                    int amogus = 0;
+                    ++amogus;
+                }
+                res += diff;
+            }
+        }
+        return Math.Sqrt(res);
     }
 }
