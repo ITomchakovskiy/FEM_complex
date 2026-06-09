@@ -221,12 +221,12 @@ public class FiniteElementMesh<VectorT>(IReadOnlyList<VectorT> vertices, IReadOn
             }
             NewElementList.AddRange(element.Refine([], edgeVertices.ToArray(), NewVertexList.Count,out isElementVertexNeeded));
 
-            if(isElementVertexNeeded)
-            {
-                var local_vertices = element.Geometry.VertexNumber.Select(i => vertices[i]).ToArray();
-                //VectorT elementCenter = element.Geometry.CalculateCenterVertex(local_vertices);
-                //NewVertexList.Add(elementCenter);
-            }
+            // if(isElementVertexNeeded)
+            // {
+            //     var local_vertices = element.Geometry.VertexNumber.Select(i => vertices[i]).ToArray();
+            //     //VectorT elementCenter = element.Geometry.CalculateCenterVertex(local_vertices);
+            //     //NewVertexList.Add(elementCenter);
+            // }
         }
 
         foreach(var boundary in boundaries) //refining boundary conditions

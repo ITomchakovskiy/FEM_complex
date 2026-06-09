@@ -1,0 +1,4 @@
+[
+    {"Name":"m1","Functions":{"Lambda":"1","Gamma":"1","F":"x + y + z"},"MaterialType":"Solid"},
+    {"Name":"ed1","Functions":{"Ug":"x + y + z"},"MaterialType":"DirichletCondition"}
+]

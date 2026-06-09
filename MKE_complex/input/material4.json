@@ -1,0 +1,11 @@
+[
+    {"Name":"volume1","Functions":{"Lambda":"2","Gamma":"1","F":"e^((x + y)/3.0)*5.0/9.0"},"MaterialType":"Solid"},
+    {"Name":"ed11","Functions":{"Ug":"e^((x + y)/3.0)"},"MaterialType":"DirichletCondition"},
+    {"Name":"ed12","Functions":{"Ug":"e^((x + y)/3.0)"},"MaterialType":"DirichletCondition"},
+    {"Name":"ed21","Functions":{"Ug":"e^((x + y)/3.0)"},"MaterialType":"DirichletCondition"},
+    {"Name":"ed22","Functions":{"Ug":"e^((x + y)/3.0)"},"MaterialType":"DirichletCondition"},
+    {"Name":"ed23","Functions":{"Ug":"e^((x + y)/3.0)"},"MaterialType":"DirichletCondition"},
+    {"Name":"ed24","Functions":{"Ug":"e^((x + y)/3.0)"},"MaterialType":"DirichletCondition"},
+    {"Name":"ed31","Functions":{"Ug":"e^((x + y)/3.0)"},"MaterialType":"DirichletCondition"},
+    {"Name":"ed32","Functions":{"Ug":"e^((x + y)/3.0)"},"MaterialType":"DirichletCondition"}
+]

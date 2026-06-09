@@ -1,11 +1,4 @@
 [
     {"Name":"m1","Functions":{"Lambda":"1","Gamma":"1","F":"e^((x + y + z)/5.0)*22.0/25.0"},"MaterialType":"Solid"},
-    {"Name":"m2","Functions":{"Lambda":"0","Gamma":"1","F":"e^(x/5.0) * e^(y/5.0) * e^(z/5.0) * 22.0 / 25.0"},"MaterialType":"Solid"},
-    {"Name":"ed1","Functions":{"Ug":"e^((x + y + z) / 5.0)"},"MaterialType":"DirichletCondition"},
-    {"Name":"ed2","Functions":{"Ug":"e^((x + y + z) / 5.0)"},"MaterialType":"DirichletCondition"},
-    {"Name":"ed3","Functions":{"Ug":"sin(x/5.0)*cos(y/5.0)*sin(z/5.0)"},"MaterialType":"DirichletCondition"},
-    {"Name":"ed4","Functions":{"Ug":"sin(x/5.0)*cos(y/5.0)*sin(z/5.0)"},"MaterialType":"DirichletCondition"},
-    {"Name":"ed5","Functions":{"Ug":"sin(x/5.0)*cos(y/5.0)*sin(z/5.0)"},"MaterialType":"DirichletCondition"},
-    {"Name":"ed6","Functions":{"Ug":"sin(x/5.0)*cos(y/5.0)*sin(z/5.0)"},"MaterialType":"DirichletCondition"},
-    {"Name":"ed7","Functions":{"Ug":"sin(x/5.0)*cos(y/5.0)*sin(z/5.0)"},"MaterialType":"DirichletCondition"}
+    {"Name":"ed1","Functions":{"Ug":"e^((x + y + z)/5.0)"},"MaterialType":"DirichletCondition"}
 ]

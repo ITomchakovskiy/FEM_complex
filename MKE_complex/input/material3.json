@@ -1,0 +1,11 @@
+[
+    {"Name":"volume1","Functions":{"Lambda":"2","Gamma":"1","F":"2*x^2 + 3*y^2 + 6*x*y - 20"},"MaterialType":"Solid"},
+    {"Name":"ed11","Functions":{"Ug":"2*x^2 + 3*y^2 + 6*x*y"},"MaterialType":"DirichletCondition"},
+    {"Name":"ed12","Functions":{"Ug":"2*x^2 + 3*y^2 + 6*x*y"},"MaterialType":"DirichletCondition"},
+    {"Name":"ed21","Functions":{"Ug":"2*x^2 + 3*y^2 + 6*x*y"},"MaterialType":"DirichletCondition"},
+    {"Name":"ed22","Functions":{"Ug":"2*x^2 + 3*y^2 + 6*x*y"},"MaterialType":"DirichletCondition"},
+    {"Name":"ed23","Functions":{"Ug":"2*x^2 + 3*y^2 + 6*x*y"},"MaterialType":"DirichletCondition"},
+    {"Name":"ed24","Functions":{"Ug":"2*x^2 + 3*y^2 + 6*x*y"},"MaterialType":"DirichletCondition"},
+    {"Name":"ed31","Functions":{"Ug":"2*x^2 + 3*y^2 + 6*x*y"},"MaterialType":"DirichletCondition"},
+    {"Name":"ed32","Functions":{"Ug":"2*x^2 + 3*y^2 + 6*x*y"},"MaterialType":"DirichletCondition"}
+]

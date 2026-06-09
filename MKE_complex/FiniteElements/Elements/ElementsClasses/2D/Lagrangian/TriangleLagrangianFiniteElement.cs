@@ -260,6 +260,7 @@ public class TriangleLagrangianFiniteElement : IFiniteElement<Vector2D>, IFinite
 
     public IFiniteElement<Vector2D>[] Refine(ReadOnlySpan<int> FaceVertices, ReadOnlySpan<int> EdgeVertices, int ElementVertex, out bool IsElementVertexNeeded)
     {
-        throw new NotImplementedException();
+        var geometries = geometry.Refine(FaceVertices, EdgeVertices, ElementVertex, out IsElementVertexNeeded);
+        return [.. geometries.Select(i => new TriangleLagrangianFiniteElement(Material, (Triangle<Vector2D>)i, Order))];
     }
 }

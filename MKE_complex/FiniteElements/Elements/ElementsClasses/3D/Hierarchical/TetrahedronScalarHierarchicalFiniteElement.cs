@@ -269,4 +269,16 @@ public class TetrahedronScalarHierarchicalFiniteElement : IFiniteElement3D, IFin
         
         return Result;
     }
+
+    public double CalcResultAtPointLocal(ReadOnlySpan<double> localSolution, double[] pointL)
+    {
+        var BasisValues = TetrahedronHierarchicalBases.BasisFunctions(Order, PolinomialType.Simple).Select(f => f(pointL)).ToArray();
+
+        double Result = 0d;
+
+        for(int i = 0; i < DOFs.Length; ++i)
+            Result += BasisValues[i] * localSolution[i];
+        
+        return Result;
+    }
 }

@@ -166,11 +166,21 @@ public class TetrahedronScalarLagrangianFiniteElement : IFiniteElement3D, IFinit
         return LocalCoordinates;
     }
 
+    public Vector3D[] GlobalLagrangianVerticesAtDofs(ReadOnlySpan<Vector3D> vertices)
+    {
+        var A = vertices[0]; var B = vertices[1]; var C = vertices[2]; var D = vertices[3];
+
+        Vector3D[] res = [A, B ,C , D,  (A + B) / 2d, (A + C) / 2d, (A + D) / 2d, (B + C) / 2d, (B + D) / 2d, (D + C) / 2d];
+
+        return res;
+    }
+
     public double[] CalcLocalRightPart(ReadOnlySpan<Vector3D> vertices, Func<Vector3D, double> F)
     {
         var AbsDetD = TetrahedronLocalCoordinates.Alpha.CalcAbsDetD(vertices);
-        var verticesCopy = vertices.ToArray();
-        var GlobalLagrangianVerticesAtDOFs = LocalLagrangianVerticesAtDofs().Select(i => TetrahedronLocalCoordinates.LocalCoordinatesToGlobal(verticesCopy, i));
+        //var verticesCopy = vertices.ToArray();
+        //var GlobalLagrangianVerticesAtDOFs = LocalLagrangianVerticesAtDofs().Select(i => TetrahedronLocalCoordinates.LocalCoordinatesToGlobal(verticesCopy, i));
+        var GlobalLagrangianVerticesAtDOFs = GlobalLagrangianVerticesAtDofs(vertices);
         var weights = GlobalLagrangianVerticesAtDOFs.Select(F).ToArray();
 
         var matrix = TetrahedronScalarLagrangianCartesianLocalMatrices.CalculateLocalMassMatrix(Order, AbsDetD, 1d);
@@ -193,6 +203,17 @@ public class TetrahedronScalarLagrangianFiniteElement : IFiniteElement3D, IFinit
         var Alpha = TetrahedronLocalCoordinates.Alpha.CalcAlphas(vertices);
         var localPoint = TetrahedronLocalCoordinates.LocalCoordinates.Select(i => i(point, Alpha)).ToArray();
         var basesValues = TetrahedronScalarLagrangianBases.BasisFunctions(Order).Select(f => f(localPoint)).ToArray();
+        double res = 0d;
+        for(int i = 0; i < basesValues.Length; ++i)
+            res += basesValues[i] * localSolution[i];
+        return res;
+    }
+
+    public double CalcResultAtPointLocal(ReadOnlySpan<double> localSolution, double[] pointLocal)
+    {
+        //var Alpha = TetrahedronLocalCoordinates.Alpha.CalcAlphas(vertices);
+        //var localPoint = TetrahedronLocalCoordinates.LocalCoordinates.Select(i => i(point, Alpha)).ToArray();
+        var basesValues = TetrahedronScalarLagrangianBases.BasisFunctions(Order).Select(f => f(pointLocal)).ToArray();
         double res = 0d;
         for(int i = 0; i < basesValues.Length; ++i)
             res += basesValues[i] * localSolution[i];

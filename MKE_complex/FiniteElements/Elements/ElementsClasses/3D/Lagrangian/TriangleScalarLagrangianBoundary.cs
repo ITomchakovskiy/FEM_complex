@@ -123,6 +123,13 @@ public class TriangleScalarLagrangianBoundary : IBoundaryCondition3D, IBoundaryC
         return LocalCoordinates;
     }
 
+    private Vector3D[] GlobalLagrangianVerticesAtDofs(ReadOnlySpan<Vector3D> vertices)
+    {
+        var A = vertices[0]; var B = vertices[1]; var C = vertices[2];
+        Vector3D[] res = [A,B,C,(A +B)/2d,(B+C)/2d,(A+C)/2d];
+        return res;
+    }
+
     public double[][] CalcLocalMatrixForRobinCondition(Vector3D[] vertices, Func<Vector3D, double> Beta)
     {
         throw new NotImplementedException();
@@ -140,7 +147,8 @@ public class TriangleScalarLagrangianBoundary : IBoundaryCondition3D, IBoundaryC
 
     public double[] CalcLocalRightPartForDirichletCondition(Vector3D[] vertices, Func<Vector3D, double> Ug)
     {
-        var GlobalVertices = LagrangianVerticesAtDofs().Select(i => TriangleLocalCoordinates.LocalCoordinatesToGlobal(vertices, i));
+        //var GlobalVertices = LagrangianVerticesAtDofs().Select(i => TriangleLocalCoordinates.LocalCoordinatesToGlobal(vertices, i));
+        var GlobalVertices = GlobalLagrangianVerticesAtDofs(vertices);
 
         return [.. GlobalVertices.Select(Ug)];
     }
