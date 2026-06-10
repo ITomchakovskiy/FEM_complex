@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 namespace MKE_complex.FiniteElements.Elements.ElementsClasses._2D.Lagrangian.TriangleElements;
 
 [FiniteElementAttribute(GeometryType.Triangle, BasisType.Lagrangian)]
-public class TriangleLagrangianFiniteElement : IFiniteElement<Vector2D>, IFiniteElementScalarEllipticProblemCalculation<Vector2D>
+public class TriangleLagrangianFiniteElement : IFiniteElement<Vector2D>, IFiniteElementScalarEllipticProblemCalculation<Vector2D>, IIntegrationElement<Vector2D>
 {
     public TriangleLagrangianFiniteElement(string material, Triangle<Vector2D> geometry, int order)
     {
@@ -258,9 +258,60 @@ public class TriangleLagrangianFiniteElement : IFiniteElement<Vector2D>, IFinite
         return result;
     }
 
+    public double CalcResultAtPointLocal(ReadOnlySpan<double> localSolution, double[] PointL)
+    {
+        //var Alpha = TriangleLocalCoordinates.Alpha.CalcAlphas(vertices);
+
+        //var LocalCoordinates = TriangleLocalCoordinates.LocalCoordinates.Select(i => i(point, Alpha)).ToArray();
+         
+        var basisFunctionValues = TriangleLagrangianBases.BasisFunctions(Order).Select(i => i(PointL)).ToArray();
+
+        double result = 0d;
+
+        for(int i = 0; i < DOFs.Length; ++i)
+            result += localSolution[i] * basisFunctionValues[i];
+        return result;
+    }
+
+
     public IFiniteElement<Vector2D>[] Refine(ReadOnlySpan<int> FaceVertices, ReadOnlySpan<int> EdgeVertices, int ElementVertex, out bool IsElementVertexNeeded)
     {
         var geometries = geometry.Refine(FaceVertices, EdgeVertices, ElementVertex, out IsElementVertexNeeded);
         return [.. geometries.Select(i => new TriangleLagrangianFiniteElement(Material, (Triangle<Vector2D>)i, Order))];
+    }
+
+    public double IntegrateElement(ReadOnlySpan<Vector2D> vertices, Func<Vector2D, double> F, int scheme)
+    {
+        var Quadrature = TriangleQuadratures.GetQuadrature(scheme);
+        double res = 0d;
+        for(int i = 0; i < Quadrature.Weights.Length; ++i)
+        {
+            var pointL = Quadrature.LocalPoints[i];
+            var w = Quadrature.Weights[i];
+            var pointG = TriangleLocalCoordinates.LocalCoordinatesToGlobal(vertices, pointL);
+
+            res += w * F(pointG);
+        }
+        var AbsDetD = TriangleLocalCoordinates.Alpha.CalcAbsDetD(vertices);
+
+        return res * AbsDetD;
+    }
+
+    public double IntegrateDiscrepancy(ReadOnlySpan<Vector2D> vertices, Func<Vector2D, double> F, ReadOnlySpan<double> localSolution, int scheme)
+    {
+        var Quadrature = TriangleQuadratures.GetQuadrature(scheme);
+        double res = 0d;
+        for(int i = 0; i < Quadrature.Weights.Length; ++i)
+        {
+            var pointL = Quadrature.LocalPoints[i];
+            var w = Quadrature.Weights[i];
+            var pointG = TriangleLocalCoordinates.LocalCoordinatesToGlobal(vertices, pointL);
+
+            var value = CalcResultAtPointLocal(localSolution, pointL);
+            res += w * (F(pointG) - value) * (F(pointG) - value);
+        }
+        var AbsDetD = TriangleLocalCoordinates.Alpha.CalcAbsDetD(vertices);
+
+        return res * AbsDetD;
     }
 }

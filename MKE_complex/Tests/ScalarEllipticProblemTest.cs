@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using MKE_complex.FiniteElements.Elements;
 using MKE_complex.FiniteElements.Elements.ElementsClasses._2D.Lagrangian.TriangleElements;
+using MKE_complex.Mesh;
 using MKE_complex.Mesh.MeshBuilder;
 using MKE_complex.Problems;
 using MKE_complex.Problems.Materials;
@@ -89,8 +90,8 @@ namespace MKE_complex.Tests
             }
         }
 
-            int order = 2;
-            int refinement = 4;
+            int order = 1;
+            int refinement = 0;
 
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 
@@ -125,16 +126,23 @@ namespace MKE_complex.Tests
 
             
 
-            
+            double U(Vector2D A)
+            {
+                double x = A.X, y = A.Y;
+                //return Math.Exp((x + y) /3d);
+                return x*x;
+            }
 
             problem.Solve();
 
-            BuildTrueLagrangianSolution(problem,(vec) => Math.Exp((vec.X + vec.Y)/3.0));
+            //BuildTrueLagrangianSolution(problem,U);
 
-            var points = PointsOnRectangle(new(0.05, 0.05), new(10d, 4d), new(0.1, 0.1));
+            //var points = PointsOnRectangle(new(0.05, 0.05), new(10d, 4d), new(0.1, 0.1));
 
             //var discr = problem.EvaluateDiscrepancy(points, (vec) => 2d * vec.X * vec.X + 3d * vec.Y * vec.Y + 6d * vec.X * vec.Y);
-            var discr = problem.EvaluateDiscrepancy(points, (vec) => Math.Exp((vec.X + vec.Y)/3.0));
+            var discr = 0d;
+            if(problem.Mesh is IIntgrateMesh<Vector2D> Imesh)
+                discr = Imesh.IntegrateDiscrepancy(U,problem.Solution, 4);
 
             //problem.Mesh.
 

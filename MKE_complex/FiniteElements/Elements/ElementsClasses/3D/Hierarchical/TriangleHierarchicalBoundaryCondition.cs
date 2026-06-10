@@ -133,7 +133,8 @@ public class TriangleHierarchicalBoundaryCondition : IBoundaryCondition3D, IBoun
 
     public double[][] CalcLocalMatrixForRobinCondition(Vector3D[] vertices, Func<Vector3D, double> Beta)
     {
-        var AvgBeta = LagrangianVerticesAtDofs().Select(i => TriangleLocalCoordinates.LocalCoordinatesToGlobal(vertices,i)).Average(Beta);
+        //var AvgBeta = LagrangianVerticesAtDofs().Select(i => TriangleLocalCoordinates.LocalCoordinatesToGlobal(vertices,i)).Average(Beta);
+        var AvgBeta = GlobalLagrangianVerticesAtDofs(vertices).Average(Beta);
 
         var AbsDetD = TriangleLocalCoordinates.Alpha.CalcAbsDetD(vertices);
         return TriangleScalarHierarchicalCartesianLocalMatrices.CalculateLocalMassMatrix(Order,AbsDetD,AvgBeta, PolinomialType.Simple);
@@ -143,7 +144,8 @@ public class TriangleHierarchicalBoundaryCondition : IBoundaryCondition3D, IBoun
     {
         var AbsDetD = TriangleLocalCoordinates.Alpha.CalcAbsDetD(vertices);
         var Hierarchical_LagrangianMassMatrix = TriangleScalarHierarchicalCartesianLocalMatrices.CalculateLocalHierarchical_LagrangianMassMatrix(Order,AbsDetD,PolinomialType.Simple);
-        var weights = LagrangianVerticesAtDofs().Select(i => TriangleLocalCoordinates.LocalCoordinatesToGlobal(vertices,i)).Select(i => Theta(i)).ToArray();
+        //var weights = LagrangianVerticesAtDofs().Select(i => TriangleLocalCoordinates.LocalCoordinatesToGlobal(vertices,i)).Select(i => Theta(i)).ToArray();
+        var weights = GlobalLagrangianVerticesAtDofs(vertices).Select(i => Theta(i)).ToArray();
 
         var result = new double[Hierarchical_LagrangianMassMatrix.Length];
 
@@ -160,7 +162,8 @@ public class TriangleHierarchicalBoundaryCondition : IBoundaryCondition3D, IBoun
     {
         var AbsDetD = TriangleLocalCoordinates.Alpha.CalcAbsDetD(vertices);
         var Hierarchical_LagrangianMassMatrix = TriangleScalarHierarchicalCartesianLocalMatrices.CalculateLocalHierarchical_LagrangianMassMatrix(Order,AbsDetD,PolinomialType.Simple);
-        var weights = LagrangianVerticesAtDofs().Select(i => TriangleLocalCoordinates.LocalCoordinatesToGlobal(vertices,i)).Select(i => UBeta(i)*Beta(i)).ToArray();
+        //var weights = LagrangianVerticesAtDofs().Select(i => TriangleLocalCoordinates.LocalCoordinatesToGlobal(vertices,i)).Select(i => UBeta(i)*Beta(i)).ToArray();
+        var weights = GlobalLagrangianVerticesAtDofs(vertices).Select(i => UBeta(i)*Beta(i)).ToArray();
 
         var result = new double[Hierarchical_LagrangianMassMatrix.Length];
 
@@ -217,11 +220,30 @@ public class TriangleHierarchicalBoundaryCondition : IBoundaryCondition3D, IBoun
         return LocalCoordinates;
     }
 
+    Vector3D[] GlobalLagrangianVerticesAtDofs(ReadOnlySpan<Vector3D> vertices)
+    {
+        Vector3D[] P1 = vertices.ToArray();
+        Vector3D A = vertices[0], B = vertices[1], C = vertices[2];
+        Vector3D[] P2 = [A,B,C,(A + B)/2d,(A + C)/2d,(B + C)/2d];
+        Vector3D[] P3 = [A,B,C, A + (B - A)/3d, A + 2d*(B - A)/3d, 
+                                B + (C - B)/3d, B + 2d*(C - B)/3d,
+                                C + (A - C)/3d, C + 2d*(A - C)/3d, 
+                                (A + B + C)/3d];
+        return Order switch
+        {
+            1 => P1,
+            2 => P2,
+            3 => P3,
+            _ => throw new NotImplementedException()
+        };
+    }
+
     public double[] CalcLocalRightPartForDirichletCondition(Vector3D[] vertices, Func<Vector3D, double> Ug)
     {
         var AbsDetD = TriangleLocalCoordinates.Alpha.CalcAbsDetD(vertices);
         var Hierarchical_LagrangianMassMatrix = TriangleScalarHierarchicalCartesianLocalMatrices.CalculateLocalHierarchical_LagrangianMassMatrix(Order,AbsDetD,PolinomialType.Simple);
-        var GlobalLagrangianVerticesAtDOFs = LagrangianVerticesAtDofs().Select(i => TriangleLocalCoordinates.LocalCoordinatesToGlobal(vertices,i));
+        var GlobalLagrangianVerticesAtDOFs = GlobalLagrangianVerticesAtDofs(vertices);
+        //var GlobalLagrangianVerticesAtDOFs = LagrangianVerticesAtDofs().Select(i => TriangleLocalCoordinates.LocalCoordinatesToGlobal(vertices,i));
         var weights = GlobalLagrangianVerticesAtDOFs.Select(Ug).ToArray();
 
         var result = new double[Hierarchical_LagrangianMassMatrix.Length];

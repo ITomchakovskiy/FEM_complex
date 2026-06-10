@@ -19,11 +19,8 @@ namespace MKE_complex.Tests
         private void TestFunc(int refinement)
         {
             BasisType basis = BasisType.Hierarchical; int order = 3; double h = 0.4d;
-            double Length = 5d;
+            double Length = 10d;
             int scheme = 3;
-            //var materialsfile = "materials5.json";
-            var materialsfile = "Cubic.json";
-            var materialsFolder = "TetrahedronHierarchical";
 
             Assembly assembly = Assembly.GetExecutingAssembly();
 
@@ -31,26 +28,16 @@ namespace MKE_complex.Tests
 
             MaterialCreator.LoadMaterialsAssemblyInfo(assembly);
 
-            //var Mesh = CubeMesh2(basis, order, Length);
+            var Mesh = CubeMesh2(basis, order, Length);
 
-            var Mesh = SingleTetrahedron(basis, order, Length);
+            //var Mesh = SingleTetrahedron(basis, order, Length);
 
             for(int i = 0; i < refinement; ++i)
                 Mesh = (FiniteElementMesh<Vector3D>)Mesh.Refine();
 
             Console.WriteLine("Is mesh conforming: " + Mesh.IsMeshConforming());
 
-            var problem = new ScalarHierarchicalEllipticProblem<Vector3D>
-            //var problem = new ScalarEllipticProblem<Vector3D>
-            {
-                Mesh = Mesh
-            };
-
-            problem.LoadMaterials(materialsFolder, materialsfile);
-
-            problem.Solve();
-
-            //var points = PointsOnRectangle(new(h/2d, h/2d, h/2d), new(Length-h/2d, Length-h/2d,Length-h/2d), new(h, h, h));
+            DofsEnumerators.DofsEnumerator.EnumerateMeshDofs(Mesh);
 
             double A(Vector3D point)
             {
@@ -66,22 +53,12 @@ namespace MKE_complex.Tests
 
                 //return Math.Exp((x + y + z) / 5d);
                 //return x*x*x + y*y*y + z*z*z;
-                return x*x*x;
+                //return x*x*x;
+                return 1d;
             }
-
-            //var discr = problem.EvaluateDiscrepancy(points, A) * Math.Sqrt(Length*Length*Length);
-
-            //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            //BuildTrueLagrangianSolution(problem,A);
-
-            // var discr = EvaluateDiscrepancyGaussParallelepiped(new(0d,0d,0d),new(Length,Length,Length),
-            //                                                   new(h,h,h), A, CalculateFunctionAtPoint);
-            //double discr = Mesh.IntegrateDiscrepancy(A, problem.Solution, scheme);
 
             double discr = Mesh.Integrate(A, scheme);
         
-            //var discr = IntegrationTest(problem, A);
-
 
             Console.WriteLine(discr);
         }
@@ -102,6 +79,40 @@ namespace MKE_complex.Tests
                                                          FiniteElementsCreator.CreateBoundaryCondition(GeometryType.TriangleBoundary, basis, order, "ed1", new TriangleBoundary([0,2,3])),
                                                          FiniteElementsCreator.CreateBoundaryCondition(GeometryType.TriangleBoundary, basis, order, "ed1", new TriangleBoundary([1,2,3])),
                                                          ];
+            
+            return new FiniteElementMesh<Vector3D>(vertices.ToList(),elements.ToList(),boundaries.ToList());
+        }
+
+        FiniteElementMesh<Vector3D> CubeMesh2(BasisType basis, int order, double Length)
+        {
+            Vector3D[] vertices = [new(0d, 0d, 0d),
+                                   new(Length, 0d, 0d),
+                                   new(0d, Length, 0d),
+                                   new(Length, Length, 0d),
+                                   new(0d, 0d, Length),
+                                   new(Length, 0d, Length),
+                                   new(0d,Length,Length),
+                                   new(Length,Length,Length)];
+
+            IFiniteElement<Vector3D>[] elements = [FiniteElementsCreator.CreateFiniteElement(GeometryType.Tetrahedron, basis, order, "m1",new Tetrahedron([0,1,2,4])),
+                                                   FiniteElementsCreator.CreateFiniteElement(GeometryType.Tetrahedron, basis, order, "m1",new Tetrahedron([1,2,3,7])),
+                                                   FiniteElementsCreator.CreateFiniteElement(GeometryType.Tetrahedron, basis, order, "m1",new Tetrahedron([1,4,5,7])),
+                                                   FiniteElementsCreator.CreateFiniteElement(GeometryType.Tetrahedron, basis, order, "m1",new Tetrahedron([1,2,4,7])),
+                                                   FiniteElementsCreator.CreateFiniteElement(GeometryType.Tetrahedron, basis, order, "m1",new Tetrahedron([2,4,6,7])),
+                                       ];
+
+            IBoundaryCondition<Vector3D>[] boundaries = [FiniteElementsCreator.CreateBoundaryCondition(GeometryType.TriangleBoundary, basis, order, "ed1", new TriangleBoundary([0,2,4])),
+                                                         FiniteElementsCreator.CreateBoundaryCondition(GeometryType.TriangleBoundary, basis, order, "ed1", new TriangleBoundary([2,4,6])),
+                                                         FiniteElementsCreator.CreateBoundaryCondition(GeometryType.TriangleBoundary, basis, order, "ed1", new TriangleBoundary([1,5,7])),
+                                                         FiniteElementsCreator.CreateBoundaryCondition(GeometryType.TriangleBoundary, basis, order, "ed1", new TriangleBoundary([1,3,7])),
+                                                         FiniteElementsCreator.CreateBoundaryCondition(GeometryType.TriangleBoundary, basis, order, "ed1", new TriangleBoundary([0,1,4])),
+                                                         FiniteElementsCreator.CreateBoundaryCondition(GeometryType.TriangleBoundary, basis, order, "ed1", new TriangleBoundary([1,4,5])),
+                                                         FiniteElementsCreator.CreateBoundaryCondition(GeometryType.TriangleBoundary, basis, order, "ed1", new TriangleBoundary([2,3,7])),
+                                                         FiniteElementsCreator.CreateBoundaryCondition(GeometryType.TriangleBoundary, basis, order, "ed1", new TriangleBoundary([2,6,7])),
+                                                         FiniteElementsCreator.CreateBoundaryCondition(GeometryType.TriangleBoundary, basis, order, "ed1", new TriangleBoundary([0,1,2])),
+                                                         FiniteElementsCreator.CreateBoundaryCondition(GeometryType.TriangleBoundary, basis, order, "ed1", new TriangleBoundary([1,2,3])),
+                                                         FiniteElementsCreator.CreateBoundaryCondition(GeometryType.TriangleBoundary, basis, order, "ed1", new TriangleBoundary([4,6,7])),
+                                                         FiniteElementsCreator.CreateBoundaryCondition(GeometryType.TriangleBoundary, basis, order, "ed1", new TriangleBoundary([4,5,7])),];
             
             return new FiniteElementMesh<Vector3D>(vertices.ToList(),elements.ToList(),boundaries.ToList());
         }

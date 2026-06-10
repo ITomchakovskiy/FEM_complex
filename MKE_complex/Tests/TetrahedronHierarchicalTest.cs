@@ -368,11 +368,11 @@ namespace MKE_complex.Tests
 
         private void TestFunc(int refinement)
         {
-            BasisType basis = BasisType.Hierarchical; int order = 1; double h = 0.4d;
-            double Length = 5d;
+            BasisType basis = BasisType.Hierarchical; int order = 3; double h = 0.4d;
+            double Length = 10d;
             int scheme = 3;
-            //var materialsfile = "materials5.json";
-            var materialsfile = "Cubic.json";
+            var materialsfile = "materials5.json";
+            //var materialsfile = "Cubic.json";
             var materialsFolder = "TetrahedronHierarchical";
 
             Assembly assembly = Assembly.GetExecutingAssembly();
@@ -381,9 +381,9 @@ namespace MKE_complex.Tests
 
             MaterialCreator.LoadMaterialsAssemblyInfo(assembly);
 
-            //var Mesh = CubeMesh2(basis, order, Length);
+            var Mesh = CubeMesh2(basis, order, Length);
 
-            var Mesh = SingleTetrahedron(basis, order, Length);
+            //var Mesh = SingleTetrahedron(basis, order, Length);
 
             for(int i = 0; i < refinement; ++i)
                 Mesh = (FiniteElementMesh<Vector3D>)Mesh.Refine();
@@ -414,9 +414,9 @@ namespace MKE_complex.Tests
 
                 //return Math.Sin(x/5d) * Math.Cos(y/5d) * Math.Sin(z/5d);
 
-                //return Math.Exp((x + y + z) / 5d);
+                return Math.Exp((x + y + z) / 5d);
                 //return x*x*x + y*y*y + z*z*z;
-                return x*x*x;
+                //return x*x*x;
             }
 
             //var discr = problem.EvaluateDiscrepancy(points, A) * Math.Sqrt(Length*Length*Length);

@@ -312,24 +312,21 @@ public class FiniteElementMesh<VectorT>(IReadOnlyList<VectorT> vertices, IReadOn
 
     public double IntegrateDiscrepancy(Func<VectorT, double> F, ReadOnlySpan<double> Solution, int scheme)
     {
-        double res = 0d;
         var SolutionCopy = Solution.ToArray();
-        foreach(var elem in elements.OfType<IIntegrationElement<VectorT>>())
+        var discrepancyValues = new double[elements.Count()];
+        //foreach(var elem in elements.OfType<IIntegrationElement<VectorT>>())
+        Parallel.For(0, discrepancyValues.Length, i =>
         {
-            if(elem is IFiniteElement<VectorT> felem)
+            var elem = elements[i];
+            if(elem is IIntegrationElement<VectorT> ielem)
             {
-                var vertices = felem.Geometry.VertexNumber.Select(i => this.vertices[i]);
+                var vertices = elem.Geometry.VertexNumber.Select(i => this.vertices[i]);
 
-                var localSolution = felem.DOFs.Select(i => SolutionCopy[i]).ToArray();
-                double diff = elem.IntegrateDiscrepancy(vertices.ToArray(), F, localSolution, scheme);
-                if(diff > 1d)
-                {
-                    int amogus = 0;
-                    ++amogus;
-                }
-                res += diff;
+                var localSolution = elem.DOFs.Select(i => SolutionCopy[i]).ToArray();
+                double diff = ielem.IntegrateDiscrepancy(vertices.ToArray(), F, localSolution, scheme);
+                discrepancyValues[i] = diff;
             }
-        }
-        return Math.Sqrt(res);
+        });
+        return Math.Sqrt(discrepancyValues.Sum());
     }
 }

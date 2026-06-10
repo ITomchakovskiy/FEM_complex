@@ -216,10 +216,38 @@ public class TetrahedronScalarHierarchicalFiniteElement : IFiniteElement3D, IFin
         return LocalCoordinates;
     }
 
+    Vector3D[] GlobalLagrangianVerticesAtDofs(ReadOnlySpan<Vector3D> vertices)
+    {
+        Vector3D[] P1 = vertices.ToArray();
+        Vector3D A = vertices[0], B = vertices[1], C = vertices[2], D = vertices[3];
+        Vector3D[] P2 = [A,B,C, D ,(A + B)/2d,(A + C)/2d,(A + D)/2d,
+                                   (B + C)/2d, (B + D)/2d, (D + C)/2d
+                                    ];
+        Vector3D[] P3 = [A,B,C, D, A + (B - A)/3d, A + 2d*(B - A)/3d,
+                                   A + (C - A)/3d, A + 2d*(C - A)/3d,
+                                   A + (D - A)/3d, A + 2d*(D - A)/3d,
+                                   B + (C - B)/3d, B + 2d*(C - B)/3d,
+                                   B + (D - B)/3d, B + 2d*(D - B)/3d,
+                                   C + (D - C)/3d, C + 2d*(D - C)/3d,
+                                   (A + B + C)/3d,
+                                   (A + B + D)/3d,
+                                   (A + C + D)/3d,
+                                   (B + C + D)/3d,
+                                  ];
+        return Order switch
+        {
+            1 => P1,
+            2 => P2,
+            3 => P3,
+            _ => throw new NotImplementedException()
+        };
+    }
+
     public double[][] CalcLocalMatrix(ReadOnlySpan<Vector3D> vertices, Func<Vector3D, double> Lambda, Func<Vector3D, double> Gamma)
     {
         var verticesArray = vertices.ToArray();
-        var LagrangianVerticesAtDofs = LocalLagrangianVerticesAtDofs().Select(i => TetrahedronLocalCoordinates.LocalCoordinatesToGlobal(verticesArray,i));
+        //var LagrangianVerticesAtDofs = LocalLagrangianVerticesAtDofs().Select(i => TetrahedronLocalCoordinates.LocalCoordinatesToGlobal(verticesArray,i));
+        var LagrangianVerticesAtDofs = GlobalLagrangianVerticesAtDofs(vertices);
         var AvgLambda = LagrangianVerticesAtDofs.Average(Lambda);
         var AvgGamma = LagrangianVerticesAtDofs.Average(Gamma);
 
@@ -242,7 +270,8 @@ public class TetrahedronScalarHierarchicalFiniteElement : IFiniteElement3D, IFin
     {
         var AbsDetD = TetrahedronLocalCoordinates.Alpha.CalcAbsDetD(vertices);
         var verticesArray = vertices.ToArray();
-        var weights = LocalLagrangianVerticesAtDofs().Select(i => TetrahedronLocalCoordinates.LocalCoordinatesToGlobal(verticesArray,i)).Select(F).ToArray();
+        //var weights = LocalLagrangianVerticesAtDofs().Select(i => TetrahedronLocalCoordinates.LocalCoordinatesToGlobal(verticesArray,i)).Select(F).ToArray();
+        var weights = GlobalLagrangianVerticesAtDofs(vertices).Select(F).ToArray();
         var Hierarchical_LagrangianMassMatrix = TetrahedronHierarchicalCartesianLocalMatrices.CalculateLocalHierarchical_LagrangianMassMatrix(Order, AbsDetD, PolinomialType.Simple);
 
         var Result = new double[DOFs.Length];
