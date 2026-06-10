@@ -368,7 +368,7 @@ namespace MKE_complex.Tests
 
         private void TestFunc(int refinement)
         {
-            BasisType basis = BasisType.Hierarchical; int order = 3; double h = 0.4d;
+            BasisType basis = BasisType.Hierarchical; int order = 1; double h = 0.4d;
             double Length = 5d;
             int scheme = 3;
             //var materialsfile = "materials5.json";
@@ -432,7 +432,9 @@ namespace MKE_complex.Tests
 
             // var discr = EvaluateDiscrepancyGaussParallelepiped(new(0d,0d,0d),new(Length,Length,Length),
             //                                                   new(h,h,h), A, CalculateFunctionAtPoint);
-            double discr = Mesh.IntegrateDiscrepancy(A, problem.Solution, scheme);
+            double discr  = 0d;
+            if(problem.Mesh is IIntgrateMesh<Vector3D> iMesh)
+                discr = iMesh.IntegrateDiscrepancy(A, problem.Solution, scheme);
         
             //var discr = IntegrationTest(problem, A);
 
